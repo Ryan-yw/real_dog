@@ -70,7 +70,6 @@ auto TCurve::getTCurve(int count)->double
 	return s;
 }
 
-
 //计算梯形曲线的参数，由成员函数初始化，对应输入参数由构造函数初始化
 auto TCurve::getCurveParam()->void
 {
@@ -92,7 +91,7 @@ auto TCurve::getCurveParam()->void
 
 
 
-/********************************************************************************************椭圆轨迹************************************************************************************/
+//////////////////////////////////////////////////////////////////////////椭圆轨迹////////////////////////////////////////////////
 
 //生成椭圆轨迹，在Tc时间内  x方向0->a;y方向0->b->0;z方向0->c。对应输入参数由构造函数初始化。
 auto EllipseTrajectory::getEllipseTrajectory(int count)->void
@@ -105,7 +104,7 @@ auto EllipseTrajectory::getEllipseTrajectory(int count)->void
 
 
 
-/******************************************************************************************身体旋转角度轨迹******************************************************************************/
+/////////////////////////////////////////////////////////////////////////身体旋转角度轨迹/////////////////////////////////////////////////////////////////////
 
 //生成身体绕xyz三轴旋转的角度轨迹0->theta
 auto BodyPose::getBodyRotationTrajectory(int count)->void
@@ -120,14 +119,14 @@ auto BodyPose::getBodyRotationTrajectory(int count)->void
 
 
 
-/****************************************************************************************脚和身体位置和姿态的规划*************************************************************************/
+/////////////////////////////////////////////////脚和身体位置和姿态的规划//////////////////////////////////////////////////////
 
-//本函数用于规划四足机器人四只脚的轨迹。
+//对角步态足端在笛卡尔空间下的坐标规划
 //当前脚的位置 = 上一步脚的位置 + 脚位置增量
-//没当计算完一次梯形曲线，脚的位置跟新一次
-//注意：#脚的位置在初始时刻要初始化移一下，否则一开始只有脚13动，24脚的初始位置时0
+//每当计算完一次梯形曲线，脚的位置跟新一次
+//注意：#脚的位置在初始时刻要初始化一下，否则一开始只有脚13动，24脚的初始位置时0
 //#注意：目前只适用于平地行走
-auto planLeg(int e_1, int n, double* current_leg, int count, EllipseTrajectory* Ellipse)->void
+auto planLegTrot(int e_1, int n, double* current_leg, int count, EllipseTrajectory* Ellipse)->void
 {
 	if (count == 0)//初始化脚的位置，否则24脚初始位置为0
 	{
@@ -200,12 +199,106 @@ auto planLeg(int e_1, int n, double* current_leg, int count, EllipseTrajectory* 
 	}
 }
 
+//静态步态足端在笛卡尔空间下的坐标规划
+//当前脚的位置 = 上一步脚的位置 + 脚位置增量
+//每当计算完一次梯形曲线，脚的位置跟新一次
+//注意：#脚的位置在初始时刻要初始化一下，否则一开始只有脚13动，24脚的初始位置时0
+//#注意：目前只适用于平地行走
+auto planLegWalk(int e_1, int n, double* current_leg, int count, EllipseTrajectory* Ellipse)->void
+{
+	if (count == 0)//初始化脚的位置，否则24脚初始位置为0
+	{
+		for (int i = 0; i < 12; i++)
+		{
+			current_leg[i] = foot_position_start_point[i];
+		}
+	}
+	Ellipse->getEllipseTrajectory(count);
+
+	if ((e_1 + 1) % 4 == 1)  //迈1腿
+	{
+		if (e_1 == 0)   //加速段
+		{
+			//规划leg1
+			current_leg[0] = foot_position_start_point[0] + Ellipse->get_x() / 2;
+			current_leg[1] = foot_position_start_point[1] + Ellipse->get_y();
+			current_leg[2] = foot_position_start_point[2] + Ellipse->get_z() / 2;
+		}
+		else
+		{
+			//规划leg1
+			current_leg[0] = foot_position_start_point[0] + Ellipse->get_x();
+			current_leg[1] = foot_position_start_point[1] + Ellipse->get_y();
+			current_leg[2] = foot_position_start_point[2] + Ellipse->get_z();
+		}
+	}
+	else if ((e_1 + 1) % 4 == 2)  //迈4腿
+	{
+		if (e_1 == 1)//加速段
+		{
+			//规划leg4
+			current_leg[9] = foot_position_start_point[9] + Ellipse->get_x() / 2;
+			current_leg[10] = foot_position_start_point[10] + Ellipse->get_y();
+			current_leg[11] = foot_position_start_point[11] + Ellipse->get_z() / 2;
+		}
+		else
+		{
+			//规划leg4
+			current_leg[9] = foot_position_start_point[9] + Ellipse->get_x();
+			current_leg[10] = foot_position_start_point[10] + Ellipse->get_y();
+			current_leg[11] = foot_position_start_point[11] + Ellipse->get_z();
+		}
+	}
+	else if ((e_1 + 1) % 4 == 3)  //迈2腿
+	{
+		if (e_1 == (4 * n - 2))//减速段
+		{
+			//规划leg2
+			current_leg[3] = foot_position_start_point[3] + Ellipse->get_x() / 2;
+			current_leg[4] = foot_position_start_point[4] + Ellipse->get_y();
+			current_leg[5] = foot_position_start_point[5] + Ellipse->get_z() / 2;
+		}
+		else
+		{
+			//规划leg2
+			current_leg[3] = foot_position_start_point[3] + Ellipse->get_x();
+			current_leg[4] = foot_position_start_point[4] + Ellipse->get_y();
+			current_leg[5] = foot_position_start_point[5] + Ellipse->get_z();
+		}
+	}
+	else //迈3腿
+	{
+		if (e_1 == (4 * n - 1))//减速段
+		{
+			//规划leg3
+			current_leg[6] = foot_position_start_point[6] + Ellipse->get_x() / 2;
+			current_leg[7] = foot_position_start_point[7] + Ellipse->get_y();
+			current_leg[8] = foot_position_start_point[8] + Ellipse->get_z() / 2;
+		}
+		else
+		{
+			//规划leg3
+			current_leg[6] = foot_position_start_point[6] + Ellipse->get_x();
+			current_leg[7] = foot_position_start_point[7] + Ellipse->get_y();
+			current_leg[8] = foot_position_start_point[8] + Ellipse->get_z();
+		}
+	}
+
+	if (count == floor(Ellipse->getTcurve().getTc() * 1000) - 1)
+	{
+		for (int i = 0; i < 12; i++)
+		{
+			foot_position_start_point[i] = current_leg[i];
+		}
+	}
+}
+
 
 //本函数用于规划四足机器人身体的位置轨迹，不加旋转（姿态变换）
 //当前身体的位置 = 上一步身体的位置 + 身体位置增量
 //每当结束一次命令是，身体的位置跟新一次
 //#注意：目前只适用于平地行走
-auto planBodyTransform(int e_1, int n, double* current_body, int count, EllipseTrajectory* Ellipse)->void
+auto planBodyTransformTrot(int e_1, int n, double* current_body, int count, EllipseTrajectory* Ellipse)->void
 {
 	int per_step_count = Ellipse->getTcurve().getTc() * 1000;
 	if (count == 0) //有用，不能删，否则算不出角度
@@ -241,6 +334,54 @@ auto planBodyTransform(int e_1, int n, double* current_body, int count, EllipseT
 	}
 
 	if (count + 1 >= 2 * n * per_step_count)
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			body_pisiton_start_point[i] = current_body[i];
+		}
+	}
+}
+
+//本函数用于规划四足机器人身体的位置轨迹，不加旋转（姿态变换）
+//当前身体的位置 = 上一步身体的位置 + 身体位置增量
+//每当结束一次命令是，身体的位置跟新一次
+//#注意：目前只适用于平地行走
+auto planBodyTransformWalk(int e_1, int n, double* current_body, int count, EllipseTrajectory* Ellipse)->void
+{
+	int per_step_count = Ellipse->getTcurve().getTc() * 1000;
+	if (count == 0) //有用，不能删，否则算不出角度
+	{
+		for (int i = 0; i < 16; i++)
+		{
+			current_body[i] = body_pisiton_start_point[i];
+		}
+	}
+
+	if (e_1 == 0)   //加速段
+	{
+		//规划身体
+		current_body[3] = body_pisiton_start_point[3] + Ellipse->get_a() * count * count / (4.0 * per_step_count * per_step_count);
+		current_body[7] = body_pisiton_start_point[7];
+		current_body[11] = body_pisiton_start_point[11] + Ellipse->get_c() * count * count / (4.0 * per_step_count * per_step_count);
+	}
+	else if (e_1 == (4 * n - 1))//减速段
+	{
+
+		//规划身体
+		int t = (4 * n - 1) * per_step_count + per_step_count;
+		current_body[3] = body_pisiton_start_point[3] + 0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a 
+		current_body[7] = body_pisiton_start_point[7];
+		current_body[11] = body_pisiton_start_point[11] + 0 - Ellipse->get_c() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_c() * n - Ellipse->get_c() / 2.0;
+	}
+	else //匀速段
+	{
+		//规划身体
+		current_body[3] = body_pisiton_start_point[3] + Ellipse->get_a() / 4.0 + Ellipse->get_a() * (count - per_step_count) / per_step_count / 2;//速度为100mm/s  每秒计数per_step_count
+		current_body[7] = body_pisiton_start_point[7];
+		current_body[11] = body_pisiton_start_point[11] + Ellipse->get_c() / 4.0 + Ellipse->get_c() * (count - per_step_count) / per_step_count / 2;
+	}
+
+	if (count + 1 >= 4 * n * per_step_count)
 	{
 		for (int i = 0; i < 16; i++)
 		{
@@ -406,7 +547,38 @@ auto planBodyDownPrepare(int count, double* current_body, EllipseTrajectory* bod
 /////////////////////////////////////////////////////////////////步态规划///////////////////////////////////////////////
 
 //以下函数在robot.cpp中被调用
-//机器人行走步态，包括原地踏步、前进、后退、左移、右移。
+
+
+//机器人行走对角步态，包括原地踏步、前进、后退、左移、右移。
+//其中步长步高和步数可由用户输入。走一步的时间（或行走快慢）可由用户输入梯形曲线的速度和加速度确定
+//#注意：行走最大速度和加速度还没测试
+auto trotPlan(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
+{
+
+	int per_step_count = Ellipse->getTcurve().getTc() * 1000;
+
+	static double current_leg_in_ground[12] = { 0 };
+	static double current_body_in_ground[16] = { 0 };
+
+
+	//判断行走状态
+	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步e1加1
+
+	//规划腿
+	planLegTrot(e_1, n, current_leg_in_ground, count % per_step_count, Ellipse);
+	//规划身体
+	planBodyTransformTrot(e_1, n, current_body_in_ground, count, Ellipse);
+
+
+	inverse(current_leg_in_ground, current_body_in_ground, input);
+
+
+
+	return 2 * n * per_step_count - count - 1;
+}
+
+
+//机器人行走对角步态，包括原地踏步、前进、后退、左移、右移。
 //其中步长步高和步数可由用户输入。走一步的时间（或行走快慢）可由用户输入梯形曲线的速度和加速度确定
 //#注意：行走最大速度和加速度还没测试
 auto walkPlan(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
@@ -422,18 +594,14 @@ auto walkPlan(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
 	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步e1加1
 
 	//规划腿
-	planLeg(e_1, n, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegTrot(e_1, n, current_leg_in_ground, count % per_step_count, Ellipse);
 	//规划身体
-	planBodyTransform(e_1, n, current_body_in_ground, count, Ellipse);
-
+	planBodyTransformWalk(e_1, n, current_body_in_ground, count, Ellipse);
 
 	inverse(current_leg_in_ground, current_body_in_ground, input);
 
-
-
-	return 2 * n * per_step_count - count - 1;
+	return 4 * n * per_step_count - count - 1;
 }
-
 
 //机器人原地扭动步态，包括原地俯仰，横滚，偏航
 //#注意：只能完成单独的一项，比如要实现先俯仰后偏航，必须等俯仰结束后恢复到初始位置才能进行偏航
@@ -451,7 +619,7 @@ auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, 
 	//std::cout << body_pose_param->pitch_ << std::endl;
 
 	//规划腿
-	planLeg(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
 	//规划身体姿态
 	planBodyRotation(count, current_body_in_ground, body_pose_param);
 
@@ -475,7 +643,7 @@ auto upPlan(int count, EllipseTrajectory* Ellipse, double* input)->int
 	//std::cout << body_pose_param->pitch_ << std::endl;
 
 	//规划腿
-	planLeg(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
 	//规划身体
 	planBodyUp(count, current_body_in_ground, Ellipse);
 
@@ -500,7 +668,7 @@ auto downPlan(int count, EllipseTrajectory* Ellipse, double* input)->int
 	//std::cout << body_pose_param->pitch_ << std::endl;
 
 	//规划腿
-	planLeg(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
 	//规划身体
 	planBodyDown(count, current_body_in_ground, Ellipse);
 
@@ -525,7 +693,7 @@ auto downPlanPrepare(int count, EllipseTrajectory* Ellipse, double* input)->int
 	//std::cout << body_pose_param->pitch_ << std::endl;
 
 	//规划腿
-	planLeg(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
 	//规划身体
 	planBodyDownPrepare(count, current_body_in_ground, Ellipse);
 

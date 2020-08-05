@@ -111,6 +111,7 @@ namespace robot
         ARIS_REGISTER_TYPE(DogForward);
     private:
         double step_;
+        double gait_;
     };
 
     class DogBack :public aris::plan::Plan

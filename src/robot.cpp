@@ -397,7 +397,7 @@ auto DogTaBu::executeRT()->int
     s1.getCurveParam();
     EllipseTrajectory e1(0, 150, 0, s1);
     int ret = 1;
-    ret = walkPlan(step_, count()-1, &e1, input_angle);
+    ret = trotPlan(step_, count()-1, &e1, input_angle);
 
     for(int i=0;i<12;i++)
     {
@@ -421,6 +421,7 @@ DogTaBu::~DogTaBu() = default;
 auto DogForward::prepareNrt()->void
 {
     step_ = doubleParam("step");
+    gait_ = doubleParam("gait");
     for(auto &m:motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogForward::executeRT()->int
@@ -449,7 +450,17 @@ auto DogForward::executeRT()->int
     TCurve s1(1, 4);
     s1.getCurveParam();
     EllipseTrajectory e1(220, 150, 0, s1);
-    ret =  walkPlan(step_,count()-1, &e1,input_angle);
+
+    if (gait_ == 1)//trot
+    {
+        mout() << "bbbbbbbbbbbbbb" << std::endl;
+        ret = trotPlan(step_, count() - 1, &e1, input_angle);
+    }
+    else //walk
+    {
+        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        mout() << "aaaaaaaaaaaaaa" << std::endl;
+    }
 
     for(int i=0;i<12;i++)
     {
@@ -463,8 +474,11 @@ auto DogForward::executeRT()->int
 DogForward::DogForward(const std::string &name) : Plan(name)
 {
     command().loadXmlStr(
-       "<Command name=\"dog_forward\">"
-        "	<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+        "<Command name=\"dog_forward\">"
+            "<GroupParam>"
+                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+            "</GroupParam>"
         "</Command>");
 }
 DogForward::~DogForward() = default;
@@ -498,7 +512,7 @@ auto DogBack::executeRT()->int
     TCurve s1(1, 4);
     s1.getCurveParam();
     EllipseTrajectory e1(-220, 150, 0, s1);
-    ret = walkPlan(step_, count() - 1, &e1, input_angle);
+    ret = trotPlan(step_, count() - 1, &e1, input_angle);
 
     for (int i = 0; i < 12; i++)
     {
@@ -547,7 +561,7 @@ auto DogLeft::executeRT()->int
     TCurve s1(1, 4);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 150, -220, s1);
-    ret = walkPlan(step_, count() - 1, &e1, input_angle);
+    ret = trotPlan(step_, count() - 1, &e1, input_angle);
 
     for (int i = 0; i < 12; i++)
     {
@@ -596,7 +610,7 @@ auto DogRight::executeRT()->int
     TCurve s1(1, 4);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 150,220, s1);
-    ret = walkPlan(step_, count() - 1, &e1, input_angle);
+    ret = trotPlan(step_, count() - 1, &e1, input_angle);
 
     for (int i = 0; i < 12; i++)
     {
