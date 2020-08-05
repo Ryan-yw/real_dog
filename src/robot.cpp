@@ -218,10 +218,10 @@ auto DogPrepare::executeRT()->int
     double angle[12]={0};
     if (count() == 1)this->master()->logFileRawName("prepare");
     const double distance[12]={
-                                0,0.582289,-1.12207,
-                                0,0.582289,-1.12207,
-                                0,-0.582289,1.12207,
-                                0,-0.582289,1.12207
+                                0,0.582289,-1.12207*1.5,//小腿带轮减速比1.5
+                                0,0.582289,-1.12207*1.5,
+                                0,-0.582289,1.12207*1.5,
+                                0,-0.582289,1.12207*1.5
                                 //0,0.666031,-1.10885,
                                 //0,0.484712,-1.10885,
                                 //0,-0.484712,1.10885,
@@ -303,13 +303,23 @@ auto DogSitDown::executeRT()->int
 
     ret = downPlan(count()-1, &e1, input_angle);
 
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogSitDown::DogSitDown(const std::string& name) : Plan(name)
@@ -352,13 +362,23 @@ auto DogStandUp::executeRT()->int
 
     ret = upPlan(count() - 1, &e1, input_angle);
 
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogStandUp::DogStandUp(const std::string& name) : Plan(name)
@@ -399,13 +419,23 @@ auto DogTaBu::executeRT()->int
     int ret = 1;
     ret = walkPlan(step_, count()-1, &e1, input_angle);
 
-    for(int i=0;i<12;i++)
+    //输出角度，用于仿真测试
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
+    //发送电机角度
+    for (int i = 0; i < 12; i++)
+    {
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    }
     return ret;
 }
 DogTaBu::DogTaBu(const std::string& name) : Plan(name)
@@ -451,13 +481,23 @@ auto DogForward::executeRT()->int
     EllipseTrajectory e1(220, 150, 0, s1);
     ret =  walkPlan(step_,count()-1, &e1,input_angle);
 
-    for(int i=0;i<12;i++)
+    //输出角度，用于仿真测试
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
+    //发送电机角度
+    for (int i = 0; i < 12; i++)
+    {
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    }
     return ret;
 }
 DogForward::DogForward(const std::string &name) : Plan(name)
@@ -500,13 +540,23 @@ auto DogBack::executeRT()->int
     EllipseTrajectory e1(-220, 150, 0, s1);
     ret = walkPlan(step_, count() - 1, &e1, input_angle);
 
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogBack::DogBack(const std::string& name) : Plan(name)
@@ -549,13 +599,23 @@ auto DogLeft::executeRT()->int
     EllipseTrajectory e1(0, 150, -220, s1);
     ret = walkPlan(step_, count() - 1, &e1, input_angle);
 
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogLeft::DogLeft(const std::string& name) : Plan(name)
@@ -598,13 +658,23 @@ auto DogRight::executeRT()->int
     EllipseTrajectory e1(0, 150,220, s1);
     ret = walkPlan(step_, count() - 1, &e1, input_angle);
 
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogRight::DogRight(const std::string& name) : Plan(name)
@@ -648,13 +718,23 @@ auto DogPitchUp::executeRT()->int
 
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogPitchUp::DogPitchUp(const std::string& name) : Plan(name)
@@ -696,14 +776,23 @@ auto DogPitchDown::executeRT()->int
     BodyPose body_pose(0, 0, -30, s1);
 
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
-
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogPitchDown::DogPitchDown(const std::string& name) : Plan(name)
@@ -746,13 +835,23 @@ auto DogRolll::executeRT()->int
     BodyPose body_pose(30, 0, 0, s1);
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogRolll::DogRolll(const std::string& name) : Plan(name)
@@ -794,13 +893,23 @@ auto DogRollr::executeRT()->int
     BodyPose body_pose(-30, 0, 0, s1);
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogRollr::DogRollr(const std::string& name) : Plan(name)
@@ -842,13 +951,23 @@ auto DogYawl::executeRT()->int
     BodyPose body_pose(0, 30, 0, s1);
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogYawl::DogYawl(const std::string& name) : Plan(name)
@@ -890,13 +1009,23 @@ auto DogYawr::executeRT()->int
     BodyPose body_pose(0, -30, 0, s1);
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
     for (int i = 0; i < 12; i++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
     return ret;
 }
 DogYawr::DogYawr(const std::string& name) : Plan(name)
