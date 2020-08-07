@@ -8,15 +8,12 @@ using namespace std;
 
 //行走参数静态变量
 static double foot_position_start_point[12] = {
-                                        // (kBodyLong-100) / 2, 0, -(kBodyWidth / 2) - L1,  //leg1 ->012
-                                        //-(kBodyLong-100) / 2, 0, -(kBodyWidth / 2) - L1,  //leg2 ->345
-                                        //-(kBodyLong-100) / 2, 0,  (kBodyWidth / 2) + L1,   //leg3 ->678
-                                        // (kBodyLong-100) / 2, 0,  (kBodyWidth / 2) + L1    //leg4 ->91011
 										 kBodyLong / 2, 0, -(kBodyWidth / 2) - L1,  //leg1 ->012
 										-kBodyLong / 2, 0, -(kBodyWidth / 2) - L1,  //leg2 ->345
 										-kBodyLong / 2, 0,  (kBodyWidth / 2) + L1,   //leg3 ->678
 										 kBodyLong / 2, 0,  (kBodyWidth / 2) + L1    //leg4 ->91011
 };
+
 static double body_pisiton_start_point[16] = { 1,0,0,0,
 											   0,1,0,kBodyHigh,
 											   0,0,1,0,
@@ -26,7 +23,8 @@ static double body_pose_start_yaw = 0;
 static double body_pose_start_roll = 0;
 
 
-
+extern double file_current_leg[12];
+extern double file_current_body[12];
 /////////////////////////////////////梯形曲线///////////////////////////////////////////////
 //生成梯形曲线0->1
 //输入：时间，每毫秒计数一次
@@ -294,7 +292,7 @@ auto planLegWalk(int e_1, int n, double* current_leg, int count, EllipseTrajecto
 }
 
 
-//本函数用于规划四足机器人身体的位置轨迹，不加旋转（姿态变换）
+//本函数用于规划四足机器人在对角步态下身体的位置轨迹，不加旋转（姿态变换）
 //当前身体的位置 = 上一步身体的位置 + 身体位置增量
 //每当结束一次命令是，身体的位置跟新一次
 //#注意：目前只适用于平地行走
@@ -321,7 +319,7 @@ auto planBodyTransformTrot(int e_1, int n, double* current_body, int count, Elli
 
 		//规划身体
 		int t = (2 * n - 1) * per_step_count + per_step_count;
-		current_body[3] = body_pisiton_start_point[3] + 0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a 
+		current_body[3] = body_pisiton_start_point[3] + 0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a
 		current_body[7] = body_pisiton_start_point[7];
 		current_body[11] = body_pisiton_start_point[11] + 0 - Ellipse->get_c() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_c() * n - Ellipse->get_c() / 2.0;
 	}
@@ -342,7 +340,7 @@ auto planBodyTransformTrot(int e_1, int n, double* current_body, int count, Elli
 	}
 }
 
-//本函数用于规划四足机器人身体的位置轨迹，不加旋转（姿态变换）
+//本函数用于规划四足机器人在walk步态下身体的位置轨迹，不加旋转（姿态变换）
 //当前身体的位置 = 上一步身体的位置 + 身体位置增量
 //每当结束一次命令是，身体的位置跟新一次
 //#注意：目前只适用于平地行走
@@ -357,28 +355,28 @@ auto planBodyTransformWalk(int e_1, int n, double* current_body, int count, Elli
 		}
 	}
 
-	if (e_1 == 0)   //加速段
+	if (e_1 == 0 || e_1 == 1)   //加速段
 	{
 		//规划身体
-		current_body[3] = body_pisiton_start_point[3] + Ellipse->get_a() * count * count / (4.0 * per_step_count * per_step_count);
+		current_body[3] = body_pisiton_start_point[3] + Ellipse->get_a() * count * count / (4.0 * 2 * per_step_count * 2 * per_step_count);
 		current_body[7] = body_pisiton_start_point[7];
-		current_body[11] = body_pisiton_start_point[11] + Ellipse->get_c() * count * count / (4.0 * per_step_count * per_step_count);
+		current_body[11] = body_pisiton_start_point[11] + Ellipse->get_c() * count * count / (4.0 * 2 * per_step_count * 2 * per_step_count);
 	}
-	else if (e_1 == (4 * n - 1))//减速段
+	else if (e_1 == (4 * n - 1) || e_1 == (4 * n - 2))//减速段
 	{
 
 		//规划身体
-		int t = (4 * n - 1) * per_step_count + per_step_count;
-		current_body[3] = body_pisiton_start_point[3] + 0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a 
+		int t = 4 * n * per_step_count;
+		current_body[3] = body_pisiton_start_point[3] + 0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * 2*per_step_count * 2*per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a 
 		current_body[7] = body_pisiton_start_point[7];
-		current_body[11] = body_pisiton_start_point[11] + 0 - Ellipse->get_c() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_c() * n - Ellipse->get_c() / 2.0;
+		current_body[11] = body_pisiton_start_point[11] + 0 - Ellipse->get_c() * (count - t) * (count - t) / (4.0 * 2*per_step_count * 2*per_step_count) + Ellipse->get_c() * n - Ellipse->get_c() / 2.0;
 	}
 	else //匀速段
 	{
-		//规划身体
-		current_body[3] = body_pisiton_start_point[3] + Ellipse->get_a() / 4.0 + Ellipse->get_a() * (count - per_step_count) / per_step_count / 2;//速度为100mm/s  每秒计数per_step_count
+		//规划身体，在加速段的基础上计算。斜率可自定
+		current_body[3] = body_pisiton_start_point[3] + Ellipse->get_a() / 4.0 + Ellipse->get_a() * (count - 2 * per_step_count) / per_step_count / 4.0;//速度为100mm/s  每秒计数per_step_count
 		current_body[7] = body_pisiton_start_point[7];
-		current_body[11] = body_pisiton_start_point[11] + Ellipse->get_c() / 4.0 + Ellipse->get_c() * (count - per_step_count) / per_step_count / 2;
+		current_body[11] = body_pisiton_start_point[11] + Ellipse->get_c() / 4.0 + Ellipse->get_c() * (count - 2 * per_step_count) / per_step_count / 4.0;
 	}
 
 	if (count + 1 >= 4 * n * per_step_count)
@@ -569,10 +567,17 @@ auto trotPlan(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
 	//规划身体
 	planBodyTransformTrot(e_1, n, current_body_in_ground, count, Ellipse);
 
-
+	//模型测试使用
+	for (int j = 0; j < 12; j++)
+	{
+		file_current_leg[j] = current_leg_in_ground[j];
+	}
+	for (int j = 0; j < 12; j++)
+	{
+		file_current_body[j] = current_body_in_ground[j];
+	}
+	//模型测试使用
 	inverse(current_leg_in_ground, current_body_in_ground, input);
-
-
 
 	return 2 * n * per_step_count - count - 1;
 }
@@ -594,10 +599,19 @@ auto walkPlan(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
 	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步e1加1
 
 	//规划腿
-	planLegTrot(e_1, n, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegWalk(e_1, n, current_leg_in_ground, count % per_step_count, Ellipse);
 	//规划身体
 	planBodyTransformWalk(e_1, n, current_body_in_ground, count, Ellipse);
-
+	//模型测试使用
+	for (int j = 0; j < 12; j++)
+	{
+		file_current_leg[j] = current_leg_in_ground[j];
+	}
+	for (int j = 0; j < 12; j++)
+	{
+		file_current_body[j] = current_body_in_ground[j];
+	}
+	//模型测试使用
 	inverse(current_leg_in_ground, current_body_in_ground, input);
 
 	return 4 * n * per_step_count - count - 1;
@@ -696,6 +710,17 @@ auto downPlanPrepare(int count, EllipseTrajectory* Ellipse, double* input)->int
 	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
 	//规划身体
 	planBodyDownPrepare(count, current_body_in_ground, Ellipse);
+	
+	//模型测试使用
+	for (int j = 0; j < 12; j++)
+	{
+		file_current_leg[j] = current_leg_in_ground[j];
+	}
+	for (int j = 0; j < 12; j++)
+	{
+		file_current_body[j] = current_body_in_ground[j];
+	}
+	//模型测试使用
 
 	inverse(current_leg_in_ground, current_body_in_ground, input);
 

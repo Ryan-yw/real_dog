@@ -8,7 +8,12 @@
 #include"plan.h"
 
 double input_angle[12] = {0};
+
+//输出参数，模型曲线测试使用
+double file_current_leg[12] = { 0 };
+double file_current_body[16] = { 0 };
 double time_test = 0;
+
 using namespace aris::dynamic;
 using namespace aris::plan;
 const double PI = aris::PI;
@@ -449,26 +454,33 @@ auto DogForward::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(220, 150, 0, s1);
+    EllipseTrajectory e1(100, 150, 0, s1);
 
     if (gait_ == 1)//trot
     {
-        mout() << "bbbbbbbbbbbbbb" << std::endl;
+        mout() << "1111111111111" << std::endl;
         ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
     else //walk
     {
         ret = walkPlan(step_, count() - 1, &e1, input_angle);
-        mout() << "aaaaaaaaaaaaaa" << std::endl;
+        mout() << "22222222222222" << std::endl;
     }
-
-    for(int i=0;i<12;i++)
+    //模型测试输出
+    for (int j = 0; j < 12; j++)
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        lout() << file_current_leg[j] << "\t";
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
+    lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+
+
+    //for(int i=0;i<12;i++)
+    //{
+    //    lout() << input_angle[i] << "\t";
+    //    controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    //}
+    //time_test += 0.001;
+    //lout() << time_test << std::endl;
     return ret;
 }
 DogForward::DogForward(const std::string &name) : Plan(name)
@@ -487,6 +499,7 @@ DogForward::~DogForward() = default;
 auto DogBack::prepareNrt()->void
 {
     step_ = doubleParam("step");
+    gait_ = doubleParam("gait");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogBack::executeRT()->int
@@ -511,23 +524,42 @@ auto DogBack::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(-220, 150, 0, s1);
-    ret = trotPlan(step_, count() - 1, &e1, input_angle);
+    EllipseTrajectory e1(-100, 150, 0, s1);
 
-    for (int i = 0; i < 12; i++)
+    if (gait_ == 1)//trot
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        mout() << "333333333333333" << std::endl;
+        ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
+    else //walk
+    {
+        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        mout() << "44444444444444444" << std::endl;
+    }
+    //模型测试输出
+    for (int j = 0; j < 12; j++)
+    {
+        lout() << file_current_leg[j] << "\t";
+    }
+    lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+
+    //for (int i = 0; i < 12; i++)
+    //{
+    //    lout() << input_angle[i] << "\t";
+    //    controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    //}
+    //time_test += 0.001;
+    //lout() << time_test << std::endl;
     return ret;
 }
 DogBack::DogBack(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
         "<Command name=\"dog_back\">"
-        "	<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+            "<GroupParam>"
+                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+            "</GroupParam>"
         "</Command>");
 }
 DogBack::~DogBack() = default;
@@ -536,6 +568,7 @@ DogBack::~DogBack() = default;
 auto DogLeft::prepareNrt()->void
 {
     step_ = doubleParam("step");
+    gait_ = doubleParam("gait");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogLeft::executeRT()->int
@@ -560,23 +593,42 @@ auto DogLeft::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 150, -220, s1);
-    ret = trotPlan(step_, count() - 1, &e1, input_angle);
+    EllipseTrajectory e1(0, 150, -100, s1);
 
-    for (int i = 0; i < 12; i++)
+    if (gait_ == 1)//trot
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        mout() << "5555555555555" << std::endl;
+        ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
+    else //walk
+    {
+        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        mout() << "6666666666666" << std::endl;
+    }
+    //模型测试输出
+    for (int j = 0; j < 12; j++)
+    {
+        lout() << file_current_leg[j] << "\t";
+    }
+    lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+
+    //for (int i = 0; i < 12; i++)
+    //{
+    //    lout() << input_angle[i] << "\t";
+    //    controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    //}
+    //time_test += 0.001;
+    //lout() << time_test << std::endl;
     return ret;
 }
 DogLeft::DogLeft(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
         "<Command name=\"dog_left\">"
-        "	<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+            "<GroupParam>"
+                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+            "</GroupParam>"
         "</Command>");
 }
 DogLeft::~DogLeft() = default;
@@ -585,6 +637,7 @@ DogLeft::~DogLeft() = default;
 auto DogRight::prepareNrt()->void
 {
     step_ = doubleParam("step");
+    gait_ = doubleParam("gait");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogRight::executeRT()->int
@@ -609,23 +662,42 @@ auto DogRight::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 150,220, s1);
-    ret = trotPlan(step_, count() - 1, &e1, input_angle);
-
-    for (int i = 0; i < 12; i++)
+    EllipseTrajectory e1(0, 150,100, s1);
+    
+    if (gait_ == 1)//trot
     {
-        lout() << input_angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+        mout() << "777777777777" << std::endl;
+        ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
+    else //walk
+    {
+        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        mout() << "8888888888888" << std::endl;
+    }
+    //模型测试输出
+    for (int j = 0; j < 12; j++)
+    {
+        lout() << file_current_leg[j] << "\t";
+    }
+    lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+
+    //for (int i = 0; i < 12; i++)
+    //{
+    //    lout() << input_angle[i] << "\t";
+    //    controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    //}
+    //time_test += 0.001;
+    //lout() << time_test << std::endl;
     return ret;
 }
 DogRight::DogRight(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
         "<Command name=\"dog_right\">"
-        "	<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+            "<GroupParam>"
+                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+            "</GroupParam>"
         "</Command>");
 }
 DogRight::~DogRight() = default;
