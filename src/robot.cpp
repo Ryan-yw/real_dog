@@ -8,7 +8,12 @@
 #include"plan.h"
 
 double input_angle[12] = {0};
+
+//输出参数，模型曲线测试使用
+double file_current_leg[12] = { 0 };
+double file_current_body[16] = { 0 };
 double time_test = 0;
+
 using namespace aris::dynamic;
 using namespace aris::plan;
 const double PI = aris::PI;
@@ -417,7 +422,7 @@ auto DogTaBu::executeRT()->int
     s1.getCurveParam();
     EllipseTrajectory e1(0, 150, 0, s1);
     int ret = 1;
-    ret = walkPlan(step_, count()-1, &e1, input_angle);
+    ret = trotPlan(step_, count()-1, &e1, input_angle);
 
     //输出角度，用于仿真测试
     {
@@ -451,6 +456,7 @@ DogTaBu::~DogTaBu() = default;
 auto DogForward::prepareNrt()->void
 {
     step_ = doubleParam("step");
+    gait_ = doubleParam("gait");
     for(auto &m:motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogForward::executeRT()->int
@@ -478,11 +484,28 @@ auto DogForward::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(220, 150, 0, s1);
-    ret =  walkPlan(step_,count()-1, &e1,input_angle);
+    EllipseTrajectory e1(100, 150, 0, s1);
+
+    if (gait_ == 1)//trot
+    {
+        mout() << "1111111111111" << std::endl;
+        ret = trotPlan(step_, count() - 1, &e1, input_angle);
+    }
+    else //walk
+    {
+        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        mout() << "22222222222222" << std::endl;
+    }
 
     //输出角度，用于仿真测试
     {
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        //输出电机角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
@@ -498,13 +521,17 @@ auto DogForward::executeRT()->int
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
+
     return ret;
 }
 DogForward::DogForward(const std::string &name) : Plan(name)
 {
     command().loadXmlStr(
-       "<Command name=\"dog_forward\">"
-        "	<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+        "<Command name=\"dog_forward\">"
+            "<GroupParam>"
+                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+            "</GroupParam>"
         "</Command>");
 }
 DogForward::~DogForward() = default;
@@ -513,6 +540,7 @@ DogForward::~DogForward() = default;
 auto DogBack::prepareNrt()->void
 {
     step_ = doubleParam("step");
+    gait_ = doubleParam("gait");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogBack::executeRT()->int
@@ -537,11 +565,27 @@ auto DogBack::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(-220, 150, 0, s1);
-    ret = walkPlan(step_, count() - 1, &e1, input_angle);
+    EllipseTrajectory e1(-100, 150, 0, s1);
+    if (gait_ == 1)//trot
+    {
+        mout() << "333333333333333" << std::endl;
+        ret = trotPlan(step_, count() - 1, &e1, input_angle);
+    }
+    else //walk
+    {
+        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        mout() << "44444444444444444" << std::endl;
+    }
 
     //输出角度，用于仿真测试
     {
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        //输出关节角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
@@ -563,7 +607,10 @@ DogBack::DogBack(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
         "<Command name=\"dog_back\">"
-        "	<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+            "<GroupParam>"
+                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+            "</GroupParam>"
         "</Command>");
 }
 DogBack::~DogBack() = default;
@@ -572,6 +619,7 @@ DogBack::~DogBack() = default;
 auto DogLeft::prepareNrt()->void
 {
     step_ = doubleParam("step");
+    gait_ = doubleParam("gait");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogLeft::executeRT()->int
@@ -593,14 +641,30 @@ auto DogLeft::executeRT()->int
         input_angle[10] = controller()->motionPool()[10].actualPos();
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
-
+    //轨迹规划
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 150, -220, s1);
-    ret = walkPlan(step_, count() - 1, &e1, input_angle);
+    EllipseTrajectory e1(0, 150, -100, s1);
+    if (gait_ == 1)//trot
+    {
+        mout() << "5555555555555" << std::endl;
+        ret = trotPlan(step_, count() - 1, &e1, input_angle);
+    }
+    else //walk
+    {
+        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        mout() << "6666666666666" << std::endl;
+    }
 
     //输出角度，用于仿真测试
     {
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        //输出关节角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
@@ -622,7 +686,10 @@ DogLeft::DogLeft(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
         "<Command name=\"dog_left\">"
-        "	<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+            "<GroupParam>"
+                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+            "</GroupParam>"
         "</Command>");
 }
 DogLeft::~DogLeft() = default;
@@ -631,6 +698,7 @@ DogLeft::~DogLeft() = default;
 auto DogRight::prepareNrt()->void
 {
     step_ = doubleParam("step");
+    gait_ = doubleParam("gait");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogRight::executeRT()->int
@@ -655,11 +723,28 @@ auto DogRight::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 150,220, s1);
-    ret = walkPlan(step_, count() - 1, &e1, input_angle);
+
+    EllipseTrajectory e1(0, 150,100, s1);
+    if (gait_ == 1)//trot
+    {
+        mout() << "777777777777" << std::endl;
+        ret = trotPlan(step_, count() - 1, &e1, input_angle);
+    }
+    else //walk
+    {
+        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        mout() << "8888888888888" << std::endl;
+    }
 
     //输出角度，用于仿真测试
     {
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        //输出关节角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
@@ -681,7 +766,10 @@ DogRight::DogRight(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
         "<Command name=\"dog_right\">"
-        "	<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+            "<GroupParam>"
+                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+            "</GroupParam>"
         "</Command>");
 }
 DogRight::~DogRight() = default;

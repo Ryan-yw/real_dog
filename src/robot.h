@@ -111,6 +111,7 @@ namespace robot
         ARIS_REGISTER_TYPE(DogForward);
     private:
         double step_;
+        double gait_;
     };
 
     class DogBack :public aris::plan::Plan
@@ -124,6 +125,7 @@ namespace robot
         ARIS_REGISTER_TYPE(DogBack);
     private:
         double step_;
+        double gait_;
     };
 
     class DogLeft :public aris::plan::Plan
@@ -137,6 +139,7 @@ namespace robot
         ARIS_REGISTER_TYPE(DogLeft);
     private:
         double step_;
+        double gait_;
     };
 
     class DogRight :public aris::plan::Plan
@@ -150,6 +153,7 @@ namespace robot
         ARIS_REGISTER_TYPE(DogRight);
     private:
         double step_;
+        double gait_;
     };
 
     class DogPitchUp :public aris::plan::Plan
