@@ -7,13 +7,13 @@ using namespace std;
 
 
 //行走参数静态变量
-static double foot_position_start_point[12] = {
-										 kBodyLong / 2, 0, -(kBodyWidth / 2) - L1,  //leg1 ->012
-										-kBodyLong / 2, 0, -(kBodyWidth / 2) - L1,  //leg2 ->345
-										-kBodyLong / 2, 0,  (kBodyWidth / 2) + L1,   //leg3 ->678
-										 kBodyLong / 2, 0,  (kBodyWidth / 2) + L1    //leg4 ->91011
-};
-
+//static double foot_position_start_point[12] = {
+//										 kBodyLong / 2, 0, -(kBodyWidth / 2) - L1,  //leg1 ->012
+//										-kBodyLong / 2, 0, -(kBodyWidth / 2) - L1,  //leg2 ->345
+//										-kBodyLong / 2, 0,  (kBodyWidth / 2) + L1,   //leg3 ->678
+//										 kBodyLong / 2, 0,  (kBodyWidth / 2) + L1    //leg4 ->91011
+//};
+static double foot_position_start_point[12] = { 0 };
 static double body_pisiton_start_point[16] = { 1,0,0,0,
 											   0,1,0,kBodyHigh,
 											   0,0,1,0,

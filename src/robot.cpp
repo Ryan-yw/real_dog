@@ -505,22 +505,22 @@ auto DogForward::executeRT()->int
             lout() << file_current_leg[j] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        //输出电机角度
-        for (int i = 0; i < 12; i++)
-        {
-            lout() << input_angle[i] << "\t";
-        }
-        time_test += 0.001;
-        lout() << time_test << std::endl;
+        ////输出电机角度
+        //for (int i = 0; i < 12; i++)
+        //{
+        //    lout() << input_angle[i] << "\t";
+        //}
+        //time_test += 0.001;
+        //lout() << time_test << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
-    {
-        if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-        else
-            controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }
+    //for (int i = 0; i < 12; i++)
+    //{
+    //    if (i == 2 || i == 5 || i == 8 || i == 11)
+    //        controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+    //    else
+    //        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    //}
 
     return ret;
 }
@@ -585,22 +585,22 @@ auto DogBack::executeRT()->int
             lout() << file_current_leg[j] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        //输出关节角度
-        for (int i = 0; i < 12; i++)
-        {
-            lout() << input_angle[i] << "\t";
-        }
-        time_test += 0.001;
-        lout() << time_test << std::endl;
+        ////输出关节角度
+        //for (int i = 0; i < 12; i++)
+        //{
+        //    lout() << input_angle[i] << "\t";
+        //}
+        //time_test += 0.001;
+        //lout() << time_test << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
-    {
-        if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-        else
-            controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }
+    //for (int i = 0; i < 12; i++)
+    //{
+    //    if (i == 2 || i == 5 || i == 8 || i == 11)
+    //        controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+    //    else
+    //        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    //}
     return ret;
 }
 DogBack::DogBack(const std::string& name) : Plan(name)
@@ -664,22 +664,22 @@ auto DogLeft::executeRT()->int
             lout() << file_current_leg[j] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        //输出关节角度
-        for (int i = 0; i < 12; i++)
-        {
-            lout() << input_angle[i] << "\t";
-        }
-        time_test += 0.001;
-        lout() << time_test << std::endl;
+        ////输出关节角度
+        //for (int i = 0; i < 12; i++)
+        //{
+        //    lout() << input_angle[i] << "\t";
+        //}
+        //time_test += 0.001;
+        //lout() << time_test << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
-    {
-        if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-        else
-            controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }
+    //for (int i = 0; i < 12; i++)
+    //{
+    //    if (i == 2 || i == 5 || i == 8 || i == 11)
+    //        controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+    //    else
+    //        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    //}
     return ret;
 }
 DogLeft::DogLeft(const std::string& name) : Plan(name)
@@ -744,22 +744,22 @@ auto DogRight::executeRT()->int
             lout() << file_current_leg[j] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        //输出关节角度
-        for (int i = 0; i < 12; i++)
-        {
-            lout() << input_angle[i] << "\t";
-        }
-        time_test += 0.001;
-        lout() << time_test << std::endl;
+        ////输出关节角度
+        //for (int i = 0; i < 12; i++)
+        //{
+        //    lout() << input_angle[i] << "\t";
+        //}
+        //time_test += 0.001;
+        //lout() << time_test << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+ /*   for (int i = 0; i < 12; i++)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }
+    }*/
     return ret;
 }
 DogRight::DogRight(const std::string& name) : Plan(name)
@@ -802,7 +802,7 @@ auto DogPitchUp::executeRT()->int
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(0, 0, 30, s1);
+    BodyPose body_pose(0, 0, 10, s1);
 
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
@@ -861,7 +861,7 @@ auto DogPitchDown::executeRT()->int
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(0, 0, -30, s1);
+    BodyPose body_pose(0, 0, -10, s1);
 
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
     //输出角度，用于仿真测试
@@ -920,7 +920,7 @@ auto DogRolll::executeRT()->int
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(30, 0, 0, s1);
+    BodyPose body_pose(20, 0, 0, s1);
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
     //输出角度，用于仿真测试
@@ -978,7 +978,7 @@ auto DogRollr::executeRT()->int
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(-30, 0, 0, s1);
+    BodyPose body_pose(-20, 0, 0, s1);
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
     //输出角度，用于仿真测试
@@ -1036,7 +1036,7 @@ auto DogYawl::executeRT()->int
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(0, 30, 0, s1);
+    BodyPose body_pose(0, 20, 0, s1);
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
     //输出角度，用于仿真测试
@@ -1094,7 +1094,7 @@ auto DogYawr::executeRT()->int
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(0, -30, 0, s1);
+    BodyPose body_pose(0, -20, 0, s1);
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
     //输出角度，用于仿真测试
