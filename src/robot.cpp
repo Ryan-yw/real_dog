@@ -223,10 +223,10 @@ auto DogPrepare::executeRT()->int
     double angle[12]={0};
     if (count() == 1)this->master()->logFileRawName("prepare");
     const double distance[12]={
-                                0,0.582289,-1.12207*1.5,//小腿带轮减速比1.5
-                                0,0.582289,-1.12207*1.5,
-                                0,-0.582289,1.12207*1.5,
-                                0,-0.582289,1.12207*1.5
+                                0,0.582289,-1.12207,//小腿带轮减速比1.5
+                                0,0.582289,-1.12207,
+                                0,-0.582289,1.12207,
+                                0,-0.582289,1.12207
                                 //0,0.666031,-1.10885,
                                 //0,0.484712,-1.10885,
                                 //0,-0.484712,1.10885,
@@ -257,16 +257,24 @@ auto DogPrepare::executeRT()->int
         angle[i] = begin_angle[i] + distance[i] * s1.getTCurve(count());
     }
 
-    for(int i=0;i<12;i++)
+    //输出角度，用于仿真测试
     {
-        lout() << angle[i] << "\t";
-        controller()->motionPool()[i].setTargetPos(angle[i]);
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
     }
-    time_test += 0.001;
-    lout() << time_test << std::endl;
-
+    //发送电机角度
+    for (int i = 0; i < 12; i++)
+    {
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(angle[i]);
+    }
     return s1.getTc() * 1000-count();
-
 }
 DogPrepare::DogPrepare(const std::string &name) : Plan(name)
 {
@@ -420,7 +428,7 @@ auto DogTaBu::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 150, 0, s1);
+    EllipseTrajectory e1(0, 100, 0, s1);
     int ret = 1;
     ret = trotPlan(step_, count()-1, &e1, input_angle);
 
@@ -484,43 +492,41 @@ auto DogForward::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(100, 150, 0, s1);
+    EllipseTrajectory e1(220, 100, 0, s1);
 
     if (gait_ == 1)//trot
     {
-        mout() << "1111111111111" << std::endl;
         ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
     else //walk
     {
         ret = walkPlan(step_, count() - 1, &e1, input_angle);
-        mout() << "22222222222222" << std::endl;
     }
 
     //输出角度，用于仿真测试
     {
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
-        {
-            lout() << file_current_leg[j] << "\t";
-        }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        ////输出电机角度
-        //for (int i = 0; i < 12; i++)
+        //for (int j = 0; j < 12; j++)
         //{
-        //    lout() << input_angle[i] << "\t";
+        //    lout() << file_current_leg[j] << "\t";
         //}
-        //time_test += 0.001;
-        //lout() << time_test << std::endl;
+        //lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        //输出电机角度
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
     }
     //发送电机角度
-    //for (int i = 0; i < 12; i++)
-    //{
-    //    if (i == 2 || i == 5 || i == 8 || i == 11)
-    //        controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-    //    else
-    //        controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    //}
+    for (int i = 0; i < 12; i++)
+    {
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    }
 
     return ret;
 }
@@ -565,42 +571,40 @@ auto DogBack::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(-100, 150, 0, s1);
+    EllipseTrajectory e1(-220, 100, 0, s1);
     if (gait_ == 1)//trot
     {
-        mout() << "333333333333333" << std::endl;
         ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
     else //walk
     {
         ret = walkPlan(step_, count() - 1, &e1, input_angle);
-        mout() << "44444444444444444" << std::endl;
     }
 
     //输出角度，用于仿真测试
     {
-        //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
-        {
-            lout() << file_current_leg[j] << "\t";
-        }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        ////输出关节角度
-        //for (int i = 0; i < 12; i++)
+        ////输出身体和足尖曲线
+        //for (int j = 0; j < 12; j++)
         //{
-        //    lout() << input_angle[i] << "\t";
+        //    lout() << file_current_leg[j] << "\t";
         //}
-        //time_test += 0.001;
-        //lout() << time_test << std::endl;
+        //lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        //输出关节角度
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
     }
     //发送电机角度
-    //for (int i = 0; i < 12; i++)
-    //{
-    //    if (i == 2 || i == 5 || i == 8 || i == 11)
-    //        controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-    //    else
-    //        controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    //}
+    for (int i = 0; i < 12; i++)
+    {
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    }
     return ret;
 }
 DogBack::DogBack(const std::string& name) : Plan(name)
@@ -644,42 +648,40 @@ auto DogLeft::executeRT()->int
     //轨迹规划
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 150, -100, s1);
+    EllipseTrajectory e1(0, 100, -220, s1);
     if (gait_ == 1)//trot
     {
-        mout() << "5555555555555" << std::endl;
         ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
     else //walk
     {
         ret = walkPlan(step_, count() - 1, &e1, input_angle);
-        mout() << "6666666666666" << std::endl;
     }
 
     //输出角度，用于仿真测试
     {
-        //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
-        {
-            lout() << file_current_leg[j] << "\t";
-        }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        ////输出关节角度
-        //for (int i = 0; i < 12; i++)
+        ////输出身体和足尖曲线
+        //for (int j = 0; j < 12; j++)
         //{
-        //    lout() << input_angle[i] << "\t";
+        //    lout() << file_current_leg[j] << "\t";
         //}
-        //time_test += 0.001;
-        //lout() << time_test << std::endl;
+        //lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        //输出关节角度
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
     }
     //发送电机角度
-    //for (int i = 0; i < 12; i++)
-    //{
-    //    if (i == 2 || i == 5 || i == 8 || i == 11)
-    //        controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-    //    else
-    //        controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    //}
+    for (int i = 0; i < 12; i++)
+    {
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    }
     return ret;
 }
 DogLeft::DogLeft(const std::string& name) : Plan(name)
@@ -724,42 +726,40 @@ auto DogRight::executeRT()->int
     TCurve s1(1, 4);
     s1.getCurveParam();
 
-    EllipseTrajectory e1(0, 150,100, s1);
+    EllipseTrajectory e1(0, 100,220, s1);
     if (gait_ == 1)//trot
     {
-        mout() << "777777777777" << std::endl;
         ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
     else //walk
     {
         ret = walkPlan(step_, count() - 1, &e1, input_angle);
-        mout() << "8888888888888" << std::endl;
     }
 
     //输出角度，用于仿真测试
     {
-        //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
-        {
-            lout() << file_current_leg[j] << "\t";
-        }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        ////输出关节角度
-        //for (int i = 0; i < 12; i++)
+        ////输出身体和足尖曲线
+        //for (int j = 0; j < 12; j++)
         //{
-        //    lout() << input_angle[i] << "\t";
+        //    lout() << file_current_leg[j] << "\t";
         //}
-        //time_test += 0.001;
-        //lout() << time_test << std::endl;
+        //lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        //输出关节角度
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
     }
     //发送电机角度
- /*   for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; i++)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }*/
+    }
     return ret;
 }
 DogRight::DogRight(const std::string& name) : Plan(name)
