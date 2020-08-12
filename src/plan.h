@@ -117,7 +117,8 @@ public:
 
 /***********************函数变量声明***********************/
 auto trotPlan(int n, int count, EllipseTrajectory* param, double* input)->int;
-auto walkPlan(int n, int count, EllipseTrajectory* param, double* input)->int;
+auto walkPlanSameLeg(int n, int count, EllipseTrajectory* param, double* input)->int;
+auto walkPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* input)->int;
 auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose, double* input)->int;
 auto upPlan(int count, EllipseTrajectory* Ellipse, double* input)->int;
 auto downPlan(int count, EllipseTrajectory* Ellipse, double* input)->int;

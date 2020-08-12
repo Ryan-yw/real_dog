@@ -576,16 +576,16 @@ auto trotPlan(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
 		file_current_body[j] = current_body_in_ground[j];
 	}
 	//模型测试使用
-	inverse(current_leg_in_ground, current_body_in_ground, input);
+	inverseSame(current_leg_in_ground, current_body_in_ground, input);
 
 	return 2 * n * per_step_count - count - 1;
 }
 
 
-//机器人行走对角步态，包括原地踏步、前进、后退、左移、右移。
+//机器人行走对角步态，包括原地踏步、前进、后退、左移、右移。适用于四条腿初始姿态一样的情况
 //其中步长步高和步数可由用户输入。走一步的时间（或行走快慢）可由用户输入梯形曲线的速度和加速度确定
 //#注意：行走最大速度和加速度还没测试
-auto walkPlan(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
+auto walkPlanSameLeg(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
 {
 
 	int per_step_count = Ellipse->getTcurve().getTc() * 1000;
@@ -611,10 +611,45 @@ auto walkPlan(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
 		file_current_body[j] = current_body_in_ground[j];
 	}
 	//模型测试使用
-	inverse(current_leg_in_ground, current_body_in_ground, input);
+	inverseSame(current_leg_in_ground, current_body_in_ground, input);
 
 	return 4 * n * per_step_count - count - 1;
 }
+
+//机器人行走对角步态，包括原地踏步、前进、后退、左移、右移。适用于前后腿对称的情况
+//其中步长步高和步数可由用户输入。走一步的时间（或行走快慢）可由用户输入梯形曲线的速度和加速度确定
+//#注意：行走最大速度和加速度还没测试
+auto walkPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
+{
+
+	int per_step_count = Ellipse->getTcurve().getTc() * 1000;
+
+	static double current_leg_in_ground[12] = { 0 };
+	static double current_body_in_ground[16] = { 0 };
+
+
+	//判断行走状态
+	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步e1加1
+
+	//规划腿
+	planLegWalk(e_1, n, current_leg_in_ground, count % per_step_count, Ellipse);
+	//规划身体
+	planBodyTransformWalk(e_1, n, current_body_in_ground, count, Ellipse);
+	//模型测试使用
+	for (int j = 0; j < 12; j++)
+	{
+		file_current_leg[j] = current_leg_in_ground[j];
+	}
+	for (int j = 0; j < 12; j++)
+	{
+		file_current_body[j] = current_body_in_ground[j];
+	}
+	//模型测试使用
+	inverseSymmetry(current_leg_in_ground, current_body_in_ground, input);
+
+	return 4 * n * per_step_count - count - 1;
+}
+
 
 //机器人原地扭动步态，包括原地俯仰，横滚，偏航
 //#注意：只能完成单独的一项，比如要实现先俯仰后偏航，必须等俯仰结束后恢复到初始位置才能进行偏航
@@ -637,7 +672,7 @@ auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, 
 	planBodyRotation(count, current_body_in_ground, body_pose_param);
 
 
-	inverse(current_leg_in_ground, current_body_in_ground, input);
+	inverseSame(current_leg_in_ground, current_body_in_ground, input);
 
 	return  per_step_count - count - 1;
 }
@@ -661,7 +696,7 @@ auto upPlan(int count, EllipseTrajectory* Ellipse, double* input)->int
 	planBodyUp(count, current_body_in_ground, Ellipse);
 
 
-	inverse(current_leg_in_ground, current_body_in_ground, input);
+	inverseSame(current_leg_in_ground, current_body_in_ground, input);
 
 
 	return  per_step_count - count - 1;
@@ -686,7 +721,7 @@ auto downPlan(int count, EllipseTrajectory* Ellipse, double* input)->int
 	planBodyDown(count, current_body_in_ground, Ellipse);
 
 
-	inverse(current_leg_in_ground, current_body_in_ground, input);
+	inverseSame(current_leg_in_ground, current_body_in_ground, input);
 
 
 	return  per_step_count - count - 1;
@@ -721,7 +756,7 @@ auto downPlanPrepare(int count, EllipseTrajectory* Ellipse, double* input)->int
 	}
 	//模型测试使用
 
-	inverse(current_leg_in_ground, current_body_in_ground, input);
+	inverseSame(current_leg_in_ground, current_body_in_ground, input);
 
 
 	return  per_step_count - count - 1;

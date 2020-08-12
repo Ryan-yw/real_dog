@@ -54,6 +54,19 @@ namespace robot
         ARIS_REGISTER_TYPE(DogHome);
     };
 
+    class DogSwitchPrePose :public aris::plan::Plan
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+
+        virtual ~DogSwitchPrePose();
+        explicit DogSwitchPrePose(const std::string& name = "dog_switchpose");
+        ARIS_REGISTER_TYPE(DogSwitchPrePose);
+    private:
+        double prepose_;
+    };
+
     class DogPrepare :public aris::plan::Plan
     {
     public:
@@ -63,6 +76,8 @@ namespace robot
         virtual ~DogPrepare();
         explicit DogPrepare(const std::string &name = "dog_prepare");
         ARIS_REGISTER_TYPE(DogPrepare);
+    private:
+        double prepose_;
     };
 
     class DogSitDown :public aris::plan::Plan
@@ -112,6 +127,7 @@ namespace robot
     private:
         double step_;
         double gait_;
+        double prepose_;
     };
 
     class DogBack :public aris::plan::Plan
@@ -126,6 +142,7 @@ namespace robot
     private:
         double step_;
         double gait_;
+        double prepose_;
     };
 
     class DogLeft :public aris::plan::Plan
@@ -140,6 +157,7 @@ namespace robot
     private:
         double step_;
         double gait_;
+        double prepose_;
     };
 
     class DogRight :public aris::plan::Plan
@@ -154,6 +172,7 @@ namespace robot
     private:
         double step_;
         double gait_;
+        double prepose_;
     };
 
     class DogPitchUp :public aris::plan::Plan

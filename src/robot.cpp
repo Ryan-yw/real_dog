@@ -212,9 +212,101 @@ DogHome::DogHome(const std::string &name) : Plan(name)
 }
 DogHome::~DogHome() = default;
 
+//轴空间初始位姿切换
+auto DogSwitchPrePose::prepareNrt()->void
+{
+    prepose_ = doubleParam("prepose");
+    for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
+}
+auto DogSwitchPrePose::executeRT()->int
+{
+    static double begin_angle[12] = { 0 };
+    double angle[12] = { 0 };
+    if (count() == 1)this->master()->logFileRawName("switchpose");
+    double distance_same[12] = {
+        0,0.582289,-1.12207,//四条腿一样
+        0,0.582289,-1.12207,
+        0,-0.582289,1.12207,
+        0,-0.582289,1.12207
+    };
+    double distance_symmetry[12] = {
+    0,0.582289,-1.12207,//前后腿对称，14相同，23相同
+    0,-0.582289,1.12207,
+    0,0.582289,-1.12207,
+    0,-0.582289,1.12207
+    };
+
+    if (count() == 1)
+    {
+        begin_angle[0] = controller()->motionPool()[0].actualPos();
+        begin_angle[1] = controller()->motionPool()[1].actualPos();
+        begin_angle[2] = controller()->motionPool()[2].actualPos()/1.5;
+        begin_angle[3] = controller()->motionPool()[3].actualPos();
+        begin_angle[4] = controller()->motionPool()[4].actualPos();
+        begin_angle[5] = controller()->motionPool()[5].actualPos()/1.5;
+        begin_angle[6] = controller()->motionPool()[6].actualPos();
+        begin_angle[7] = controller()->motionPool()[7].actualPos();
+        begin_angle[8] = controller()->motionPool()[8].actualPos()/1.5;
+        begin_angle[9] = controller()->motionPool()[9].actualPos();
+        begin_angle[10] = controller()->motionPool()[10].actualPos();
+        begin_angle[11] = controller()->motionPool()[11].actualPos()/1.5;
+    }
+
+
+    TCurve s1(5, 2);//0.9s
+    s1.getCurveParam();
+
+    if (prepose_ == 1)//same
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            angle[i] = begin_angle[i] + (distance_same[i] - begin_angle[i]) * s1.getTCurve(count());
+        }
+    }
+    else //symmetry
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            angle[i] = begin_angle[i] + (distance_symmetry[i] - begin_angle[i]) * s1.getTCurve(count());
+        }
+    }
+
+
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; i++)
+        {
+            lout() << angle[i] << "\t";
+        }
+        time_test += 0.001;
+        lout() << time_test << std::endl;
+    }
+    //发送电机角度
+    for (int i = 0; i < 12; i++)
+    {
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(1.5 * angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(angle[i]);
+    }
+    return s1.getTc() * 1000 - count();
+}
+DogSwitchPrePose::DogSwitchPrePose(const std::string& name) : Plan(name)
+{
+    command().loadXmlStr(
+        "<Command name=\"dog_switchpose\">"
+            "<GroupParam>"
+                "<Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
+            "</GroupParam>"
+        "</Command>");
+}
+DogSwitchPrePose::~DogSwitchPrePose() = default;
+
+
 //轴空间准备
 auto DogPrepare::prepareNrt()->void
 {
+    prepose_ = doubleParam("prepose");
     for(auto &m:motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogPrepare::executeRT()->int
@@ -222,16 +314,22 @@ auto DogPrepare::executeRT()->int
     static double begin_angle[12]={0};
     double angle[12]={0};
     if (count() == 1)this->master()->logFileRawName("prepare");
-    const double distance[12]={
-                                0,0.582289,-1.12207,//小腿带轮减速比1.5
-                                0,0.582289,-1.12207,
-                                0,-0.582289,1.12207,
-                                0,-0.582289,1.12207
-                                //0,0.666031,-1.10885,
-                                //0,0.484712,-1.10885,
-                                //0,-0.484712,1.10885,
-                                //0,-0.666031,1.10885
-                              };
+    double distance[12] = {
+        0,0.582289,-1.12207,//四条腿一样
+        0,0.582289,-1.12207,
+        0,-0.582289,1.12207,
+        0,-0.582289,1.12207
+    };
+
+    if (prepose_ != 1)//symmetry
+    {
+        distance[4] = -distance[4]; //前后腿对称，14相同，23相同
+        distance[5] = -distance[5];
+        distance[7] = -distance[7];
+        distance[8] = -distance[8];
+    }
+   
+
     if (count() == 1)
     {
         begin_angle[0] = controller()->motionPool()[0].actualPos();
@@ -279,7 +377,9 @@ auto DogPrepare::executeRT()->int
 DogPrepare::DogPrepare(const std::string &name) : Plan(name)
 {
     command().loadXmlStr(
-       "<Command name=\"dog_prepare\"/>");
+       "<Command name=\"dog_prepare\">"
+       "   <Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
+        "</Command>");
 }
 DogPrepare::~DogPrepare() = default;
 
@@ -465,6 +565,7 @@ auto DogForward::prepareNrt()->void
 {
     step_ = doubleParam("step");
     gait_ = doubleParam("gait");
+    prepose_ = doubleParam("prepose");
     for(auto &m:motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogForward::executeRT()->int
@@ -494,13 +595,22 @@ auto DogForward::executeRT()->int
     s1.getCurveParam();
     EllipseTrajectory e1(220, 100, 0, s1);
 
-    if (gait_ == 1)//trot
+    //步态规划
+    if (gait_ == 1 && prepose_ == 1)//trot & same
     {
         ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
-    else //walk
+    else if (gait_ != 1 && prepose_ == 1) //walk & same
     {
-        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
+    }
+    else if (gait_ != 1 && prepose_ != 1)  //walk & symmetry
+    {
+        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
+    }
+    else //
+    {
+        mout() << "input error" << std::endl;
     }
 
     //输出角度，用于仿真测试
@@ -535,8 +645,9 @@ DogForward::DogForward(const std::string &name) : Plan(name)
     command().loadXmlStr(
         "<Command name=\"dog_forward\">"
             "<GroupParam>"
-                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
-                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+        "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+        "       <Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+        "       <Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
             "</GroupParam>"
         "</Command>");
 }
@@ -547,6 +658,7 @@ auto DogBack::prepareNrt()->void
 {
     step_ = doubleParam("step");
     gait_ = doubleParam("gait");
+    prepose_ = doubleParam("prepose");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogBack::executeRT()->int
@@ -572,13 +684,22 @@ auto DogBack::executeRT()->int
     TCurve s1(1, 4);
     s1.getCurveParam();
     EllipseTrajectory e1(-220, 100, 0, s1);
-    if (gait_ == 1)//trot
+    //步态规划
+    if (gait_ == 1 && prepose_ == 1)//trot & same
     {
         ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
-    else //walk
+    else if (gait_ != 1 && prepose_ == 1) //walk & same
     {
-        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
+    }
+    else if (gait_ != 1 && prepose_ != 1)  //walk & symmetry
+    {
+        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
+    }
+    else //
+    {
+        mout() << "input error" << std::endl;
     }
 
     //输出角度，用于仿真测试
@@ -612,8 +733,9 @@ DogBack::DogBack(const std::string& name) : Plan(name)
     command().loadXmlStr(
         "<Command name=\"dog_back\">"
             "<GroupParam>"
-                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
-                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+        "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+        "       <Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+        "       <Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
             "</GroupParam>"
         "</Command>");
 }
@@ -624,6 +746,7 @@ auto DogLeft::prepareNrt()->void
 {
     step_ = doubleParam("step");
     gait_ = doubleParam("gait");
+    prepose_ = doubleParam("prepose");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogLeft::executeRT()->int
@@ -649,13 +772,22 @@ auto DogLeft::executeRT()->int
     TCurve s1(1, 4);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 100, -220, s1);
-    if (gait_ == 1)//trot
+    //步态规划
+    if (gait_ == 1 && prepose_ == 1)//trot & same
     {
         ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
-    else //walk
+    else if (gait_ != 1 && prepose_ == 1) //walk & same
     {
-        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
+    }
+    else if (gait_ != 1 && prepose_ != 1)  //walk & symmetry
+    {
+        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
+    }
+    else //
+    {
+        mout() << "input error" << std::endl;
     }
 
     //输出角度，用于仿真测试
@@ -689,8 +821,9 @@ DogLeft::DogLeft(const std::string& name) : Plan(name)
     command().loadXmlStr(
         "<Command name=\"dog_left\">"
             "<GroupParam>"
-                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
-                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+        "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+        "       <Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+        "       <Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
             "</GroupParam>"
         "</Command>");
 }
@@ -701,6 +834,7 @@ auto DogRight::prepareNrt()->void
 {
     step_ = doubleParam("step");
     gait_ = doubleParam("gait");
+    prepose_ = doubleParam("prepose");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogRight::executeRT()->int
@@ -727,13 +861,22 @@ auto DogRight::executeRT()->int
     s1.getCurveParam();
 
     EllipseTrajectory e1(0, 100,220, s1);
-    if (gait_ == 1)//trot
+    //步态规划
+    if (gait_ == 1 && prepose_ == 1)//trot & same
     {
         ret = trotPlan(step_, count() - 1, &e1, input_angle);
     }
-    else //walk
+    else if (gait_ != 1 && prepose_ == 1) //walk & same
     {
-        ret = walkPlan(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
+    }
+    else if (gait_ != 1 && prepose_ != 1)  //walk & symmetry
+    {
+        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
+    }
+    else //
+    {
+        mout() << "input error" << std::endl;
     }
 
     //输出角度，用于仿真测试
@@ -767,8 +910,9 @@ DogRight::DogRight(const std::string& name) : Plan(name)
     command().loadXmlStr(
         "<Command name=\"dog_right\">"
             "<GroupParam>"
-                "<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
-                "<Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+        "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+        "       <Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
+        "       <Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
             "</GroupParam>"
         "</Command>");
 }
@@ -1268,6 +1412,7 @@ auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>
     plan_root->planPool().add<DogReadJoint>();
     plan_root->planPool().add<DogMoveJoint>();
     plan_root->planPool().add<DogHome>();
+    plan_root->planPool().add<DogSwitchPrePose>();
     plan_root->planPool().add<DogPrepare>();
     plan_root->planPool().add<DogSitDown>();
     plan_root->planPool().add<DogStandUp>();

@@ -173,7 +173,7 @@ double* s_inv_pp2pp(const double* inv_relative_pm, const double* from_pp, double
 }
 
 //运动学反解
-void leg_left_12(double* ee_xyz_wrt_leg, double* mot_pos_3)
+void leg_12(double* ee_xyz_wrt_leg, double* mot_pos_3)
 {
     //计算xita3
     double x = ee_xyz_wrt_leg[0];
@@ -247,7 +247,7 @@ void leg_left_12(double* ee_xyz_wrt_leg, double* mot_pos_3)
     mot_pos_3[2] *= PI / 180.0;
 
 }
-void leg_right_34(double* ee_xyz_wrt_leg, double* mot_pos_3)
+void leg_34(double* ee_xyz_wrt_leg, double* mot_pos_3)
 {
     //计算xita3
 
@@ -311,7 +311,7 @@ void leg_right_34(double* ee_xyz_wrt_leg, double* mot_pos_3)
     mot_pos_3[2] *= PI / 180.0;
 }
 
-auto inverse(double* leg_in_ground, double* body_in_ground, double* input)->int
+auto inverseSame(double* leg_in_ground, double* body_in_ground, double* input)->int
 {
     double real_pm1[16] = { 0 }, real_pm2[16] = { 0 }, real_pm3[16] = { 0 }, real_pm4[16] = { 0 };
     s_pm_dot_inv_pm(PL1, body_in_ground, real_pm1);
@@ -325,13 +325,35 @@ auto inverse(double* leg_in_ground, double* body_in_ground, double* input)->int
     s_pp2pp(real_pm3, leg_in_ground + 2 * 3, xyz_in_leg + 2 * 3);
     s_pp2pp(real_pm4, leg_in_ground + 3 * 3, xyz_in_leg + 3 * 3);
 
-    leg_left_12(xyz_in_leg + 0 * 3, input + 0 * 3);//1
-    leg_left_12(xyz_in_leg + 1 * 3, input + 1 * 3);//2
-    leg_right_34(xyz_in_leg + 2 * 3, input + 2 * 3);//3
-    leg_right_34(xyz_in_leg + 3 * 3, input + 3 * 3);//4
+    
+    leg_12(xyz_in_leg + 0 * 3, input + 0 * 3);//1
+    leg_12(xyz_in_leg + 1 * 3, input + 1 * 3);//2
+    leg_34(xyz_in_leg + 2 * 3, input + 2 * 3);//3
+    leg_34(xyz_in_leg + 3 * 3, input + 3 * 3);//4
 
     return 0;
 }
 
+auto inverseSymmetry(double* leg_in_ground, double* body_in_ground, double* input)->int
+{
+    double real_pm1[16] = { 0 }, real_pm2[16] = { 0 }, real_pm3[16] = { 0 }, real_pm4[16] = { 0 };
+    s_pm_dot_inv_pm(PL1, body_in_ground, real_pm1);
+    s_pm_dot_inv_pm(PL2, body_in_ground, real_pm2);
+    s_pm_dot_inv_pm(PL3, body_in_ground, real_pm3);
+    s_pm_dot_inv_pm(PL4, body_in_ground, real_pm4);
 
+    double xyz_in_leg[12] = { 0 }; //腿末端在腿坐标系下的表达
+    s_pp2pp(real_pm1, leg_in_ground + 0 * 3, xyz_in_leg + 0 * 3);
+    s_pp2pp(real_pm2, leg_in_ground + 1 * 3, xyz_in_leg + 1 * 3);
+    s_pp2pp(real_pm3, leg_in_ground + 2 * 3, xyz_in_leg + 2 * 3);
+    s_pp2pp(real_pm4, leg_in_ground + 3 * 3, xyz_in_leg + 3 * 3);
+
+
+    leg_12(xyz_in_leg + 0 * 3, input + 0 * 3);//1
+    leg_34(xyz_in_leg + 1 * 3, input + 1 * 3);//2
+    leg_12(xyz_in_leg + 2 * 3, input + 2 * 3);//3
+    leg_34(xyz_in_leg + 3 * 3, input + 3 * 3);//4
+
+    return 0;
+}
 
