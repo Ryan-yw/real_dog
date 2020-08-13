@@ -593,7 +593,7 @@ auto DogForward::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(220, 100, 0, s1);
+    EllipseTrajectory e1(400, 100, 0, s1);
 
     //步态规划
     if (gait_ == 1 && prepose_ == 1)//trot & same
@@ -683,7 +683,7 @@ auto DogBack::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(-220, 100, 0, s1);
+    EllipseTrajectory e1(-400, 100, 0, s1);
     //步态规划
     if (gait_ == 1 && prepose_ == 1)//trot & same
     {
@@ -771,7 +771,7 @@ auto DogLeft::executeRT()->int
     //轨迹规划
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 100, -220, s1);
+    EllipseTrajectory e1(0, 100, -200, s1);
     //步态规划
     if (gait_ == 1 && prepose_ == 1)//trot & same
     {
@@ -860,7 +860,7 @@ auto DogRight::executeRT()->int
     TCurve s1(1, 4);
     s1.getCurveParam();
 
-    EllipseTrajectory e1(0, 100,220, s1);
+    EllipseTrajectory e1(0, 100,200, s1);
     //步态规划
     if (gait_ == 1 && prepose_ == 1)//trot & same
     {
