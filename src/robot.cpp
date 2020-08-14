@@ -215,7 +215,7 @@ DogHome::~DogHome() = default;
 //轴空间初始位姿切换
 auto DogSwitchPrePose::prepareNrt()->void
 {
-    prepose_ = doubleParam("prepose");
+    prepose_ = cmdParams().at("prepose");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogSwitchPrePose::executeRT()->int
@@ -256,21 +256,24 @@ auto DogSwitchPrePose::executeRT()->int
     TCurve s1(5, 2);//0.9s
     s1.getCurveParam();
 
-    if (prepose_ == 1)//same
+    if (prepose_ == "same")//same
     {
         for (int i = 0; i < 12; i++)
         {
             angle[i] = begin_angle[i] + (distance_same[i] - begin_angle[i]) * s1.getTCurve(count());
         }
     }
-    else //symmetry
+    else if(prepose_=="symmetry")//symmetry
     {
         for (int i = 0; i < 12; i++)
         {
             angle[i] = begin_angle[i] + (distance_symmetry[i] - begin_angle[i]) * s1.getTCurve(count());
         }
     }
-
+    else
+    {
+        mout() << "input error" << std::endl;
+    }
 
     //输出角度，用于仿真测试
     {
@@ -279,7 +282,13 @@ auto DogSwitchPrePose::executeRT()->int
             lout() << angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -296,7 +305,7 @@ DogSwitchPrePose::DogSwitchPrePose(const std::string& name) : Plan(name)
     command().loadXmlStr(
         "<Command name=\"dog_switchpose\">"
             "<GroupParam>"
-                "<Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
+                "<Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
             "</GroupParam>"
         "</Command>");
 }
@@ -306,7 +315,7 @@ DogSwitchPrePose::~DogSwitchPrePose() = default;
 //轴空间准备
 auto DogPrepare::prepareNrt()->void
 {
-    prepose_ = doubleParam("prepose");
+    prepose_ = cmdParams().at("prepose");
     for(auto &m:motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogPrepare::executeRT()->int
@@ -321,7 +330,7 @@ auto DogPrepare::executeRT()->int
         0,-0.582289,1.12207
     };
 
-    if (prepose_ != 1)//symmetry
+    if (prepose_ == "symmetry")//symmetry
     {
         distance[4] = -distance[4]; //前后腿对称，14相同，23相同
         distance[5] = -distance[5];
@@ -362,7 +371,13 @@ auto DogPrepare::executeRT()->int
             lout() << angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -378,7 +393,7 @@ DogPrepare::DogPrepare(const std::string &name) : Plan(name)
 {
     command().loadXmlStr(
        "<Command name=\"dog_prepare\">"
-       "   <Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
+       "   <Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
         "</Command>");
 }
 DogPrepare::~DogPrepare() = default;
@@ -423,7 +438,14 @@ auto DogSitDown::executeRT()->int
             lout() << input_angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -482,7 +504,14 @@ auto DogStandUp::executeRT()->int
             lout() << input_angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -505,6 +534,7 @@ DogStandUp::~DogStandUp() = default;
 auto DogTaBu::prepareNrt()->void
 {
     step_ = doubleParam("step");
+    prepose_ = cmdParams().at("prepose");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogTaBu::executeRT()->int
@@ -530,7 +560,19 @@ auto DogTaBu::executeRT()->int
     s1.getCurveParam();
     EllipseTrajectory e1(0, 100, 0, s1);
     int ret = 1;
-    ret = trotPlan(step_, count()-1, &e1, input_angle);
+    //步态规划
+    if ( prepose_ == "same")// same
+    {
+        ret = trotPlanSameLeg(step_, count() - 1, &e1, input_angle);
+    }
+    else if (prepose_ == "symmetry")  //symmetry
+    {
+        ret = trotPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
+    }
+    else //
+    {
+        mout() << "input error" << std::endl;
+    }
 
     //输出角度，用于仿真测试
     {
@@ -539,7 +581,14 @@ auto DogTaBu::executeRT()->int
             lout() << input_angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -555,7 +604,10 @@ DogTaBu::DogTaBu(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
         "<Command name=\"dog_tabu\">"
-        "	<Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+        "<GroupParam>"
+        "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
+        "       <Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
+        "</GroupParam>"
         "</Command>");
 }
 DogTaBu::~DogTaBu() = default;
@@ -564,13 +616,13 @@ DogTaBu::~DogTaBu() = default;
 auto DogForward::prepareNrt()->void
 {
     step_ = doubleParam("step");
-    gait_ = doubleParam("gait");
-    prepose_ = doubleParam("prepose");
+    prepose_ = cmdParams().at("prepose");
+    gait_ = cmdParams().at("gait");
     for(auto &m:motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogForward::executeRT()->int
 {
-    
+
     if(count()==1)this->master()->logFileRawName("forward");
     
     int ret=0;
@@ -596,15 +648,15 @@ auto DogForward::executeRT()->int
     EllipseTrajectory e1(400, 100, 0, s1);
 
     //步态规划
-    if (gait_ == 1 && prepose_ == 1)//trot & same
+    if (gait_ == "trot" && prepose_ == "same")//trot & same
     {
-        ret = trotPlan(step_, count() - 1, &e1, input_angle);
+        ret = trotPlanSameLeg(step_, count() - 1, &e1, input_angle);
     }
-    else if (gait_ != 1 && prepose_ == 1) //walk & same
+    else if (gait_ =="walk"  && prepose_ == "same") //walk & same
     {
         ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
     }
-    else if (gait_ != 1 && prepose_ != 1)  //walk & symmetry
+    else if (gait_ == "walk" && prepose_ == "symmetry")  //walk & symmetry
     {
         ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
     }
@@ -615,19 +667,20 @@ auto DogForward::executeRT()->int
 
     //输出角度，用于仿真测试
     {
-        //输出身体和足尖曲线
-        //for (int j = 0; j < 12; j++)
-        //{
-        //    lout() << file_current_leg[j] << "\t";
-        //}
-        //lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
         //输出电机角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -646,8 +699,8 @@ DogForward::DogForward(const std::string &name) : Plan(name)
         "<Command name=\"dog_forward\">"
             "<GroupParam>"
         "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
-        "       <Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
-        "       <Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
+        "       <Param name=\"gait\" default=\"trot\" abbreviation=\"g\"/>"
+        "       <Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
             "</GroupParam>"
         "</Command>");
 }
@@ -657,8 +710,8 @@ DogForward::~DogForward() = default;
 auto DogBack::prepareNrt()->void
 {
     step_ = doubleParam("step");
-    gait_ = doubleParam("gait");
-    prepose_ = doubleParam("prepose");
+    prepose_ = cmdParams().at("prepose");
+    gait_ = cmdParams().at("gait");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogBack::executeRT()->int
@@ -685,15 +738,15 @@ auto DogBack::executeRT()->int
     s1.getCurveParam();
     EllipseTrajectory e1(-400, 100, 0, s1);
     //步态规划
-    if (gait_ == 1 && prepose_ == 1)//trot & same
+    if (gait_ == "trot" && prepose_ == "same")//trot & same
     {
-        ret = trotPlan(step_, count() - 1, &e1, input_angle);
+        ret = trotPlanSameLeg(step_, count() - 1, &e1, input_angle);
     }
-    else if (gait_ != 1 && prepose_ == 1) //walk & same
+    else if (gait_ == "walk" && prepose_ == "same") //walk & same
     {
         ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
     }
-    else if (gait_ != 1 && prepose_ != 1)  //walk & symmetry
+    else if (gait_ == "walk" && prepose_ == "symmetry")  //walk & symmetry
     {
         ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
     }
@@ -704,19 +757,20 @@ auto DogBack::executeRT()->int
 
     //输出角度，用于仿真测试
     {
-        ////输出身体和足尖曲线
-        //for (int j = 0; j < 12; j++)
-        //{
-        //    lout() << file_current_leg[j] << "\t";
-        //}
-        //lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        //输出关节角度
+        //输出电机角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -734,8 +788,8 @@ DogBack::DogBack(const std::string& name) : Plan(name)
         "<Command name=\"dog_back\">"
             "<GroupParam>"
         "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
-        "       <Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
-        "       <Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
+        "       <Param name=\"gait\" default=\"trot\" abbreviation=\"g\"/>"
+        "       <Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
             "</GroupParam>"
         "</Command>");
 }
@@ -745,8 +799,8 @@ DogBack::~DogBack() = default;
 auto DogLeft::prepareNrt()->void
 {
     step_ = doubleParam("step");
-    gait_ = doubleParam("gait");
-    prepose_ = doubleParam("prepose");
+    prepose_ = cmdParams().at("prepose");
+    gait_ = cmdParams().at("gait");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogLeft::executeRT()->int
@@ -773,15 +827,15 @@ auto DogLeft::executeRT()->int
     s1.getCurveParam();
     EllipseTrajectory e1(0, 100, -200, s1);
     //步态规划
-    if (gait_ == 1 && prepose_ == 1)//trot & same
+    if (gait_ == "trot" && prepose_ == "same")//trot & same
     {
-        ret = trotPlan(step_, count() - 1, &e1, input_angle);
+        ret = trotPlanSameLeg(step_, count() - 1, &e1, input_angle);
     }
-    else if (gait_ != 1 && prepose_ == 1) //walk & same
+    else if (gait_ == "walk" && prepose_ == "same") //walk & same
     {
         ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
     }
-    else if (gait_ != 1 && prepose_ != 1)  //walk & symmetry
+    else if (gait_ == "walk" && prepose_ == "symmetry")  //walk & symmetry
     {
         ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
     }
@@ -792,19 +846,20 @@ auto DogLeft::executeRT()->int
 
     //输出角度，用于仿真测试
     {
-        ////输出身体和足尖曲线
-        //for (int j = 0; j < 12; j++)
-        //{
-        //    lout() << file_current_leg[j] << "\t";
-        //}
-        //lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        //输出关节角度
+        //输出电机角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -822,8 +877,8 @@ DogLeft::DogLeft(const std::string& name) : Plan(name)
         "<Command name=\"dog_left\">"
             "<GroupParam>"
         "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
-        "       <Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
-        "       <Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
+        "       <Param name=\"gait\" default=\"trot\" abbreviation=\"g\"/>"
+        "       <Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
             "</GroupParam>"
         "</Command>");
 }
@@ -833,8 +888,8 @@ DogLeft::~DogLeft() = default;
 auto DogRight::prepareNrt()->void
 {
     step_ = doubleParam("step");
-    gait_ = doubleParam("gait");
-    prepose_ = doubleParam("prepose");
+    prepose_ = cmdParams().at("prepose");
+    gait_ = cmdParams().at("gait");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
 auto DogRight::executeRT()->int
@@ -862,15 +917,15 @@ auto DogRight::executeRT()->int
 
     EllipseTrajectory e1(0, 100,200, s1);
     //步态规划
-    if (gait_ == 1 && prepose_ == 1)//trot & same
+    if (gait_ == "trot" && prepose_ == "same")//trot & same
     {
-        ret = trotPlan(step_, count() - 1, &e1, input_angle);
+        ret = trotPlanSameLeg(step_, count() - 1, &e1, input_angle);
     }
-    else if (gait_ != 1 && prepose_ == 1) //walk & same
+    else if (gait_ == "walk" && prepose_ == "same") //walk & same
     {
         ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
     }
-    else if (gait_ != 1 && prepose_ != 1)  //walk & symmetry
+    else if (gait_ == "walk" && prepose_ == "symmetry")  //walk & symmetry
     {
         ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
     }
@@ -881,19 +936,20 @@ auto DogRight::executeRT()->int
 
     //输出角度，用于仿真测试
     {
-        ////输出身体和足尖曲线
-        //for (int j = 0; j < 12; j++)
-        //{
-        //    lout() << file_current_leg[j] << "\t";
-        //}
-        //lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-        //输出关节角度
+        //输出电机角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -911,8 +967,8 @@ DogRight::DogRight(const std::string& name) : Plan(name)
         "<Command name=\"dog_right\">"
             "<GroupParam>"
         "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
-        "       <Param name=\"gait\" default=\"1\" abbreviation=\"g\"/>"
-        "       <Param name=\"prepose\" default=\"1\" abbreviation=\"p\"/>"
+        "       <Param name=\"gait\" default=\"trot\" abbreviation=\"g\"/>"
+        "       <Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
             "</GroupParam>"
         "</Command>");
 }
