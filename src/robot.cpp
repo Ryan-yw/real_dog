@@ -974,14 +974,15 @@ DogRight::DogRight(const std::string& name) : Plan(name)
 }
 DogRight::~DogRight() = default;
 
-//pitchup
-auto DogPitchUp::prepareNrt()->void
+//pitch
+auto DogPitch::prepareNrt()->void
 {
+    turn_angle_ = doubleParam("angle");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
-auto DogPitchUp::executeRT()->int
+auto DogPitch::executeRT()->int
 {
-    if (count() == 1)this->master()->logFileRawName("pitchup");
+    if (count() == 1)this->master()->logFileRawName("pitch");
     int ret = 0;
     if (count() == 1)
     {
@@ -995,14 +996,14 @@ auto DogPitchUp::executeRT()->int
         input_angle[7] = controller()->motionPool()[7].actualPos();
         input_angle[8] = controller()->motionPool()[8].actualPos();
         input_angle[9] = controller()->motionPool()[9].actualPos();
-        //input_angle[10] = controller()->motionPool()[10].actualPos();
-        //input_angle[11] = controller()->motionPool()[11].actualPos();
+        input_angle[10] = controller()->motionPool()[10].actualPos();
+        input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(0, 0, 10, s1);
+    BodyPose body_pose(0, 0, turn_angle_, s1);
 
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
@@ -1025,22 +1026,24 @@ auto DogPitchUp::executeRT()->int
     }
     return ret;
 }
-DogPitchUp::DogPitchUp(const std::string& name) : Plan(name)
+DogPitch::DogPitch(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
-        "<Command name=\"dog_pitchup\">"
+        "<Command name=\"dog_pitch\">"
+        "	<Param name=\"angle\" default=\"10\" abbreviation=\"d\"/>"
         "</Command>");
 }
-DogPitchUp::~DogPitchUp() = default;
+DogPitch::~DogPitch() = default;
 
-//pitchdown
-auto DogPitchDown::prepareNrt()->void
+//roll
+auto DogRoll::prepareNrt()->void
 {
+    turn_angle_ = doubleParam("angle");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
-auto DogPitchDown::executeRT()->int
+auto DogRoll::executeRT()->int
 {
-    if (count() == 1)this->master()->logFileRawName("pitchdown");
+    if (count() == 1)this->master()->logFileRawName("roll");
     int ret = 0;
     if (count() == 1)
     {
@@ -1054,73 +1057,14 @@ auto DogPitchDown::executeRT()->int
         input_angle[7] = controller()->motionPool()[7].actualPos();
         input_angle[8] = controller()->motionPool()[8].actualPos();
         input_angle[9] = controller()->motionPool()[9].actualPos();
-        //input_angle[10] = controller()->motionPool()[10].actualPos();
-        //input_angle[11] = controller()->motionPool()[11].actualPos();
+        input_angle[10] = controller()->motionPool()[10].actualPos();
+        input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(0, 0, -10, s1);
-
-    ret = posePlan(count()-1, &e1, &body_pose, input_angle);
-    //输出角度，用于仿真测试
-    {
-        for (int i = 0; i < 12; i++)
-        {
-            lout() << input_angle[i] << "\t";
-        }
-        time_test += 0.001;
-        lout() << time_test << std::endl;
-    }
-    //发送电机角度
-    for (int i = 0; i < 12; i++)
-    {
-        if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-        else
-            controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }
-    return ret;
-}
-DogPitchDown::DogPitchDown(const std::string& name) : Plan(name)
-{
-    command().loadXmlStr(
-        "<Command name=\"dog_pitchdown\">"
-        "</Command>");
-}
-DogPitchDown::~DogPitchDown() = default;
-
-
-//rolll
-auto DogRolll::prepareNrt()->void
-{
-    for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
-}
-auto DogRolll::executeRT()->int
-{
-    if (count() == 1)this->master()->logFileRawName("rolll");
-    int ret = 0;
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        //input_angle[10] = controller()->motionPool()[10].actualPos();
-        //input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
-
-    TCurve s1(5, 2);
-    s1.getCurveParam();
-    EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(20, 0, 0, s1);
+    BodyPose body_pose(turn_angle_, 0, 0, s1);
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
     //输出角度，用于仿真测试
@@ -1142,22 +1086,25 @@ auto DogRolll::executeRT()->int
     }
     return ret;
 }
-DogRolll::DogRolll(const std::string& name) : Plan(name)
+DogRoll::DogRoll(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
-        "<Command name=\"dog_rolll\">"
+        "<Command name=\"dog_roll\">"
+        "	<Param name=\"angle\" default=\"10\" abbreviation=\"d\"/>"
         "</Command>");
 }
-DogRolll::~DogRolll() = default;
+DogRoll::~DogRoll() = default;
 
-//rollr
-auto DogRollr::prepareNrt()->void
+
+//yaw
+auto DogYaw::prepareNrt()->void
 {
+    turn_angle_ = doubleParam("angle");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
-auto DogRollr::executeRT()->int
+auto DogYaw::executeRT()->int
 {
-    if (count() == 1)this->master()->logFileRawName("rollr");
+    if (count() == 1)this->master()->logFileRawName("yaw");
     int ret = 0;
     if (count() == 1)
     {
@@ -1171,14 +1118,14 @@ auto DogRollr::executeRT()->int
         input_angle[7] = controller()->motionPool()[7].actualPos();
         input_angle[8] = controller()->motionPool()[8].actualPos();
         input_angle[9] = controller()->motionPool()[9].actualPos();
-        //input_angle[10] = controller()->motionPool()[10].actualPos();
-        //input_angle[11] = controller()->motionPool()[11].actualPos();
+        input_angle[10] = controller()->motionPool()[10].actualPos();
+        input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(-20, 0, 0, s1);
+    BodyPose body_pose(0, turn_angle_, 0, s1);
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
 
     //输出角度，用于仿真测试
@@ -1200,129 +1147,14 @@ auto DogRollr::executeRT()->int
     }
     return ret;
 }
-DogRollr::DogRollr(const std::string& name) : Plan(name)
+DogYaw::DogYaw(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
-        "<Command name=\"dog_rollr\">"
+        "<Command name=\"dog_yaw\">"
+        "	<Param name=\"angle\" default=\"10\" abbreviation=\"d\"/>"
         "</Command>");
 }
-DogRollr::~DogRollr() = default;
-
-//yawl
-auto DogYawl::prepareNrt()->void
-{
-    for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
-}
-auto DogYawl::executeRT()->int
-{
-    if (count() == 1)this->master()->logFileRawName("yawl");
-    int ret = 0;
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        //input_angle[10] = controller()->motionPool()[10].actualPos();
-        //input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
-
-    TCurve s1(5, 2);
-    s1.getCurveParam();
-    EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(0, 20, 0, s1);
-    ret = posePlan(count()-1, &e1, &body_pose, input_angle);
-
-    //输出角度，用于仿真测试
-    {
-        for (int i = 0; i < 12; i++)
-        {
-            lout() << input_angle[i] << "\t";
-        }
-        time_test += 0.001;
-        lout() << time_test << std::endl;
-    }
-    //发送电机角度
-    for (int i = 0; i < 12; i++)
-    {
-        if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-        else
-            controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }
-    return ret;
-}
-DogYawl::DogYawl(const std::string& name) : Plan(name)
-{
-    command().loadXmlStr(
-        "<Command name=\"dog_yawl\">"
-        "</Command>");
-}
-DogYawl::~DogYawl() = default;
-
-//yawr
-auto DogYawr::prepareNrt()->void
-{
-    for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
-}
-auto DogYawr::executeRT()->int
-{
-    if (count() == 1)this->master()->logFileRawName("yawr");
-    int ret = 0;
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        //input_angle[10] = controller()->motionPool()[10].actualPos();
-        //input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
-
-    TCurve s1(5, 2);
-    s1.getCurveParam();
-    EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(0, -20, 0, s1);
-    ret = posePlan(count()-1, &e1, &body_pose, input_angle);
-
-    //输出角度，用于仿真测试
-    {
-        for (int i = 0; i < 12; i++)
-        {
-            lout() << input_angle[i] << "\t";
-        }
-        time_test += 0.001;
-        lout() << time_test << std::endl;
-    }
-    //发送电机角度
-    for (int i = 0; i < 12; i++)
-    {
-        if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-        else
-            controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }
-    return ret;
-}
-DogYawr::DogYawr(const std::string& name) : Plan(name)
-{
-    command().loadXmlStr(
-        "<Command name=\"dog_yawr\">"
-        "</Command>");
-}
-DogYawr::~DogYawr() = default;
+DogYaw::~DogYaw() = default;
 
 
 auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
@@ -1477,12 +1309,9 @@ auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>
     plan_root->planPool().add<DogBack>();
     plan_root->planPool().add<DogLeft>();
     plan_root->planPool().add<DogRight>();
-    plan_root->planPool().add<DogPitchUp>();
-    plan_root->planPool().add<DogPitchDown>();
-    plan_root->planPool().add<DogRolll>();
-    plan_root->planPool().add<DogRollr>();
-    plan_root->planPool().add<DogYawl>();
-    plan_root->planPool().add<DogYawr>();
+    plan_root->planPool().add<DogPitch>();
+    plan_root->planPool().add<DogRoll>();
+    plan_root->planPool().add<DogYaw>();
     return plan_root;
 }
 
