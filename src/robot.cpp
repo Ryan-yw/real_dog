@@ -1003,18 +1003,33 @@ auto DogPitch::executeRT()->int
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(0, 0, turn_angle_, s1);
 
-    ret = posePlan(count()-1, &e1, &body_pose, input_angle);
+    if (std::abs(turn_angle_) > 10)
+    {
+        mout() << "input exceed mas value" << std::endl;
+    }
+    else
+    {
+        BodyPose body_pose(0, 0, turn_angle_, s1);
+        ret = posePlan(count() - 1, &e1, &body_pose, input_angle);
+    }
 
     //输出角度，用于仿真测试
     {
+        //输出电机角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -1064,17 +1079,33 @@ auto DogRoll::executeRT()->int
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    BodyPose body_pose(turn_angle_, 0, 0, s1);
-    ret = posePlan(count()-1, &e1, &body_pose, input_angle);
-
+    if (std::abs(turn_angle_) > 20)
+    {
+        mout() << "input exceed mas value" << std::endl;
+    }
+    else
+    {
+        BodyPose body_pose(turn_angle_, 0, 0, s1);
+        ret = posePlan(count() - 1, &e1, &body_pose, input_angle);
+    }
+    
+   
     //输出角度，用于仿真测试
     {
+        //输出电机角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)
@@ -1130,12 +1161,20 @@ auto DogYaw::executeRT()->int
 
     //输出角度，用于仿真测试
     {
+        //输出电机角度
         for (int i = 0; i < 12; i++)
         {
             lout() << input_angle[i] << "\t";
         }
         time_test += 0.001;
-        lout() << time_test << std::endl;
+        lout() << time_test << "\t";
+
+        //输出身体和足尖曲线
+        for (int j = 0; j < 12; j++)
+        {
+            lout() << file_current_leg[j] << "\t";
+        }
+        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; i++)

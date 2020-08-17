@@ -845,7 +845,16 @@ auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, 
 	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
 	//规划身体姿态
 	planBodyRotation(count, current_body_in_ground, body_pose_param);
-
+	//模型测试使用
+	for (int j = 0; j < 12; j++)
+	{
+		file_current_leg[j] = current_leg_in_ground[j];
+	}
+	for (int j = 0; j < 12; j++)
+	{
+		file_current_body[j] = current_body_in_ground[j];
+	}
+	//模型测试使用
 
 	inverseSame(current_leg_in_ground, current_body_in_ground, input);
 
