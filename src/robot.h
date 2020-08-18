@@ -169,71 +169,48 @@ namespace robot
         std::string prepose_;
     };
 
-    class DogPitchUp :public aris::plan::Plan
+    class DogPitch :public aris::plan::Plan
     {
     public:
         auto virtual prepareNrt()->void;
         auto virtual executeRT()->int;
 
-        virtual ~DogPitchUp();
-        explicit DogPitchUp(const std::string& name = "dog_pitchup");
-        ARIS_REGISTER_TYPE(DogPitchUp);
+        virtual ~DogPitch();
+        explicit DogPitch(const std::string& name = "dog_pitch");
+        ARIS_REGISTER_TYPE(DogPitch);
+    private:
+        double turn_angle_;
     };
 
-    class DogPitchDown :public aris::plan::Plan
+
+    class DogRoll :public aris::plan::Plan
     {
     public:
         auto virtual prepareNrt()->void;
         auto virtual executeRT()->int;
 
-        virtual ~DogPitchDown();
-        explicit DogPitchDown(const std::string& name = "dog_pitchdown");
-        ARIS_REGISTER_TYPE(DogPitchDown);
+        virtual ~DogRoll();
+        explicit DogRoll(const std::string& name = "dog_roll");
+        ARIS_REGISTER_TYPE(DogRoll);
+    private:
+        double turn_angle_;
     };
 
-    class DogRolll :public aris::plan::Plan
+
+    class DogYaw :public aris::plan::Plan
     {
     public:
         auto virtual prepareNrt()->void;
         auto virtual executeRT()->int;
 
-        virtual ~DogRolll();
-        explicit DogRolll(const std::string& name = "dog_rolll");
-        ARIS_REGISTER_TYPE(DogRolll);
+        virtual ~DogYaw();
+        explicit DogYaw(const std::string& name = "dog_yaw");
+        ARIS_REGISTER_TYPE(DogYaw);
+    private:
+        double turn_angle_;
     };
 
-    class DogRollr :public aris::plan::Plan
-    {
-    public:
-        auto virtual prepareNrt()->void;
-        auto virtual executeRT()->int;
 
-        virtual ~DogRollr();
-        explicit DogRollr(const std::string& name = "dog_rollr");
-        ARIS_REGISTER_TYPE(DogRollr);
-    };
-
-    class DogYawl :public aris::plan::Plan
-    {
-    public:
-        auto virtual prepareNrt()->void;
-        auto virtual executeRT()->int;
-
-        virtual ~DogYawl();
-        explicit DogYawl(const std::string& name = "dog_yawl");
-        ARIS_REGISTER_TYPE(DogYawl);
-    };
-
-    class DogYawr :public aris::plan::Plan
-    {
-    public:
-        auto virtual prepareNrt()->void;
-        auto virtual executeRT()->int;
-
-        virtual ~DogYawr();
-        explicit DogYawr(const std::string& name = "dog_tawr");
-        ARIS_REGISTER_TYPE(DogYawr);
-    };
 
     auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>;
     auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>;
