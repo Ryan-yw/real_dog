@@ -398,15 +398,15 @@ DogPrepare::DogPrepare(const std::string &name) : Plan(name)
 }
 DogPrepare::~DogPrepare() = default;
 
-//下蹲
-auto DogSitDown::prepareNrt()->void
+//下蹲起立  distance:上下移动的距离，输入正值为向上
+auto DogUpDown::prepareNrt()->void
 {
+    distance_ = doubleParam("distance");
     for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
 }
-auto DogSitDown::executeRT()->int
+auto DogUpDown::executeRT()->int
 {
-
-    if (count() == 1)this->master()->logFileRawName("sitdown");
+    if (count() == 1)this->master()->logFileRawName("updown");
 
     int ret = 1;
 
@@ -429,7 +429,7 @@ auto DogSitDown::executeRT()->int
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
 
-    ret = downPlan(count()-1, &e1, input_angle);
+    ret = updownPlan(count() - 1, &e1, distance_, input_angle);
 
     //输出角度，用于仿真测试
     {
@@ -457,78 +457,14 @@ auto DogSitDown::executeRT()->int
     }
     return ret;
 }
-DogSitDown::DogSitDown(const std::string& name) : Plan(name)
+DogUpDown::DogUpDown(const std::string& name) : Plan(name)
 {
     command().loadXmlStr(
-        "<Command name=\"dog_sitdown\"/>");
+        "<Command name=\"dog_updown\">"
+        "	<Param name=\"distance\" default=\"1\" abbreviation=\"d\"/>"
+        "</Command>");
 }
-DogSitDown::~DogSitDown() = default;
-
-//起立
-auto DogStandUp::prepareNrt()->void
-{
-    for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
-}
-auto DogStandUp::executeRT()->int
-{
-
-    if (count() == 1)this->master()->logFileRawName("standup");
-
-    int ret = 1;
-
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        input_angle[10] = controller()->motionPool()[10].actualPos();
-        input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
-    TCurve s1(5, 2);//0.9s
-    s1.getCurveParam();
-    EllipseTrajectory e1(0, 0, 0, s1);
-
-    ret = upPlan(count() - 1, &e1, input_angle);
-
-    //输出角度，用于仿真测试
-    {
-        for (int i = 0; i < 12; i++)
-        {
-            lout() << input_angle[i] << "\t";
-        }
-        time_test += 0.001;
-        lout() << time_test << "\t";
-
-        //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
-        {
-            lout() << file_current_leg[j] << "\t";
-        }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-    }
-    //发送电机角度
-    for (int i = 0; i < 12; i++)
-    {
-        if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-        else
-            controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }
-    return ret;
-}
-DogStandUp::DogStandUp(const std::string& name) : Plan(name)
-{
-    command().loadXmlStr(
-        "<Command name=\"dog_standup\"/>");
-}
-DogStandUp::~DogStandUp() = default;
+DogUpDown::~DogUpDown() = default;
 
 //踏步
 auto DogTaBu::prepareNrt()->void
@@ -1470,8 +1406,7 @@ auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>
     plan_root->planPool().add<DogHome>();
     plan_root->planPool().add<DogSwitchPrePose>();
     plan_root->planPool().add<DogPrepare>();
-    plan_root->planPool().add<DogSitDown>();
-    plan_root->planPool().add<DogStandUp>();
+    plan_root->planPool().add<DogUpDown>();
     plan_root->planPool().add<DogTaBu>();
     plan_root->planPool().add<DogForward>();
     plan_root->planPool().add<DogBack>();

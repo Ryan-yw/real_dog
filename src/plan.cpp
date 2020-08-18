@@ -601,10 +601,9 @@ auto planBodyRotation(int count, double* current_body, BodyPose* body_pose_param
 }
 
 
-//本函数用于规划四足机器人下蹲和起立
+//本函数用于规划四足机器人下蹲和起立  
 //#注意：只适用于当脚不动时，身体上下动的情况
-
-auto planBodyUp(int count, double* current_body, EllipseTrajectory* body_p_param)->void
+auto planBodyUpDown(int count, double* current_body, EllipseTrajectory* body_p_param,double distance)->void
 {
 
 	//开始时读取之前的值
@@ -616,7 +615,7 @@ auto planBodyUp(int count, double* current_body, EllipseTrajectory* body_p_param
 		}
 	}
 
-	current_body[7] = 350 + (kBodyHigh - 350) * body_p_param->getTcurve().getTCurve(count);
+	current_body[7] = body_pisiton_start_point[7] + distance * body_p_param->getTcurve().getTCurve(count);
 
 	//结束时保存变化之后的值
 	if (count + 1 == floor(body_p_param->getTcurve().getTc() * 1000))
@@ -628,33 +627,6 @@ auto planBodyUp(int count, double* current_body, EllipseTrajectory* body_p_param
 	}
 }
 
-
-auto planBodyDown(int count, double* current_body, EllipseTrajectory* body_p_param)->void
-{
-
-	//开始时读取之前的值
-	if (count == 0) //有用，不能删，否则算不出角度
-	{
-		for (int i = 0; i < 16; i++)
-		{
-			current_body[i] = body_pisiton_start_point[i];
-		}
-	}
-
-	current_body[7] = kBodyHigh - (kBodyHigh - 350) * body_p_param->getTcurve().getTCurve(count);
-
-
-
-
-	//结束时保存变化之后的值
-	if (count + 1 == floor(body_p_param->getTcurve().getTc() * 1000))
-	{
-		for (int i = 0; i < 16; i++)
-		{
-			body_pisiton_start_point[i] = current_body[i];
-		}
-	}
-}
 
 auto planBodyDownPrepare(int count, double* current_body, EllipseTrajectory* body_p_param)->void
 {
@@ -852,32 +824,7 @@ auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, 
 	return  per_step_count - count - 1;
 }
 
-auto upPlan(int count, EllipseTrajectory* Ellipse, double* input)->int
-{
-	int per_step_count = Ellipse->getTcurve().getTc() * 1000;
-	static double current_leg_in_ground[12] = { 0 };
-	static double current_body_in_ground[16] = { 0 };
-
-	//规划腿
-	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
-	//规划身体
-	planBodyUp(count, current_body_in_ground, Ellipse);
-
-	//模型测试使用
-	for (int j = 0; j < 12; j++)
-	{
-		file_current_leg[j] = current_leg_in_ground[j];
-	}
-	for (int j = 0; j < 12; j++)
-	{
-		file_current_body[j] = current_body_in_ground[j];
-	}
-	//模型测试使用
-	inverseSame(current_leg_in_ground, current_body_in_ground, input);
-	return  per_step_count - count - 1;
-}
-
-auto downPlan(int count, EllipseTrajectory* Ellipse, double* input)->int
+auto updownPlan(int count, EllipseTrajectory* Ellipse,double distance, double* input)->int
 {
 
 	int per_step_count = Ellipse->getTcurve().getTc() * 1000;
@@ -888,7 +835,7 @@ auto downPlan(int count, EllipseTrajectory* Ellipse, double* input)->int
 	//规划腿
 	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
 	//规划身体
-	planBodyDown(count, current_body_in_ground, Ellipse);
+	planBodyUpDown(count, current_body_in_ground, Ellipse,distance);
 
 	//模型测试使用
 	for (int j = 0; j < 12; j++)

@@ -80,26 +80,19 @@ namespace robot
         std::string prepose_;
     };
 
-    class DogSitDown :public aris::plan::Plan
+
+
+    class DogUpDown :public aris::plan::Plan
     {
     public:
         auto virtual prepareNrt()->void;
         auto virtual executeRT()->int;
 
-        virtual ~DogSitDown();
-        explicit DogSitDown(const std::string& name = "dog_sitdown");
-        ARIS_REGISTER_TYPE(DogSitDown);
-    };
-
-    class DogStandUp :public aris::plan::Plan
-    {
-    public:
-        auto virtual prepareNrt()->void;
-        auto virtual executeRT()->int;
-
-        virtual ~DogStandUp();
-        explicit DogStandUp(const std::string& name = "dog_standup");
-        ARIS_REGISTER_TYPE(DogStandUp);
+        virtual ~DogUpDown();
+        explicit DogUpDown(const std::string& name = "dog_updown");
+        ARIS_REGISTER_TYPE(DogUpDown);
+    private:
+        double distance_;
     };
 
     class DogTaBu :public aris::plan::Plan
