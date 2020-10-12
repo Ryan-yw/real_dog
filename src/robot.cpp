@@ -224,16 +224,16 @@ auto DogSwitchPrePose::executeRT()->int
     double angle[12] = { 0 };
     if (count() == 1)this->master()->logFileRawName("switchpose");
     double distance_same[12] = {
-        0,0.582289,-1.12207,//四条腿一样
-        0,0.582289,-1.12207,
-        0,-0.582289,1.12207,
-        0,-0.582289,1.12207
+        0,0.585500,-1.10605,//四条腿一样
+        0,0.585500,-1.10603,
+        0,-0.585500,1.10605,
+        0,-0.585500,1.10603
     };
     double distance_symmetry[12] = {
-    0,0.582289,-1.12207,//前后腿对称，14相同，23相同
-    0,-0.582289,1.12207,
-    0,0.582289,-1.12207,
-    0,-0.582289,1.12207
+    //0,0.582289,-1.12207,//前后腿对称，14相同，23相同
+    //0,-0.582289,1.12207,
+    //0,0.582289,-1.12207,
+    //0,-0.582289,1.12207
     };
 
     if (count() == 1)
@@ -324,10 +324,10 @@ auto DogPrepare::executeRT()->int
     double angle[12]={0};
     if (count() == 1)this->master()->logFileRawName("prepare");
     double distance[12] = {
-        0,0.582289,-1.12207,//四条腿一样
-        0,0.582289,-1.12207,
-        0,-0.582289,1.12207,
-        0,-0.582289,1.12207
+        0,0.72995,-1.37364,	
+        0,0.72995,-1.37362,	
+        0,-0.72995,1.37364,	
+        0,-0.729938,1.37362
     };
 
     if (prepose_ == "symmetry")//symmetry
@@ -492,7 +492,7 @@ auto DogTaBu::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
-    TCurve s1(1, 4);
+    TCurve s1(1, 6);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 100, 0, s1);
     int ret = 1;
@@ -579,9 +579,9 @@ auto DogForward::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
-    TCurve s1(1, 4);
+    TCurve s1(1, 6);
     s1.getCurveParam();
-    EllipseTrajectory e1(400, 100, 0, s1);
+    EllipseTrajectory e1(150, 80, 0, s1);
 
     //步态规划
     if (gait_ == "trot" && prepose_ == "same")//trot & same
@@ -642,7 +642,7 @@ DogForward::DogForward(const std::string &name) : Plan(name)
 }
 DogForward::~DogForward() = default;
 
-//后退
+//后退`
 auto DogBack::prepareNrt()->void
 {
     step_ = doubleParam("step");
@@ -670,9 +670,9 @@ auto DogBack::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
-    TCurve s1(1, 4);
+    TCurve s1(1, 6);
     s1.getCurveParam();
-    EllipseTrajectory e1(-400, 100, 0, s1);
+    EllipseTrajectory e1(-150, 80, 0, s1);
     //步态规划
     if (gait_ == "trot" && prepose_ == "same")//trot & same
     {
@@ -759,9 +759,9 @@ auto DogLeft::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
     //轨迹规划
-    TCurve s1(1, 4);
+    TCurve s1(1, 6);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 100, -200, s1);
+    EllipseTrajectory e1(0, 80, -100, s1);
     //步态规划
     if (gait_ == "trot" && prepose_ == "same")//trot & same
     {
@@ -848,10 +848,10 @@ auto DogRight::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
-    TCurve s1(1, 4);
+    TCurve s1(1, 6);
     s1.getCurveParam();
 
-    EllipseTrajectory e1(0, 100,200, s1);
+    EllipseTrajectory e1(0, 80,100, s1);
     //步态规划
     if (gait_ == "trot" && prepose_ == "same")//trot & same
     {
@@ -1191,10 +1191,10 @@ auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
         };
         double max_acc[12]
         {
-            3000,  3000,  3000,
-            3000,  3000,  3000,
-            3000,  3000,  3000,
-            3000,  3000,  3000,
+            30000,  30000,  30000,
+            30000,  30000,  30000,
+            30000,  30000,  30000,
+            30000,  30000,  30000,
         };
 
         int phy_id[12]={2,1,0,3,4,5,8,7,6,9,10,11};
