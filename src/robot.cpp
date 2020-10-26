@@ -46,8 +46,8 @@ auto SetMaxToq::executeRT()->int
 }
 auto SetMaxToq::collectNrt()->void {}
 SetMaxToq::~SetMaxToq() = default;
-SetMaxToq::SetMaxToq(const std::string &name) : Plan(name){
-    command().loadXmlStr(
+SetMaxToq::SetMaxToq(const std::string &name){
+    aris::core::fromXmlString(command(),
                 "<Command name=\"set_toq\"/>");
 }
 
@@ -79,9 +79,9 @@ auto DogReadJoint::executeRT()->int
 
     return 0;
 }
-DogReadJoint::DogReadJoint(const std::string &name) : Plan(name)
+DogReadJoint::DogReadJoint(const std::string &name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
        "<Command name=\"dog_readj\"/>");
 }
 DogReadJoint::~DogReadJoint() = default;
@@ -156,9 +156,9 @@ auto DogMoveJoint::executeRT()->int
     return s1.getTc() * 1000-count();
 }
 auto DogMoveJoint::collectNrt()->void {}
-DogMoveJoint::DogMoveJoint(const std::string &name) : Plan(name)
+DogMoveJoint::DogMoveJoint(const std::string &name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
        "<Command name=\"dog_mvj\">"
         "	<Param name=\"direction\" default=\"1\" abbreviation=\"d\"/>"
         "</Command>");
@@ -205,9 +205,9 @@ auto DogHome::executeRT()->int
     }
     return s1.getTc() * 1000-count();
 }
-DogHome::DogHome(const std::string &name) : Plan(name)
+DogHome::DogHome(const std::string &name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
        "<Command name=\"dog_home\"/>");
 }
 DogHome::~DogHome() = default;
@@ -300,9 +300,9 @@ auto DogSwitchPrePose::executeRT()->int
     }
     return s1.getTc() * 1000 - count();
 }
-DogSwitchPrePose::DogSwitchPrePose(const std::string& name) : Plan(name)
+DogSwitchPrePose::DogSwitchPrePose(const std::string& name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
         "<Command name=\"dog_switchpose\">"
             "<GroupParam>"
                 "<Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
@@ -389,9 +389,9 @@ auto DogPrepare::executeRT()->int
     }
     return s1.getTc() * 1000-count();
 }
-DogPrepare::DogPrepare(const std::string &name) : Plan(name)
+DogPrepare::DogPrepare(const std::string &name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
        "<Command name=\"dog_prepare\">"
        "   <Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
         "</Command>");
@@ -457,9 +457,9 @@ auto DogUpDown::executeRT()->int
     }
     return ret;
 }
-DogUpDown::DogUpDown(const std::string& name) : Plan(name)
+DogUpDown::DogUpDown(const std::string& name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
         "<Command name=\"dog_updown\">"
         "	<Param name=\"distance\" default=\"1\" abbreviation=\"d\"/>"
         "</Command>");
@@ -536,9 +536,9 @@ auto DogTaBu::executeRT()->int
     }
     return ret;
 }
-DogTaBu::DogTaBu(const std::string& name) : Plan(name)
+DogTaBu::DogTaBu(const std::string& name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
         "<Command name=\"dog_tabu\">"
         "<GroupParam>"
         "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
@@ -629,9 +629,9 @@ auto DogForward::executeRT()->int
 
     return ret;
 }
-DogForward::DogForward(const std::string &name) : Plan(name)
+DogForward::DogForward(const std::string &name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
         "<Command name=\"dog_forward\">"
             "<GroupParam>"
         "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
@@ -718,9 +718,11 @@ auto DogBack::executeRT()->int
     }
     return ret;
 }
-DogBack::DogBack(const std::string& name) : Plan(name)
+DogBack::DogBack(const std::string& name) 
 {
-    command().loadXmlStr(
+    
+    
+    aris::core::fromXmlString(command(),
         "<Command name=\"dog_back\">"
             "<GroupParam>"
         "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
@@ -807,9 +809,9 @@ auto DogLeft::executeRT()->int
     }
     return ret;
 }
-DogLeft::DogLeft(const std::string& name) : Plan(name)
+DogLeft::DogLeft(const std::string& name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
         "<Command name=\"dog_left\">"
             "<GroupParam>"
         "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
@@ -897,9 +899,9 @@ auto DogRight::executeRT()->int
     }
     return ret;
 }
-DogRight::DogRight(const std::string& name) : Plan(name)
+DogRight::DogRight(const std::string& name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
         "<Command name=\"dog_right\">"
             "<GroupParam>"
         "       <Param name=\"step\" default=\"1\" abbreviation=\"n\"/>"
@@ -977,9 +979,9 @@ auto DogPitch::executeRT()->int
     }
     return ret;
 }
-DogPitch::DogPitch(const std::string& name) : Plan(name)
+DogPitch::DogPitch(const std::string& name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
         "<Command name=\"dog_pitch\">"
         "	<Param name=\"angle\" default=\"10\" abbreviation=\"d\"/>"
         "</Command>");
@@ -1053,9 +1055,9 @@ auto DogRoll::executeRT()->int
     }
     return ret;
 }
-DogRoll::DogRoll(const std::string& name) : Plan(name)
+DogRoll::DogRoll(const std::string& name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
         "<Command name=\"dog_roll\">"
         "	<Param name=\"angle\" default=\"10\" abbreviation=\"d\"/>"
         "</Command>");
@@ -1122,9 +1124,9 @@ auto DogYaw::executeRT()->int
     }
     return ret;
 }
-DogYaw::DogYaw(const std::string& name) : Plan(name)
+DogYaw::DogYaw(const std::string& name) 
 {
-    command().loadXmlStr(
+    aris::core::fromXmlString(command(),
         "<Command name=\"dog_yaw\">"
         "	<Param name=\"angle\" default=\"10\" abbreviation=\"d\"/>"
         "</Command>");
@@ -1231,7 +1233,8 @@ auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
             "	</SyncManagerPoolObject>"
             "</EthercatMotor>";
 
-        controller->slavePool().add<aris::control::EthercatMotor>().loadXmlStr(xml_str);
+        auto& s = controller->slavePool().add<aris::control::EthercatMotor>();
+        aris::core::fromXmlString(s, xml_str);
 
 #ifdef WIN32
         dynamic_cast<aris::control::EthercatMotor&>(controller->slavePool().back()).setVirtual(true);

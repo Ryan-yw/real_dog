@@ -16,3 +16,4 @@ auto inverseSymmetry(double* leg_in_ground, double* body_in_ground, double* inpu
 double* s_pm_dot_pm(const double* pm1, const double* pm2, double* pm_out);
 double* s_inv_pm_dot_pm(const double* inv_pm, const double* pm, double* pm_out);
 #endif
+ 

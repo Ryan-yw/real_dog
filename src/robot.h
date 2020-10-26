@@ -6,7 +6,7 @@
 
 namespace robot
 {
-    class SetMaxToq :public aris::plan::Plan
+    class SetMaxToq : public aris::core::CloneObject<SetMaxToq, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -15,10 +15,9 @@ namespace robot
 
         virtual ~SetMaxToq();
         explicit SetMaxToq(const std::string &name = "set_max_toq");
-        ARIS_REGISTER_TYPE(SetMaxToq);
     };
 
-    class DogReadJoint :public aris::plan::Plan
+    class DogReadJoint :public aris::core::CloneObject<DogReadJoint, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -26,10 +25,9 @@ namespace robot
 
         virtual ~DogReadJoint();
         explicit DogReadJoint(const std::string &name = "dog_read_joint");
-        ARIS_REGISTER_TYPE(DogReadJoint);
     };
 
-    class DogMoveJoint :public aris::plan::Plan
+    class DogMoveJoint :public aris::core::CloneObject<DogMoveJoint, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -38,12 +36,11 @@ namespace robot
 
         virtual ~DogMoveJoint();
         explicit DogMoveJoint(const std::string &name = "dog_move_joint");
-        ARIS_REGISTER_TYPE(DogMoveJoint);
     private:
         double dir_;
     };
     
-    class DogHome :public aris::plan::Plan
+    class DogHome :public aris::core::CloneObject<DogHome, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -51,10 +48,9 @@ namespace robot
 
         virtual ~DogHome();
         explicit DogHome(const std::string &name = "dog_home");
-        ARIS_REGISTER_TYPE(DogHome);
     };
 
-    class DogSwitchPrePose :public aris::plan::Plan
+    class DogSwitchPrePose :public aris::core::CloneObject<DogSwitchPrePose, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -62,27 +58,25 @@ namespace robot
 
         virtual ~DogSwitchPrePose();
         explicit DogSwitchPrePose(const std::string& name = "dog_switchpose");
-        ARIS_REGISTER_TYPE(DogSwitchPrePose);
     private:
         std::string prepose_;
     };
 
-    class DogPrepare :public aris::plan::Plan
+    class DogPrepare :public aris::core::CloneObject<DogPrepare, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
-        auto virtual executeRT()->int;
+        auto virtual executeRT()->int override;
 
         virtual ~DogPrepare();
         explicit DogPrepare(const std::string &name = "dog_prepare");
-        ARIS_REGISTER_TYPE(DogPrepare);
     private:
         std::string prepose_;
     };
 
 
 
-    class DogUpDown :public aris::plan::Plan
+    class DogUpDown :public aris::core::CloneObject<DogUpDown, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -90,12 +84,11 @@ namespace robot
 
         virtual ~DogUpDown();
         explicit DogUpDown(const std::string& name = "dog_updown");
-        ARIS_REGISTER_TYPE(DogUpDown);
     private:
         double distance_;
     };
 
-    class DogTaBu :public aris::plan::Plan
+    class DogTaBu :public aris::core::CloneObject<DogTaBu, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -103,13 +96,12 @@ namespace robot
 
         virtual ~DogTaBu();
         explicit DogTaBu(const std::string &name = "dog_tabu");
-        ARIS_REGISTER_TYPE(DogTaBu);
     private:
         double step_;
         std::string prepose_;
     };
 
-    class DogForward :public aris::plan::Plan
+    class DogForward :public aris::core::CloneObject<DogForward, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -117,14 +109,13 @@ namespace robot
 
         virtual ~DogForward();
         explicit DogForward(const std::string &name = "dog_forward");
-        ARIS_REGISTER_TYPE(DogForward);
     private:
         double step_;
         std::string gait_;
         std::string prepose_;
     };
 
-    class DogBack :public aris::plan::Plan
+    class DogBack :public aris::core::CloneObject<DogBack, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -132,14 +123,13 @@ namespace robot
 
         virtual ~DogBack();
         explicit DogBack(const std::string& name = "dog_back");
-        ARIS_REGISTER_TYPE(DogBack);
     private:
         double step_;
         std::string gait_;
         std::string prepose_;
     };
 
-    class DogLeft :public aris::plan::Plan
+    class DogLeft :public aris::core::CloneObject<DogLeft, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -147,14 +137,13 @@ namespace robot
 
         virtual ~DogLeft();
         explicit DogLeft(const std::string& name = "dog_left");
-        ARIS_REGISTER_TYPE(DogLeft);
     private:
         double step_;
         std::string gait_;
         std::string prepose_;
     };
 
-    class DogRight :public aris::plan::Plan
+    class DogRight :public aris::core::CloneObject<DogRight, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -162,14 +151,13 @@ namespace robot
 
         virtual ~DogRight();
         explicit DogRight(const std::string& name = "dog_right");
-        ARIS_REGISTER_TYPE(DogRight);
     private:
         double step_;
         std::string gait_;
         std::string prepose_;
     };
 
-    class DogPitch :public aris::plan::Plan
+    class DogPitch :public aris::core::CloneObject<DogPitch, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -177,13 +165,12 @@ namespace robot
 
         virtual ~DogPitch();
         explicit DogPitch(const std::string& name = "dog_pitch");
-        ARIS_REGISTER_TYPE(DogPitch);
     private:
         double turn_angle_;
     };
 
 
-    class DogRoll :public aris::plan::Plan
+    class DogRoll :public aris::core::CloneObject<DogRoll, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -191,13 +178,12 @@ namespace robot
 
         virtual ~DogRoll();
         explicit DogRoll(const std::string& name = "dog_roll");
-        ARIS_REGISTER_TYPE(DogRoll);
     private:
         double turn_angle_;
     };
 
 
-    class DogYaw :public aris::plan::Plan
+    class DogYaw :public aris::core::CloneObject<DogYaw, aris::plan::Plan>
     {
     public:
         auto virtual prepareNrt()->void;
@@ -205,7 +191,6 @@ namespace robot
 
         virtual ~DogYaw();
         explicit DogYaw(const std::string& name = "dog_yaw");
-        ARIS_REGISTER_TYPE(DogYaw);
     private:
         double turn_angle_;
     };
