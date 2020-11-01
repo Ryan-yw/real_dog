@@ -721,7 +721,6 @@ auto DogBack::executeRT()->int
 DogBack::DogBack(const std::string& name) 
 {
     
-    
     aris::core::fromXmlString(command(),
         "<Command name=\"dog_back\">"
             "<GroupParam>"
