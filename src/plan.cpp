@@ -13,7 +13,7 @@ static double foot_position_start_point[12] = {
 										-kBodyLong / 2, 0,  (kBodyWidth / 2) + L1,   //leg3 ->678
 										 kBodyLong / 2, 0,  (kBodyWidth / 2) + L1    //leg4 ->91011
 };
-static double body_pisiton_start_point[16] = { 1,0,0,0,
+static double body_position_start_point[16] = { 1,0,0,0,
 											   0,1,0,kBodyHigh,
 											   0,0,1,0,
 											   0,0,0,1 };
@@ -443,39 +443,39 @@ auto planBodyTransformTrot(int e_1, int n, double* current_body, int count, Elli
 	{
 		for (int i = 0; i < 16; i++)
 		{
-			current_body[i] = body_pisiton_start_point[i];
+			current_body[i] = body_position_start_point[i];
 		}
 	}
 
 	if (e_1 == 0)   //加速段
 	{
 		//规划身体
-		current_body[3] = body_pisiton_start_point[3] + Ellipse->get_a() * count * count / (4.0 * per_step_count * per_step_count);
-		current_body[7] = body_pisiton_start_point[7];
-		current_body[11] = body_pisiton_start_point[11] + Ellipse->get_c() * count * count / (4.0 * per_step_count * per_step_count);
+		current_body[3] = body_position_start_point[3] + Ellipse->get_a() * count * count / (4.0 * per_step_count * per_step_count);
+		current_body[7] = body_position_start_point[7];
+		current_body[11] = body_position_start_point[11] + Ellipse->get_c() * count * count / (4.0 * per_step_count * per_step_count);
 	}
 	else if (e_1 == (2 * n - 1))//减速段
 	{
 
 		//规划身体
 		int t = (2 * n - 1) * per_step_count + per_step_count;
-		current_body[3] = body_pisiton_start_point[3] + 0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a
-		current_body[7] = body_pisiton_start_point[7];
-		current_body[11] = body_pisiton_start_point[11] + 0 - Ellipse->get_c() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_c() * n - Ellipse->get_c() / 2.0;
+		current_body[3] = body_position_start_point[3] + 0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a
+		current_body[7] = body_position_start_point[7];
+		current_body[11] = body_position_start_point[11] + 0 - Ellipse->get_c() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_c() * n - Ellipse->get_c() / 2.0;
 	}
 	else //匀速段
 	{
 		//规划身体
-		current_body[3] = body_pisiton_start_point[3] + Ellipse->get_a() / 4.0 + Ellipse->get_a() * (count - per_step_count) / per_step_count / 2;//速度为100mm/s  每秒计数per_step_count
-		current_body[7] = body_pisiton_start_point[7];
-		current_body[11] = body_pisiton_start_point[11] + Ellipse->get_c() / 4.0 + Ellipse->get_c() * (count - per_step_count) / per_step_count / 2;
+		current_body[3] = body_position_start_point[3] + Ellipse->get_a() / 4.0 + Ellipse->get_a() * (count - per_step_count) / per_step_count / 2;//速度为100mm/s  每秒计数per_step_count
+		current_body[7] = body_position_start_point[7];
+		current_body[11] = body_position_start_point[11] + Ellipse->get_c() / 4.0 + Ellipse->get_c() * (count - per_step_count) / per_step_count / 2;
 	}
 
 	if (count + 1 >= 2 * n * per_step_count)
 	{
 		for (int i = 0; i < 16; i++)
 		{
-			body_pisiton_start_point[i] = current_body[i];
+			body_position_start_point[i] = current_body[i];
 		}
 	}
 }
@@ -491,39 +491,39 @@ auto planBodyTransformWalk(int e_1, int n, double* current_body, int count, Elli
 	{
 		for (int i = 0; i < 16; i++)
 		{
-			current_body[i] = body_pisiton_start_point[i];
+			current_body[i] = body_position_start_point[i];
 		}
 	}
 
 	if (e_1 == 0 || e_1 == 1)   //加速段
 	{
 		//规划身体
-		current_body[3] = body_pisiton_start_point[3] + Ellipse->get_a() * count * count / (4.0 * 2 * per_step_count * 2 * per_step_count);
-		current_body[7] = body_pisiton_start_point[7];
-		current_body[11] = body_pisiton_start_point[11] + Ellipse->get_c() * count * count / (4.0 * 2 * per_step_count * 2 * per_step_count);
+		current_body[3] = body_position_start_point[3] + Ellipse->get_a() * count * count / (4.0 * 2 * per_step_count * 2 * per_step_count);
+		current_body[7] = body_position_start_point[7];
+		current_body[11] = body_position_start_point[11] + Ellipse->get_c() * count * count / (4.0 * 2 * per_step_count * 2 * per_step_count);
 	}
 	else if (e_1 == (4 * n - 1) || e_1 == (4 * n - 2))//减速段
 	{
 
 		//规划身体
 		int t = 4 * n * per_step_count;
-		current_body[3] = body_pisiton_start_point[3] + 0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * 2*per_step_count * 2*per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a 
-		current_body[7] = body_pisiton_start_point[7];
-		current_body[11] = body_pisiton_start_point[11] + 0 - Ellipse->get_c() * (count - t) * (count - t) / (4.0 * 2*per_step_count * 2*per_step_count) + Ellipse->get_c() * n - Ellipse->get_c() / 2.0;
+		current_body[3] = body_position_start_point[3] + 0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * 2*per_step_count * 2*per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a 
+		current_body[7] = body_position_start_point[7];
+		current_body[11] = body_position_start_point[11] + 0 - Ellipse->get_c() * (count - t) * (count - t) / (4.0 * 2*per_step_count * 2*per_step_count) + Ellipse->get_c() * n - Ellipse->get_c() / 2.0;
 	}
 	else //匀速段
 	{
 		//规划身体，在加速段的基础上计算。斜率可自定
-		current_body[3] = body_pisiton_start_point[3] + Ellipse->get_a() / 4.0 + Ellipse->get_a() * (count - 2 * per_step_count) / per_step_count / 4.0;//速度为100mm/s  每秒计数per_step_count
-		current_body[7] = body_pisiton_start_point[7];
-		current_body[11] = body_pisiton_start_point[11] + Ellipse->get_c() / 4.0 + Ellipse->get_c() * (count - 2 * per_step_count) / per_step_count / 4.0;
+		current_body[3] = body_position_start_point[3] + Ellipse->get_a() / 4.0 + Ellipse->get_a() * (count - 2 * per_step_count) / per_step_count / 4.0;//速度为100mm/s  每秒计数per_step_count
+		current_body[7] = body_position_start_point[7];
+		current_body[11] = body_position_start_point[11] + Ellipse->get_c() / 4.0 + Ellipse->get_c() * (count - 2 * per_step_count) / per_step_count / 4.0;
 	}
 
 	if (count + 1 >= 4 * n * per_step_count)
 	{
 		for (int i = 0; i < 16; i++)
 		{
-			body_pisiton_start_point[i] = current_body[i];
+			body_position_start_point[i] = current_body[i];
 		}
 	}
 }
@@ -578,17 +578,17 @@ auto planBodyRotation(int count, double* current_body, BodyPose* body_pose_param
 
 	if (body_pose_param->getPitchTotalAngle() != 0 && body_pose_param->getRollTotalAngle() == 0 && body_pose_param->getYawTotalAngle() == 0) //pitch
 	{
-		s_pm_dot_pm(R_z, body_pisiton_start_point, tempz);
+		s_pm_dot_pm(R_z, body_position_start_point, tempz);
 		std::copy(tempz, tempz + 16, current_body);
 	}
 	else if (body_pose_param->getPitchTotalAngle() == 0 && body_pose_param->getRollTotalAngle() != 0 && body_pose_param->getYawTotalAngle() == 0) //roll
 	{
-		s_pm_dot_pm(body_pisiton_start_point, R_x, tempx);
+		s_pm_dot_pm(body_position_start_point, R_x, tempx);
 		std::copy(tempx, tempx + 16, current_body);
 	}
 	else //yaw
 	{
-		s_pm_dot_pm(body_pisiton_start_point, R_y, tempy);
+		s_pm_dot_pm(body_position_start_point, R_y, tempy);
 		std::copy(tempy, tempy + 16, current_body);
 	}
 	//结束时保存变化之后的值
@@ -611,49 +611,23 @@ auto planBodyUpDown(int count, double* current_body, EllipseTrajectory* body_p_p
 	{
 		for (int i = 0; i < 16; i++)
 		{
-			current_body[i] = body_pisiton_start_point[i];
+			current_body[i] = body_position_start_point[i];
 		}
 	}
 
-	current_body[7] = body_pisiton_start_point[7] + distance * body_p_param->getTcurve().getTCurve(count);
+	current_body[7] = body_position_start_point[7] + distance * body_p_param->getTcurve().getTCurve(count);
 
 	//结束时保存变化之后的值
 	if (count + 1 == floor(body_p_param->getTcurve().getTc() * 1000))
 	{
 		for (int i = 0; i < 16; i++)
 		{
-			body_pisiton_start_point[i] = current_body[i];
+			body_position_start_point[i] = current_body[i];
 		}
 	}
 }
 
 
-auto planBodyDownPrepare(int count, double* current_body, EllipseTrajectory* body_p_param)->void
-{
-
-	//开始时读取之前的值
-	if (count == 0) //有用，不能删，否则算不出角度
-	{
-		for (int i = 0; i < 16; i++)
-		{
-			current_body[i] = body_pisiton_start_point[i];
-		}
-	}
-
-	current_body[7] = L2 + L3 - (L2 + L3 - 550) * body_p_param->getTcurve().getTCurve(count);
-
-
-
-
-	//结束时保存变化之后的值
-	if (count + 1 == floor(body_p_param->getTcurve().getTc() * 1000))
-	{
-		for (int i = 0; i < 16; i++)
-		{
-			body_pisiton_start_point[i] = current_body[i];
-		}
-	}
-}
 /////////////////////////////////////////////////////////////////步态规划/////////////////////////////////////////////////////////////
 
 //以下函数在robot.cpp中被调用
@@ -833,7 +807,7 @@ auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, 
 	return  per_step_count - count - 1;
 }
 
-auto updownPlan(int count, EllipseTrajectory* Ellipse,double distance, double* input)->int
+auto updownPlanSame(int count, EllipseTrajectory* Ellipse,double distance, double* input)->int
 {
 
 	int per_step_count = Ellipse->getTcurve().getTc() * 1000;
@@ -862,24 +836,19 @@ auto updownPlan(int count, EllipseTrajectory* Ellipse,double distance, double* i
 	return  per_step_count - count - 1;
 }
 
-auto downPlanPrepare(int count, EllipseTrajectory* Ellipse, double* input)->int
+auto updownPlanSymmetry(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int
 {
 
 	int per_step_count = Ellipse->getTcurve().getTc() * 1000;
 
-
 	static double current_leg_in_ground[12] = { 0 };
 	static double current_body_in_ground[16] = { 0 };
-
-
-	//std::cout << current_body_in_ground[3] << std::endl;
-	//std::cout << body_pose_param->pitch_ << std::endl;
 
 	//规划腿
 	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
 	//规划身体
-	planBodyDownPrepare(count, current_body_in_ground, Ellipse);
-	
+	planBodyUpDown(count, current_body_in_ground, Ellipse, distance);
+
 	//模型测试使用
 	for (int j = 0; j < 12; j++)
 	{
@@ -890,10 +859,8 @@ auto downPlanPrepare(int count, EllipseTrajectory* Ellipse, double* input)->int
 		file_current_body[j] = current_body_in_ground[j];
 	}
 	//模型测试使用
-
-	inverseSame(current_leg_in_ground, current_body_in_ground, input);
+	inverseSymmetry(current_leg_in_ground, current_body_in_ground, input);
 
 
 	return  per_step_count - count - 1;
 }
-

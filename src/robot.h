@@ -27,6 +27,29 @@ namespace robot
         explicit DogReadJoint(const std::string &name = "dog_read_joint");
     };
 
+    class DogInitPos :public aris::core::CloneObject<DogInitPos, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+
+        virtual ~DogInitPos();
+        explicit DogInitPos(const std::string& name = "dog_get_init_pos");
+    };
+
+    class DogSetWalkMode :public aris::core::CloneObject<DogSetWalkMode, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+
+        virtual ~DogSetWalkMode();
+        explicit DogSetWalkMode(const std::string& name = "dog_set_walk_mode");
+    private:
+        std::string gait_;
+        std::string prepose_;
+    };
+
     class DogMoveJoint :public aris::core::CloneObject<DogMoveJoint, aris::plan::Plan>
     {
     public:
@@ -70,8 +93,6 @@ namespace robot
 
         virtual ~DogPrepare();
         explicit DogPrepare(const std::string &name = "dog_prepare");
-    private:
-        std::string prepose_;
     };
 
 
@@ -98,7 +119,6 @@ namespace robot
         explicit DogTaBu(const std::string &name = "dog_tabu");
     private:
         double step_;
-        std::string prepose_;
     };
 
     class DogForward :public aris::core::CloneObject<DogForward, aris::plan::Plan>
@@ -111,8 +131,6 @@ namespace robot
         explicit DogForward(const std::string &name = "dog_forward");
     private:
         double step_;
-        std::string gait_;
-        std::string prepose_;
     };
 
     class DogBack :public aris::core::CloneObject<DogBack, aris::plan::Plan>
@@ -125,8 +143,6 @@ namespace robot
         explicit DogBack(const std::string& name = "dog_back");
     private:
         double step_;
-        std::string gait_;
-        std::string prepose_;
     };
 
     class DogLeft :public aris::core::CloneObject<DogLeft, aris::plan::Plan>
@@ -139,8 +155,6 @@ namespace robot
         explicit DogLeft(const std::string& name = "dog_left");
     private:
         double step_;
-        std::string gait_;
-        std::string prepose_;
     };
 
     class DogRight :public aris::core::CloneObject<DogRight, aris::plan::Plan>
@@ -153,8 +167,6 @@ namespace robot
         explicit DogRight(const std::string& name = "dog_right");
     private:
         double step_;
-        std::string gait_;
-        std::string prepose_;
     };
 
     class DogPitch :public aris::core::CloneObject<DogPitch, aris::plan::Plan>
