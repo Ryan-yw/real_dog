@@ -288,8 +288,14 @@ auto DogSetWalkMode::prepareNrt()->void
 }
 auto DogSetWalkMode::executeRT()->int
 {
-    gait = gait_;
-    prepose = prepose_;
+    if(gait_=="trot"||gait_=="walk")
+    {gait = gait_;}
+    else
+        mout()<<"input gait error"<<std::endl;
+    if(prepose_=="same"||prepose_=="symmetry")
+        prepose=prepose_;
+    else
+        mout()<<"input prepose error"<<std::endl;
     return 0;
 }
 DogSetWalkMode::DogSetWalkMode(const std::string& name)
@@ -428,24 +434,24 @@ auto DogPrepare::executeRT()->int
     double angle[12]={0};
     if (count() == 1)this->master()->logFileRawName("prepare");
     double distance[12] = { 0 };
-    if (prepose == "same")
-    {
+//    if (prepose == "same")
+//    {
         for (int i = 0; i < 12; i++)
         {
             distance[i] = init_pos_angle[i];
         }
-    }
-    else if (prepose == "symmetry")//symmetry
-    {
-        distance[4] = -distance[4]; //前后腿对称，14相同，23相同
-        distance[5] = -distance[5];
-        distance[7] = -distance[7];
-        distance[8] = -distance[8];
-    }
-    else
-    {
-        mout() << "set mode error" << std::endl;
-    }
+//    }
+//    else if (prepose == "symmetry")//symmetry
+//    {
+//        distance[4] = -distance[4]; //前后腿对称，14相同，23相同
+//        distance[5] = -distance[5];
+//        distance[7] = -distance[7];
+//        distance[8] = -distance[8];
+//    }
+//    else
+//    {
+//        mout() << "set mode error" << std::endl;
+//    }
    
 
     if (count() == 1)
@@ -1236,24 +1242,35 @@ auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
     {
 #ifdef ARIS_USE_ETHERCAT_SIMULATION
         double pos_offset[12]
-        {
+        {            -0.0163824,
+                     0.184725,
+                     1.90999,
+                     -0.193661,
+                     0.289958,
+                     0.609837,
+                     -0.204495,
+                     0.287226,
+                     0.612374,
+                     -0.184633,
+                     0.708104,
+                     -0.945939
             0,0,0,0,0,0
         };
 #else
         double pos_offset[12]
         {
-            //-0.0405786,
-            //-0.128355,
-            //1.11861,
-            //-0.270588,
-            //0.429535,
-            //1.45398,
-            //-0.0726683,
-            //0.208502,
-            //0.0887512,
-            //0.911768,
-            //0,
-            //0
+            -0.0163824,
+            0.184725,
+            1.90999,
+            -0.193661,
+            0.289958,
+            0.609837,
+            -0.204495,
+            0.287226,
+            0.612374,
+            -0.184633,
+            0.708104,
+            -0.945939
 
         };
 #endif
