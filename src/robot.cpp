@@ -432,30 +432,18 @@ auto DogPrepare::executeRT()->int
 {
     static double begin_angle[12]={0};
     double angle[12]={0};
-    if (count() == 1)this->master()->logFileRawName("prepare");
     double distance[12] = { 0 };
-//    if (prepose == "same")
-//    {
-        for (int i = 0; i < 12; i++)
-        {
-            distance[i] = init_pos_angle[i];
-        }
-//    }
-//    else if (prepose == "symmetry")//symmetry
-//    {
-//        distance[4] = -distance[4]; //前后腿对称，14相同，23相同
-//        distance[5] = -distance[5];
-//        distance[7] = -distance[7];
-//        distance[8] = -distance[8];
-//    }
-//    else
-//    {
-//        mout() << "set mode error" << std::endl;
-//    }
+ 
+    for (int i = 0; i < 12; i++)
+    {
+        distance[i] = init_pos_angle[i];
+    }
+
    
 
     if (count() == 1)
     {
+        this->master()->logFileRawName("prepare");
         begin_angle[0] = controller()->motionPool()[0].actualPos();
         begin_angle[1] = controller()->motionPool()[1].actualPos();
         begin_angle[2] = controller()->motionPool()[2].actualPos();
