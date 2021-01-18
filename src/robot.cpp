@@ -117,7 +117,7 @@ auto DogInitPos::executeRT()->int
     }
     else //
     {
-        mout() << "input erdog_ror" << std::endl;
+        mout() << "input dog_error" << std::endl;
     }
 
     for (int j = 0; j < 12; j++)
@@ -321,7 +321,6 @@ auto DogSwitchPrePose::executeRT()->int
 {
     static double begin_angle[12] = { 0 };
     double angle[12] = { 0 };
-<<<<<<< HEAD
   
     double distance_same[12] = { 0 };
     double distance_symmetry[12] = { 0 };
@@ -346,21 +345,6 @@ auto DogSwitchPrePose::executeRT()->int
         mout() << "input error" << std::endl;
     }
 
-=======
-    if (count() == 1)this->master()->logFileRawName("switchpose");
-    double distance_same[12] = {
-        0,0.585500,-1.10605,//四条腿一样
-        0,0.585500,-1.10603,
-        0,-0.585500,1.10605,
-        0,-0.585500,1.10603
-    };
-    double distance_symmetry[12] = {
-    //0,0.582289,-1.12207,//前后腿对称，14相同，23相同
-    //0,-0.582289,1.12207,
-    //0,0.582289,-1.12207,
-    //0,-0.582289,1.12207
-    };
->>>>>>> newdog
 
     if (count() == 1)
     {
@@ -448,26 +432,15 @@ auto DogPrepare::executeRT()->int
 {
     static double begin_angle[12]={0};
     double angle[12]={0};
-<<<<<<< HEAD
+
+
+    if (count() == 1)this->master()->logFileRawName("prepare");
+
     double distance[12] = { 0 };
  
     for (int i = 0; i < 12; i++)
-=======
-    if (count() == 1)this->master()->logFileRawName("prepare");
-    double distance[12] = {
-        0,0.72995,-1.37364,	
-        0,0.72995,-1.37362,	
-        0,-0.72995,1.37364,	
-        0,-0.729938,1.37362
-    };
-
-    if (prepose_ == "symmetry")//symmetry
->>>>>>> newdog
-    {
         distance[i] = init_pos_angle[i];
-    }
 
-   
 
     if (count() == 1)
     {
