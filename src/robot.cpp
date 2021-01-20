@@ -74,7 +74,7 @@ auto DogReadJoint::executeRT()->int
     begin_angle[10] = controller()->motionPool()[10].actualPos();
     begin_angle[11] = controller()->motionPool()[11].actualPos();
 
-    for(int i=0;i<12;i++)
+    for(int i=0;i<12;++i)
     {
        std::cout<<begin_angle[i]<<std::endl;
     }
@@ -120,15 +120,15 @@ auto DogInitPos::executeRT()->int
         mout() << "input dog_error" << std::endl;
     }
 
-    for (int j = 0; j < 12; j++)
+    for (int i = 0; i < 12; ++i)
     {
-        mout() << init_pos_angle[j] << std::endl;
+        mout() << init_pos_angle[i] << std::endl;
     }
     
     //输出角度，用于仿真测试
     //{
     //    输出电机角度
-    //    for (int i = 0; i < 12; i++)
+    //    for (int i = 0; i < 12; ++i)
     //    {
     //        lout() << input_angle[i] << "\t";
     //    }
@@ -136,9 +136,9 @@ auto DogInitPos::executeRT()->int
     //    lout() << time_test << "\t";
 
     //    输出身体和足尖曲线
-    //    for (int j = 0; j < 12; j++)
+    //    for (int i = 0; i < 12; ++i)
     //    {
-    //        lout() << file_current_leg[j] << "\t";
+    //        lout() << file_current_leg[i] << "\t";
     //    }
     //    lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     //}
@@ -261,12 +261,12 @@ auto DogHome::executeRT()->int
     TCurve s1(5,2);//0.9s
     s1.getCurveParam();
 
-    for(int i=0;i<12;i++)
+    for(int i=0;i<12;++i)
     {
         angle[i] = begin_angle[i] + (0-begin_angle[i]) * s1.getTCurve(count());
     }
 
-    for(int i=0;i<12;i++)
+    for(int i=0;i<12;++i)
     {
         controller()->motionPool()[i].setTargetPos(angle[i]);
     }
@@ -327,7 +327,7 @@ auto DogSwitchPrePose::executeRT()->int
 
     if (prepose_ == "same")
     {
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             distance_same[i] = init_pos_angle[i];
             distance_symmetry[i] = init_pos_angle[i];
@@ -369,14 +369,14 @@ auto DogSwitchPrePose::executeRT()->int
 
     if (prepose_ == "same")//same
     {
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             angle[i] = begin_angle[i] + (distance_same[i] - begin_angle[i]) * s1.getTCurve(count());
         }
     }
     else if(prepose_=="symmetry")//symmetry
     {
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             angle[i] = begin_angle[i] + (distance_symmetry[i] - begin_angle[i]) * s1.getTCurve(count());
         }
@@ -390,21 +390,21 @@ auto DogSwitchPrePose::executeRT()->int
 
     //输出角度，用于仿真测试
     {
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << angle[i] << "\t";
         }
         time_test += 0.001;
         lout() << time_test << "\t";
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * angle[i]);
@@ -438,7 +438,7 @@ auto DogPrepare::executeRT()->int
 
     double distance[12] = { 0 };
  
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
         distance[i] = init_pos_angle[i];
 
 
@@ -463,28 +463,28 @@ auto DogPrepare::executeRT()->int
     TCurve s1(5,2);//0.9s
     s1.getCurveParam();
 
-    for(int i=0;i<12;i++)
+    for(int i=0;i<12;++i)
     {
         angle[i] = begin_angle[i] + distance[i] * s1.getTCurve(count());
     }
 
     //输出角度，用于仿真测试
     {
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << angle[i] << "\t";
         }
         time_test += 0.001;
         lout() << time_test << "\t";
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * angle[i]);
@@ -537,7 +537,7 @@ auto DogUpDown::executeRT()->int
     //步态规划
     if (prepose == "same")// same
     {
-        ret = updownPlanSame(count() - 1, &e1, distance_, input_angle);
+        ret = updownPlanSameLeg(count() - 1, &e1, distance_, input_angle);
     }
     else if (prepose == "symmetry")  //symmetry
     {
@@ -551,7 +551,7 @@ auto DogUpDown::executeRT()->int
 
     //输出角度，用于仿真测试
     {
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
@@ -559,14 +559,14 @@ auto DogUpDown::executeRT()->int
         lout() << time_test << "\t";
 
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
@@ -629,7 +629,7 @@ auto DogTaBu::executeRT()->int
 
     //输出角度，用于仿真测试
     {
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
@@ -637,14 +637,14 @@ auto DogTaBu::executeRT()->int
         lout() << time_test << "\t";
 
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
@@ -716,7 +716,7 @@ auto DogForward::executeRT()->int
     //输出角度，用于仿真测试
     {
         //输出电机角度
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
@@ -724,14 +724,16 @@ auto DogForward::executeRT()->int
         lout() << time_test << "\t";
 
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
+
+
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
@@ -800,7 +802,7 @@ auto DogBack::executeRT()->int
     //输出角度，用于仿真测试
     {
         //输出电机角度
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
@@ -808,14 +810,14 @@ auto DogBack::executeRT()->int
         lout() << time_test << "\t";
 
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
@@ -884,7 +886,7 @@ auto DogLeft::executeRT()->int
     //输出角度，用于仿真测试
     {
         //输出电机角度
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
@@ -892,14 +894,14 @@ auto DogLeft::executeRT()->int
         lout() << time_test << "\t";
 
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
@@ -968,7 +970,7 @@ auto DogRight::executeRT()->int
     //输出角度，用于仿真测试
     {
         //输出电机角度
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
@@ -976,14 +978,14 @@ auto DogRight::executeRT()->int
         lout() << time_test << "\t";
 
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
@@ -1044,7 +1046,7 @@ auto DogPitch::executeRT()->int
     //输出角度，用于仿真测试
     {
         //输出电机角度
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
@@ -1052,14 +1054,14 @@ auto DogPitch::executeRT()->int
         lout() << time_test << "\t";
 
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
@@ -1120,7 +1122,7 @@ auto DogRoll::executeRT()->int
     //输出角度，用于仿真测试
     {
         //输出电机角度
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
@@ -1128,14 +1130,14 @@ auto DogRoll::executeRT()->int
         lout() << time_test << "\t";
 
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
@@ -1189,7 +1191,7 @@ auto DogYaw::executeRT()->int
     //输出角度，用于仿真测试
     {
         //输出电机角度
-        for (int i = 0; i < 12; i++)
+        for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
@@ -1197,14 +1199,14 @@ auto DogYaw::executeRT()->int
         lout() << time_test << "\t";
 
         //输出身体和足尖曲线
-        for (int j = 0; j < 12; j++)
+        for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[j] << "\t";
+            lout() << file_current_leg[i] << "\t";
         }
         lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
     }
     //发送电机角度
-    for (int i = 0; i < 12; i++)
+    for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
             controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);

@@ -1,8 +1,12 @@
 ﻿#include <aris.hpp>
 #include "robot.h"
 #include"kinematics.h"
+#include"plan.h"
 
 
+extern double input_angle[12];
+extern double file_current_leg[12];
+extern double file_current_body[16];
 class Quad :public aris::dynamic::Model {
 public:
 
@@ -143,29 +147,38 @@ class DogDynamicTest :public aris::core::CloneObject<DogDynamicTest, aris::plan:
 public:
 	auto virtual executeRT()->int override 
 	{
-		double h = (1 - std::cos(count() / 1000.0 * aris::PI)) / 2 * 0.1;
+		int ret=0;
+		TCurve s1(1, 6);
+		s1.getCurveParam();
+		EllipseTrajectory e1( 0,0.080, 0, s1);
+		BodyPose body_s(0,20,0,s1);
+		// 前后左右 //
+		//ret = trotPlanSameLeg(10, count() - 1, &e1, input_angle);
+		
+		// 原地旋转 //
+		ret = turnPlanTrotSameLeg(5,count()-1, &e1, &body_s, input_angle);
 
-		//
-		//
-		//
-		static double ee0[28];
+
+		// 身子扭动 //
+		//ret = posePlan(count() - 1, &e1, &body_s, input_angle);
+		static double ee0[28]; 
+		double ee[28];
 		if (count() == 1) {
 			model()->getOutputPos(ee0);
+			aris::dynamic::s_vc(28, ee0, ee);
 		}
+	
+		aris::dynamic::s_vc(16, file_current_body+0, ee+0);
+		aris::dynamic::s_vc(12, file_current_leg+0, ee + 16); 
 
-		double ee[28];
-		aris::dynamic::s_vc(28, ee0, ee);
-
-		ee[3] = ee0[3] + h*0.2;
-		ee[15 + 2] = ee0[16 + 1] + h;
-		ee[16 + 4] = ee0[16 + 4] + 2*h;
-		ee[16 + 7] = ee0[16 + 7] + h;
-		ee[16 + 11] = ee0[16 + 11] + 2*h;
+		//aris::dynamic::dsp(4, 4, ee);
+		//aris::dynamic::dsp(4, 3, ee + 16);
 		model()->setOutputPos(ee);
 		if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
-
 		model()->setTime(0.001 * count());
-		return 2000 - count();
+		return ret;
+
+
 	}
 	explicit DogDynamicTest()
 	{
@@ -176,39 +189,42 @@ public:
 
 int main(int argc, char *argv[])
 {
-
+	// 设置模型初始位置，给关节角度  注：相对的位置是模型Quad里设置的关节轴和末端 //
 	Quad quad;
 	double set_init_position[12] = { 
 		0,0.736615,-1.38589,
 		0,0.729938,-1.37362,
 		0,-0.736615,1.38589,
 		0,-0.729938,1.37362, };
-	//double mp[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };
 	quad.setInputPos(set_init_position);
 	if (quad.forwardKinematics()) THROW_FILE_LINE("forward failed");
 
-
+	// 添加仿真器和仿真结果 //
 	auto& adams = dynamic_cast<aris::dynamic::AdamsSimulator&>(quad.simulatorPool().front());
 	auto& result = quad.simResultPool().add<aris::dynamic::SimResult>();
 	quad.init();
 
 	//adams.saveAdams("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\quad.cmd");
 
+	// 添加规划曲线 //
+	//robot::DogForward plan;
+	
+
 
 	DogDynamicTest plan;
+	//plan.prepareNrt();
+	
 	adams.simulate(plan, result);
 	adams.saveAdams("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\quad_simulation.cmd", result);
 	
-	std::cout << "finished" << std::endl;
+	std::cout << "simulate finished" << std::endl;
 
-
+//-------------------------------------------------分割线---------------------------------------------------------//
 	auto&cs = aris::server::ControlServer::instance();
 	
     cs.resetController(robot::createControllerQuadruped().release());
     cs.resetPlanRoot(robot::createPlanQuadruped().release());
 	cs.resetModel(new Quad);
-
-
 
 	//网页控制代码
 	//cs.interfacePool().add<aris::server::ProgramWebInterface>("", "5866", aris::core::Socket::WEB);

@@ -11,9 +11,21 @@ const double kBodyLong = 0.652; //m  x方向
 const double kBodyWidth = 0.1250;   //m  z方向
 const double kBodyHigh = 0.500;    //m y方向
 
+//初始时身体和脚在地面坐标系下的位置
+static double foot_position_start_point[12] = {
+                                         kBodyLong / 2, -kBodyHigh, -(kBodyWidth / 2) - L1,  //leg1 ->012
+                                        -kBodyLong / 2, -kBodyHigh, -(kBodyWidth / 2) - L1,  //leg2 ->345
+                                        -kBodyLong / 2, -kBodyHigh,  (kBodyWidth / 2) + L1,   //leg3 ->678
+                                         kBodyLong / 2, -kBodyHigh,  (kBodyWidth / 2) + L1    //leg4 ->91011
+};
+static double body_position_start_point[16] = { 1,0,0,0,
+                                               0,1,0,0,
+                                               0,0,1,0,
+                                               0,0,0,1 };
+
+
 auto inverseSame(double* leg_in_ground, double* body_in_ground, double* input)->int;
 auto inverseSymmetry(double* leg_in_ground, double* body_in_ground, double* input)->int;
-double* s_pm_dot_pm(const double* pm1, const double* pm2, double* pm_out);
-double* s_inv_pm_dot_pm(const double* inv_pm, const double* pm, double* pm_out);
+
 #endif
  
