@@ -121,7 +121,7 @@ public:
 		auto& rf_ee = this->addPointMotion(rf_p3, ground(), ee_pos[3]);
 		ground().markerPool().back().setPrtPe(std::array<double, 6>{0, 0, 0, 0, 0, 0}.data());
 
-		//body_ee.activate(false);
+		body_ee.activate(true);
 
 		lf_ee.activate(false);
 		lr_ee.activate(false);
@@ -157,9 +157,10 @@ public:
 		aris::dynamic::s_vc(28, ee0, ee);
 
 		ee[3] = ee0[3] + h*0.2;
-		ee[16 + 1] = ee0[16 + 1] + h;
-
-
+		ee[15 + 2] = ee0[16 + 1] + h;
+		ee[16 + 4] = ee0[16 + 4] + 2*h;
+		ee[16 + 7] = ee0[16 + 7] + h;
+		ee[16 + 11] = ee0[16 + 11] + 2*h;
 		model()->setOutputPos(ee);
 		if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
 
