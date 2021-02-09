@@ -19,9 +19,9 @@ static double foot_position_start_point[12] = {
                                          kBodyLong / 2, -kBodyHigh,  (kBodyWidth / 2) + L1    //leg4 ->91011
 };
 static double body_position_start_point[16] = { 1,0,0,0,
-                                               0,1,0,0,
-                                               0,0,1,0,
-                                               0,0,0,1 };
+                                                0,1,0,0,
+                                                0,0,1,0,
+                                                0,0,0,1 };
 
 
 auto inverseSame(double* leg_in_ground, double* body_in_ground, double* input)->int;

@@ -74,6 +74,7 @@ auto DogReadJoint::executeRT()->int
     begin_angle[10] = controller()->motionPool()[10].actualPos();
     begin_angle[11] = controller()->motionPool()[11].actualPos();
 
+
     for(int i=0;i<12;++i)
     {
        std::cout<<begin_angle[i]<<std::endl;
@@ -579,7 +580,7 @@ DogUpDown::DogUpDown(const std::string& name)
 {
     aris::core::fromXmlString(command(),
         "<Command name=\"dog_updown\">"
-        "	<Param name=\"distance\" default=\"1\" abbreviation=\"d\"/>"
+        "	<Param name=\"distance\" default=\"50\" abbreviation=\"d\"/>"
         "</Command>");
 }
 DogUpDown::~DogUpDown() = default;

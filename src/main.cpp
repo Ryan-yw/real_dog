@@ -30,9 +30,9 @@ public:
 		auto& rf_p1 = this->partPool().add<aris::dynamic::Part>("RF_P1", default_iv);
 		auto& rf_p2 = this->partPool().add<aris::dynamic::Part>("RF_P2", default_iv);
 		auto& rf_p3 = this->partPool().add<aris::dynamic::Part>("RF_P3", default_iv);
+
 		// add geometry //
-
-
+		this->ground().geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\ground.x_t");
 		body.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\body.x_t");
 		//leg1
 		lf_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l11.x_t");
@@ -125,7 +125,7 @@ public:
 		auto& rf_ee = this->addPointMotion(rf_p3, ground(), ee_pos[3]);
 		ground().markerPool().back().setPrtPe(std::array<double, 6>{0, 0, 0, 0, 0, 0}.data());
 
-		body_ee.activate(true);
+		body_ee.activate(false);
 
 		lf_ee.activate(false);
 		lr_ee.activate(false);
@@ -150,17 +150,19 @@ public:
 		int ret=0;
 		TCurve s1(1, 6);
 		s1.getCurveParam();
-		EllipseTrajectory e1( 0,0.080, 0, s1);
+		EllipseTrajectory e1( 0.10,0.080, 0, s1);
 		BodyPose body_s(0,20,0,s1);
 		// 前后左右 //
-		//ret = trotPlanSameLeg(10, count() - 1, &e1, input_angle);
+		ret = trotPlanSameLeg(10, count() - 1, &e1, input_angle);
 		
 		// 原地旋转 //
-		ret = turnPlanTrotSameLeg(5,count()-1, &e1, &body_s, input_angle);
+		//ret = turnPlanTrotSameLeg(5,count()-1, &e1, &body_s, input_angle);
 
 
 		// 身子扭动 //
 		//ret = posePlan(count() - 1, &e1, &body_s, input_angle);
+
+
 		static double ee0[28]; 
 		double ee[28];
 		if (count() == 1) {
@@ -175,6 +177,11 @@ public:
 		//aris::dynamic::dsp(4, 3, ee + 16);
 		model()->setOutputPos(ee);
 		if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+		
+	/*	model()->setInputAcc(ee);
+		model()->inverseDynamics();*/
+
+
 		model()->setTime(0.001 * count());
 		return ret;
 
@@ -195,9 +202,25 @@ int main(int argc, char *argv[])
 		0,0.736615,-1.38589,
 		0,0.729938,-1.37362,
 		0,-0.736615,1.38589,
+		0,-0.729938,1.37362, };	
+	double set_init_acc[12] = {
+		0,0.736615,-1.38589,
+		0,0.729938,-1.37362,
+		0,-0.736615,1.38589,
 		0,-0.729938,1.37362, };
 	quad.setInputPos(set_init_position);
 	if (quad.forwardKinematics()) THROW_FILE_LINE("forward failed");
+
+
+	
+	//quad.setInputAcc(set_init_acc);
+	//auto& inverse_dynamic = quad.solverPool().add<aris::dynamic::InverseDynamicSolver>();
+	//quad.setInputAcc(set_init_position);
+	//inverse_dynamic.dynAccAndFce();
+
+	quad.solverPool()[2].dynAccAndFce();//f
+		
+
 
 	// 添加仿真器和仿真结果 //
 	auto& adams = dynamic_cast<aris::dynamic::AdamsSimulator&>(quad.simulatorPool().front());
@@ -206,13 +229,7 @@ int main(int argc, char *argv[])
 
 	//adams.saveAdams("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\quad.cmd");
 
-	// 添加规划曲线 //
-	//robot::DogForward plan;
-	
-
-
 	DogDynamicTest plan;
-	//plan.prepareNrt();
 	
 	adams.simulate(plan, result);
 	adams.saveAdams("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\quad_simulation.cmd", result);

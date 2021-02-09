@@ -84,6 +84,7 @@ auto TCurve::getCurveParam()->void
 //---------------------------------------------------------椭圆轨迹---------------------------------------------------//
 
 //生成椭圆轨迹，在Tc时间内  x方向0->a;y方向0->b->0;z方向0->c。对应输入参数由构造函数初始化。
+//参数构造为椭圆的长轴和短轴
 auto EllipseTrajectory::getEllipseTrajectory(int count)->void
 {
 	x_ = a_ * (1 + cos(PI - PI * s_.getTCurve(count))) / 2.0;
@@ -111,10 +112,13 @@ auto BodyPose::getBodyRotationTrajectory(int count)->void
 
 //---------------------------------------------------规划脚---------------------------------------------//
 
-//对角步态足端在笛卡尔空间下的坐标规划
+///足尖在笛卡尔坐标系下的规划。没执行完一次梯形曲线记录一次数据
+///count=e_2 是0 到 Tc 循环  
+///判断当前在走哪一步,腿走一步e1加1
+
+
+//对角步态
 //当前脚的位置 = 上一步脚的位置 + 脚位置增量
-//每当计算完一次梯形曲线，脚的位置跟新一次
-//注意：#脚的位置在初始时刻要初始化一下，否则一开始只有脚13动，24脚的初始位置时0
 //#注意：目前只适用于平地行走
 auto planLegTrot(int e_1, int n, double* current_leg, int count, EllipseTrajectory* Ellipse)->void
 {
@@ -125,6 +129,7 @@ auto planLegTrot(int e_1, int n, double* current_leg, int count, EllipseTrajecto
 			current_leg[i] = foot_position_start_point[i];
 		}
 	}
+
 	Ellipse->getEllipseTrajectory(count);
 
 	if (e_1 % 2 == 0)  //偶数13迈腿，24停
@@ -189,10 +194,9 @@ auto planLegTrot(int e_1, int n, double* current_leg, int count, EllipseTrajecto
 	}
 }
 
-//静态步态足端在笛卡尔空间下的坐标规划
+//静态步态
 //当前脚的位置 = 上一步脚的位置 + 脚位置增量
 //每当计算完一次梯形曲线，脚的位置跟新一次
-//注意：#脚的位置在初始时刻要初始化一下，否则一开始只有脚13动，24脚的初始位置时0
 //#注意：目前只适用于平地行走
 auto planLegWalk(int e_1, int n, double* current_leg, int count, EllipseTrajectory* Ellipse)->void
 {
@@ -204,75 +208,8 @@ auto planLegWalk(int e_1, int n, double* current_leg, int count, EllipseTrajecto
 		}
 	}
 	Ellipse->getEllipseTrajectory(count);
-	//1423
-	//if ((e_1 + 1) % 4 == 1)  //迈1腿
-	//{
-	//	if (e_1 == 0)   //加速段
-	//	{
-	//		//规划leg1
-	//		current_leg[0] = foot_position_start_point[0] + Ellipse->get_x() / 2;
-	//		current_leg[1] = foot_position_start_point[1] + Ellipse->get_y();
-	//		current_leg[2] = foot_position_start_point[2] + Ellipse->get_z() / 2;
-	//	}
-	//	else
-	//	{
-	//		//规划leg1
-	//		current_leg[0] = foot_position_start_point[0] + Ellipse->get_x();
-	//		current_leg[1] = foot_position_start_point[1] + Ellipse->get_y();
-	//		current_leg[2] = foot_position_start_point[2] + Ellipse->get_z();
-	//	}
-	//}
-	//else if ((e_1 + 1) % 4 == 2)  //迈4腿
-	//{
-	//	if (e_1 == 1)//加速段
-	//	{
-	//		//规划leg4
-	//		current_leg[9] = foot_position_start_point[9] + Ellipse->get_x() / 2;
-	//		current_leg[10] = foot_position_start_point[10] + Ellipse->get_y();
-	//		current_leg[11] = foot_position_start_point[11] + Ellipse->get_z() / 2;
-	//	}
-	//	else
-	//	{
-	//		//规划leg4
-	//		current_leg[9] = foot_position_start_point[9] + Ellipse->get_x();
-	//		current_leg[10] = foot_position_start_point[10] + Ellipse->get_y();
-	//		current_leg[11] = foot_position_start_point[11] + Ellipse->get_z();
-	//	}
-	//}
-	//else if ((e_1 + 1) % 4 == 3)  //迈2腿
-	//{
-	//	if (e_1 == (4 * n - 2))//减速段
-	//	{
-	//		//规划leg2
-	//		current_leg[3] = foot_position_start_point[3] + Ellipse->get_x() / 2;
-	//		current_leg[4] = foot_position_start_point[4] + Ellipse->get_y();
-	//		current_leg[5] = foot_position_start_point[5] + Ellipse->get_z() / 2;
-	//	}
-	//	else
-	//	{
-	//		//规划leg2
-	//		current_leg[3] = foot_position_start_point[3] + Ellipse->get_x();
-	//		current_leg[4] = foot_position_start_point[4] + Ellipse->get_y();
-	//		current_leg[5] = foot_position_start_point[5] + Ellipse->get_z();
-	//	}
-	//}
-	//else //迈3腿
-	//{
-	//	if (e_1 == (4 * n - 1))//减速段
-	//	{
-	//		//规划leg3
-	//		current_leg[6] = foot_position_start_point[6] + Ellipse->get_x() / 2;
-	//		current_leg[7] = foot_position_start_point[7] + Ellipse->get_y();
-	//		current_leg[8] = foot_position_start_point[8] + Ellipse->get_z() / 2;
-	//	}
-	//	else
-	//	{
-	//		//规划leg3
-	//		current_leg[6] = foot_position_start_point[6] + Ellipse->get_x();
-	//		current_leg[7] = foot_position_start_point[7] + Ellipse->get_y();
-	//		current_leg[8] = foot_position_start_point[8] + Ellipse->get_z();
-	//	}
-	//}
+
+
 	//1324
 	if ((e_1 + 1) % 4 == 1)  //迈1腿
 	{
@@ -343,77 +280,7 @@ auto planLegWalk(int e_1, int n, double* current_leg, int count, EllipseTrajecto
 		}
 	}
 
-	////1432
-	//if ((e_1 + 1) % 4 == 1)  //迈1腿
-	//{
-	//	if (e_1 == 0)   //加速段
-	//	{
-	//		//规划leg1
-	//		current_leg[0] = foot_position_start_point[0] + Ellipse->get_x() / 2;
-	//		current_leg[1] = foot_position_start_point[1] + Ellipse->get_y();
-	//		current_leg[2] = foot_position_start_point[2] + Ellipse->get_z() / 2;
-	//	}
-	//	else
-	//	{
-	//		//规划leg1
-	//		current_leg[0] = foot_position_start_point[0] + Ellipse->get_x();
-	//		current_leg[1] = foot_position_start_point[1] + Ellipse->get_y();
-	//		current_leg[2] = foot_position_start_point[2] + Ellipse->get_z();
-	//	}
-	//}
-	//else if ((e_1 + 1) % 4 == 2)  //迈4腿
-	//{
-	//	if (e_1 == 1)//加速段
-	//	{
-	//		//规划leg4
-	//		current_leg[9] = foot_position_start_point[9] + Ellipse->get_x() / 2;
-	//		current_leg[10] = foot_position_start_point[10] + Ellipse->get_y();
-	//		current_leg[11] = foot_position_start_point[11] + Ellipse->get_z() / 2;
 
-	//	}
-	//	else
-	//	{
-	//		//规划leg4
-	//		current_leg[9] = foot_position_start_point[9] + Ellipse->get_x();
-	//		current_leg[10] = foot_position_start_point[10] + Ellipse->get_y();
-	//		current_leg[11] = foot_position_start_point[11] + Ellipse->get_z();
-
-	//	}
-	//}
-	//else if ((e_1 + 1) % 4 == 3)  //迈3腿
-	//{
-	//	if (e_1 == (4 * n - 2))//减速段
-	//	{
-	//		//规划leg3
-	//		current_leg[6] = foot_position_start_point[6] + Ellipse->get_x() / 2;
-	//		current_leg[7] = foot_position_start_point[7] + Ellipse->get_y();
-	//		current_leg[8] = foot_position_start_point[8] + Ellipse->get_z() / 2;
-	//	}
-	//	else
-	//	{
-	//		//规划leg3
-	//		current_leg[6] = foot_position_start_point[6] + Ellipse->get_x();
-	//		current_leg[7] = foot_position_start_point[7] + Ellipse->get_y();
-	//		current_leg[8] = foot_position_start_point[8] + Ellipse->get_z();
-	//	}
-	//}
-	//else //迈4腿
-	//{
-	//	if (e_1 == (4 * n - 1))//减速段
-	//	{
-	//		//规划leg2
-	//		current_leg[3] = foot_position_start_point[3] + Ellipse->get_x() / 2;
-	//		current_leg[4] = foot_position_start_point[4] + Ellipse->get_y();
-	//		current_leg[5] = foot_position_start_point[5] + Ellipse->get_z() / 2;
-	//	}
-	//	else
-	//	{
-	//		//规划leg2
-	//		current_leg[3] = foot_position_start_point[3] + Ellipse->get_x();
-	//		current_leg[4] = foot_position_start_point[4] + Ellipse->get_y();
-	//		current_leg[5] = foot_position_start_point[5] + Ellipse->get_z();
-	//	}
-	//}
 
 	if (count == floor(Ellipse->get_s().getTc() * 1000) - 1)
 	{
@@ -426,7 +293,6 @@ auto planLegWalk(int e_1, int n, double* current_leg, int count, EllipseTrajecto
 
 //对角步态下原地旋转
 //规划脚数值上下抬起。然后乘旋转矩阵
-//每当计算完一次梯形曲线，脚的位置跟新一次
 //#注意：目前只适用于平地
 auto planLegTrotTurn(int e_1, double* current_leg, int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param)->void
 {
@@ -701,6 +567,7 @@ auto planBodyUpDown(int count, double* current_body, EllipseTrajectory* body_p_p
 
 //本函数用于规划四足机器人原地旋转
 //每一个梯形曲线转过给定角度的一半，和trot步态对应
+//count 是 0 -> count
 auto planBodyTurn(int count, double* current_body, BodyPose* body_pose_param)->void
 {
 	double yaw = 0;
@@ -758,12 +625,12 @@ auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, 
 	static double current_leg_in_ground[12] = { 0 };
 	static double current_body_in_ground[16] = { 0 };
 
-
-	//std::cout << current_body_in_ground[3] << std::endl;
-	//std::cout << body_pose_param->pitch_ << std::endl;
+	//判断行走状态
+	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
+	int e_2 = count % per_step_count;  //0->Tc count
 
 	//规划腿
-	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegTrot(0, 1, current_leg_in_ground, e_2, Ellipse);
 	//规划身体姿态
 	planBodyRotation(count, current_body_in_ground, body_pose_param);
 	//模型测试使用
@@ -783,6 +650,8 @@ auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, 
 }
 
 
+//-------------------四条腿后曲-------------------//
+
 //机器人行走对角步态，包括原地踏步、前进、后退、左移、右移。
 //其中步长步高和步数可由用户输入。走一步的时间（或行走快慢）可由用户输入梯形曲线的速度和加速度确定
 //#注意：行走最大速度和加速度还没测试
@@ -793,13 +662,13 @@ auto trotPlanSameLeg(int n, int count, EllipseTrajectory* Ellipse, double* input
 
 	static double current_leg_in_ground[12] = { 0 };
 	static double current_body_in_ground[16] = { 0 };
-
-
 	//判断行走状态
-	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步e1加1
+	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
+	int e_2 = count % per_step_count;  //0->Tc count
+
 
 	//规划腿
-	planLegTrot(e_1, n, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegTrot(e_1, n, current_leg_in_ground, e_2, Ellipse);
 	//规划身体
 	planBodyTransformTrot(e_1, n, current_body_in_ground, count, Ellipse);
 
@@ -831,12 +700,12 @@ auto walkPlanSameLeg(int n, int count, EllipseTrajectory* Ellipse, double* input
 	static double current_leg_in_ground[12] = { 0 };
 	static double current_body_in_ground[16] = { 0 };
 
-
 	//判断行走状态
-	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步e1加1
+	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
+	int e_2 = count % per_step_count;  //0->Tc count
 
 	//规划腿
-	planLegWalk(e_1, n, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegWalk(e_1, n, current_leg_in_ground, e_2, Ellipse);
 	//规划身体
 	planBodyTransformWalk(e_1, n, current_body_in_ground, count, Ellipse);
 	//模型测试使用
@@ -862,8 +731,12 @@ auto updownPlanSameLeg(int count, EllipseTrajectory* Ellipse, double distance, d
 	static double current_leg_in_ground[12] = { 0 };
 	static double current_body_in_ground[16] = { 0 };
 
+	//判断行走状态
+	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
+	int e_2 = count % per_step_count;  //0->Tc count
+
 	//规划腿
-	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegTrot(0, 1, current_leg_in_ground, e_2, Ellipse);
 	//规划身体
 	planBodyUpDown(count, current_body_in_ground, Ellipse, distance);
 
@@ -879,7 +752,6 @@ auto updownPlanSameLeg(int count, EllipseTrajectory* Ellipse, double distance, d
 	//模型测试使用
 	inverseSame(current_leg_in_ground, current_body_in_ground, input);
 
-
 	return  per_step_count - count - 1;
 }
 
@@ -893,21 +765,13 @@ auto turnPlanTrotSameLeg(int n, int count, EllipseTrajectory* Ellipse, BodyPose*
 	static double current_body_in_ground[16] = { 0 };
 
 	//判断行走状态
-	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步e1加1
-
-	//std::cout << current_body_in_ground[3] << std::endl;
-	//std::cout << body_pose_param->pitch_ << std::endl;
+	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
+	int e_2 = count % per_step_count;  //0->Tc count
 
 	//规划腿
-	planLegTrotTurn(e_1, current_leg_in_ground, count % per_step_count, Ellipse, body_pose_param);
+	planLegTrotTurn(e_1, current_leg_in_ground, e_2, Ellipse, body_pose_param);
 	//规划身体
-	planBodyTurn(count % per_step_count, current_body_in_ground, body_pose_param);
-
-
-	//for (int i = 0; i < 16; i++)
-	//{
-	//	current_body_in_ground[i] = body_pisiton_start_point[i];
-	//}
+	planBodyTurn(e_2, current_body_in_ground, body_pose_param);
 
 
 	//模型测试使用
@@ -943,10 +807,11 @@ auto trotPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* i
 
 
 	//判断行走状态
-	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步e1加1
+	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
+	int e_2 = count % per_step_count;  //0->Tc count
 
 	//规划腿
-	planLegTrot(e_1, n, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegTrot(e_1, n, current_leg_in_ground, e_2, Ellipse);
 	//规划身体
 	planBodyTransformTrot(e_1, n, current_body_in_ground, count, Ellipse);
 
@@ -975,12 +840,11 @@ auto walkPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* i
 	static double current_leg_in_ground[12] = { 0 };
 	static double current_body_in_ground[16] = { 0 };
 
-
 	//判断行走状态
-	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步e1加1
-
+	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
+	int e_2 = count % per_step_count;  //0->Tc count
 	//规划腿
-	planLegWalk(e_1, n, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegWalk(e_1, n, current_leg_in_ground, e_2, Ellipse);
 	//规划身体
 	planBodyTransformWalk(e_1, n, current_body_in_ground, count, Ellipse);
 	//模型测试使用
@@ -1006,8 +870,12 @@ auto updownPlanSymmetry(int count, EllipseTrajectory* Ellipse, double distance, 
 	static double current_leg_in_ground[12] = { 0 };
 	static double current_body_in_ground[16] = { 0 };
 
+	//判断行走状态
+	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
+	int e_2 = count % per_step_count;  //0->Tc count
+
 	//规划腿
-	planLegTrot(0, 1, current_leg_in_ground, count % per_step_count, Ellipse);
+	planLegTrot(0, 1, current_leg_in_ground, e_2, Ellipse);
 	//规划身体
 	planBodyUpDown(count, current_body_in_ground, Ellipse, distance);
 
