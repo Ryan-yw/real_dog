@@ -5,8 +5,10 @@
 
 int main(int argc, char *argv[])
 {
+
+
 	auto&cs = aris::server::ControlServer::instance();
-	
+
     cs.resetController(robot::createControllerQuadruped().release());
     cs.resetPlanRoot(robot::createPlanQuadruped().release());
 

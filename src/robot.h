@@ -17,6 +17,17 @@ namespace robot
         explicit SetMaxToq(const std::string &name = "set_max_toq");
     };
 
+    class DogReadForce :public aris::core::CloneObject<DogReadForce, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+
+        virtual ~DogReadForce();
+        explicit DogReadForce(const std::string &name = "dog_read_force");
+
+    };
+
     class DogReadJoint :public aris::core::CloneObject<DogReadJoint, aris::plan::Plan>
     {
     public:
@@ -25,6 +36,18 @@ namespace robot
 
         virtual ~DogReadJoint();
         explicit DogReadJoint(const std::string &name = "dog_read_joint");
+    };
+
+    class DogTorqueControl :public aris::core::CloneObject<DogTorqueControl, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+
+        virtual ~DogTorqueControl();
+        explicit DogTorqueControl(const std::string &name = "dog_read_torque");
+    private:
+        double dir_;
     };
 
     class DogInitPos :public aris::core::CloneObject<DogInitPos, aris::plan::Plan>

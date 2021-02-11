@@ -31,7 +31,7 @@ auto SetMaxToq::executeRT()->int
     auto &cout = controller()->mout();
 
 
-    for (int i = 0; i < 12; ++i)
+    for (int i = 0; i < 1; ++i)
     {
         std::uint16_t max_toq=1000;
         this->ecController()->motionPool()[i].writePdo(0x6072,0,max_toq);
@@ -53,6 +53,38 @@ SetMaxToq::SetMaxToq(const std::string &name){
                 "<Command name=\"set_toq\"/>");
 }
 
+
+//read foot force
+auto DogReadForce::prepareNrt()->void
+{
+    for(auto &m:motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
+}
+auto DogReadForce::executeRT()->int
+{
+
+    // uint N
+    std::int32_t force_sensor_data[4]={0};
+
+    this->ecController()->slavePool()[0].readPdo(0x6020,0x01,force_sensor_data[0]);
+    this->ecController()->slavePool()[0].readPdo(0x6020,0x02,force_sensor_data[1]);
+    this->ecController()->slavePool()[0].readPdo(0x6020,0x04,force_sensor_data[2]);
+    this->ecController()->slavePool()[0].readPdo(0x6020,0x05,force_sensor_data[3]);
+
+    for(int i=0;i<4;++i)
+    {
+      std::cout << force_sensor_data[i] << "\t";
+    }
+    std::cout << std::endl;
+     return 1;
+}
+DogReadForce::DogReadForce(const std::string &name)
+{
+    aris::core::fromXmlString(command(),
+       "<Command name=\"dog_readf\"/>");
+}
+DogReadForce::~DogReadForce() = default;
+
+
 //读当前关节角度
 auto DogReadJoint::prepareNrt()->void
 {
@@ -62,19 +94,19 @@ auto DogReadJoint::executeRT()->int
 {
     static double begin_angle[12];
     begin_angle[0] = controller()->motionPool()[0].actualPos();
-    begin_angle[1] = controller()->motionPool()[1].actualPos();
-    begin_angle[2] = controller()->motionPool()[2].actualPos();
-    begin_angle[3] = controller()->motionPool()[3].actualPos();
-    begin_angle[4] = controller()->motionPool()[4].actualPos();
-    begin_angle[5] = controller()->motionPool()[5].actualPos();
-    begin_angle[6] = controller()->motionPool()[6].actualPos();
-    begin_angle[7] = controller()->motionPool()[7].actualPos();
-    begin_angle[8] = controller()->motionPool()[8].actualPos();
-    begin_angle[9] = controller()->motionPool()[9].actualPos();
-    begin_angle[10] = controller()->motionPool()[10].actualPos();
-    begin_angle[11] = controller()->motionPool()[11].actualPos();
+//    begin_angle[1] = controller()->motionPool()[1].actualPos();
+//    begin_angle[2] = controller()->motionPool()[2].actualPos();
+//    begin_angle[3] = controller()->motionPool()[3].actualPos();
+//    begin_angle[4] = controller()->motionPool()[4].actualPos();
+//    begin_angle[5] = controller()->motionPool()[5].actualPos();
+//    begin_angle[6] = controller()->motionPool()[6].actualPos();
+//    begin_angle[7] = controller()->motionPool()[7].actualPos();
+//    begin_angle[8] = controller()->motionPool()[8].actualPos();
+//    begin_angle[9] = controller()->motionPool()[9].actualPos();
+//    begin_angle[10] = controller()->motionPool()[10].actualPos();
+//    begin_angle[11] = controller()->motionPool()[11].actualPos();
 
-    for(int i=0;i<12;i++)
+    for(int i=0;i<1;i++)
     {
        std::cout<<begin_angle[i]<<std::endl;
     }
@@ -87,6 +119,47 @@ DogReadJoint::DogReadJoint(const std::string &name)
        "<Command name=\"dog_readj\"/>");
 }
 DogReadJoint::~DogReadJoint() = default;
+
+//read joint qorque
+auto DogTorqueControl::prepareNrt()->void
+{
+    dir_ = doubleParam("direction");
+    for(auto &m:motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
+}
+auto DogTorqueControl::executeRT()->int
+{
+
+
+    static double begin_angle[12];
+
+    if (count() == 1)
+    {
+        begin_angle[0] = controller()->motionPool()[0].actualPos();
+    }
+
+    TCurve s1(1,3);
+    s1.getCurveParam();
+
+    double angle0 = begin_angle[0] + dir_ * PI * s1.getTCurve(count());
+
+    // read toeque //
+    double torque=0;
+    this->ecController()->motionPool()[0].readPdo(0x6077,0x00,torque);
+    mout()<< torque <<std::endl;
+
+    controller()->motionPool()[0].setTargetPos(angle0);
+    return s1.getTc() * 1000-count();
+
+}
+DogTorqueControl::DogTorqueControl(const std::string &name)
+{
+    aris::core::fromXmlString(command(),
+       "<Command name=\"dog_mvt\">"
+        "<Param name=\"direction\" default=\"1\" abbreviation=\"d\"/>"
+        "</Command>");
+}
+DogTorqueControl::~DogTorqueControl() = default;
+
 
 //设置初始准备状态关节位置
 auto DogInitPos::prepareNrt()->void
@@ -168,57 +241,48 @@ auto DogMoveJoint::executeRT()->int
     if (count() == 1)
     {
         begin_angle[0] = controller()->motionPool()[0].targetPos();
-        begin_angle[1] = controller()->motionPool()[1].targetPos();
-        begin_angle[2] = controller()->motionPool()[2].targetPos();
-        begin_angle[3] = controller()->motionPool()[3].targetPos();
-        begin_angle[4] = controller()->motionPool()[4].targetPos();
-        begin_angle[5] = controller()->motionPool()[5].targetPos();
-        begin_angle[6] = controller()->motionPool()[6].targetPos();
-        begin_angle[7] = controller()->motionPool()[7].targetPos();
-        begin_angle[8] = controller()->motionPool()[8].targetPos();
-        begin_angle[9] = controller()->motionPool()[9].targetPos();
-        begin_angle[10] = controller()->motionPool()[10].targetPos();
-        begin_angle[11] = controller()->motionPool()[11].targetPos();
+//        begin_angle[1] = controller()->motionPool()[1].targetPos();
+//        begin_angle[2] = controller()->motionPool()[2].targetPos();
+//        begin_angle[3] = controller()->motionPool()[3].targetPos();
+//        begin_angle[4] = controller()->motionPool()[4].targetPos();
+//        begin_angle[5] = controller()->motionPool()[5].targetPos();
+//        begin_angle[6] = controller()->motionPool()[6].targetPos();
+//        begin_angle[7] = controller()->motionPool()[7].targetPos();
+//        begin_angle[8] = controller()->motionPool()[8].targetPos();
+//        begin_angle[9] = controller()->motionPool()[9].targetPos();
+//        begin_angle[10] = controller()->motionPool()[10].targetPos();
+//        begin_angle[11] = controller()->motionPool()[11].targetPos();
     }
         TCurve s1(1,3);
         s1.getCurveParam();
 
-
-//    TCurve s1(5, 2);
-//    s1.getCurveParam();
-//    EllipseTrajectory e1(-1, 0.8, 0, s1);
-//    e1.getEllipseTrajectory(count());
-//    pe[0] += dir_*0.1 * e1.z_;
-//    pe[1] += dir_*0.1 * e1.x_;
-//    pe[2] += 0.1 * e1.y_;
-
-    double angle0 = begin_angle[0] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle1 = begin_angle[1] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle2 = begin_angle[2] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle3 = begin_angle[3] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle4 = begin_angle[4] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle5 = begin_angle[5] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle6 = begin_angle[6] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle7 = begin_angle[7] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle8 = begin_angle[8] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle9 = begin_angle[9] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle10 = begin_angle[10] + dir_ * 0.1 * s1.getTCurve(count());
-    double angle11 = begin_angle[11] + dir_ * 0.1 * s1.getTCurve(count());
+    double angle0 = begin_angle[0] + dir_ * PI * s1.getTCurve(count());
+//    double angle1 = begin_angle[1] + dir_ * PI * s1.getTCurve(count());
+//    double angle2 = begin_angle[2] + dir_ * PI * s1.getTCurve(count());
+//    double angle3 = begin_angle[3] + dir_ * PI * s1.getTCurve(count());
+//    double angle4 = begin_angle[4] + dir_ * PI * s1.getTCurve(count());
+//    double angle5 = begin_angle[5] + dir_ * PI * s1.getTCurve(count());
+//    double angle6 = begin_angle[6] + dir_ * PI * s1.getTCurve(count());
+//    double angle7 = begin_angle[7] + dir_ * PI * s1.getTCurve(count());
+//    double angle8 = begin_angle[8] + dir_ * PI * s1.getTCurve(count());
+//    double angle9 = begin_angle[9] + dir_ * PI * s1.getTCurve(count());
+//    double angle10 = begin_angle[10] + dir_ * PI * s1.getTCurve(count());
+//    double angle11 = begin_angle[11] + dir_ * PI * s1.getTCurve(count());
 
 
 
     controller()->motionPool()[0].setTargetPos(angle0);
-    controller()->motionPool()[1].setTargetPos(angle1);
-    controller()->motionPool()[2].setTargetPos(angle2);
-    controller()->motionPool()[3].setTargetPos(angle3);
-    controller()->motionPool()[4].setTargetPos(angle4);
-    controller()->motionPool()[5].setTargetPos(angle5);
-    controller()->motionPool()[6].setTargetPos(angle6);
-    controller()->motionPool()[7].setTargetPos(angle7);
-    controller()->motionPool()[8].setTargetPos(angle8);
-    controller()->motionPool()[6].setTargetPos(angle9);
-    controller()->motionPool()[7].setTargetPos(angle10);
-    controller()->motionPool()[8].setTargetPos(angle11);
+//    controller()->motionPool()[1].setTargetPos(angle1);
+//    controller()->motionPool()[2].setTargetPos(angle2);
+//    controller()->motionPool()[3].setTargetPos(angle3);
+//    controller()->motionPool()[4].setTargetPos(angle4);
+//    controller()->motionPool()[5].setTargetPos(angle5);
+//    controller()->motionPool()[6].setTargetPos(angle6);
+//    controller()->motionPool()[7].setTargetPos(angle7);
+//    controller()->motionPool()[8].setTargetPos(angle8);
+//    controller()->motionPool()[6].setTargetPos(angle9);
+//    controller()->motionPool()[7].setTargetPos(angle10);
+//    controller()->motionPool()[8].setTargetPos(angle11);
     std::cout <<s1.getTc() << std::endl;
     return s1.getTc() * 1000-count();
 }
@@ -1225,8 +1289,11 @@ DogYaw::~DogYaw() = default;
 auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
 {
     std::unique_ptr<aris::control::Controller> controller(new aris::control::EthercatController);
+    auto &force_slave = controller->slavePool().add<aris::control::EthercatSlave>();
+    force_slave.scanInfoForCurrentSlave();
+    force_slave.scanPdoForCurrentSlave();
 
-    for (aris::Size i = 0; i < 12; ++i)
+    for (aris::Size i = 0; i < 1; ++i)
     {
 #ifdef ARIS_USE_ETHERCAT_SIMULATION
         double pos_offset[12]
@@ -1247,48 +1314,41 @@ auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
 #else
         double pos_offset[12]
         {
-            -0.0163824,
-            0.184725,
-            1.90999,
-            -0.193661,
-            0.289958,
-            0.609837,
-            -0.204495,
-            0.287226,
-            0.612374,
-            -0.184633,
-            0.708104,
-            -0.945939
+            -20556.8
+
 
         };
 #endif
         double pos_factor[12]
         {
-            262144.0 * 6 / 2 / PI, 262144.0 * 6 / 2 / PI, 262144.0 * 6 / 2 / PI,
-            262144.0 * 6 / 2 / PI, 262144.0 * 6 / 2 / PI, 262144.0 * 6 / 2 / PI,
-            262144.0 * 6 / 2 / PI, 262144.0 * 6 / 2 / PI, 262144.0 * 6 / 2 / PI,
-            262144.0 * 6 / 2 / PI, 262144.0 * 6 / 2 / PI, 262144.0 * 6 / 2 / PI,
+            16384.0 *20 / 2 / PI,16384.0 *20 / 2 / PI,16384.0 *20 / 2 / PI,
+            16384.0 *20 / 2 / PI,16384.0 *20 / 2 / PI,16384.0 *20 / 2 / PI,
+            16384.0 *20 / 2 / PI,16384.0 *20 / 2 / PI,16384.0 *20 / 2 / PI,
+            16384.0 *20 / 2 / PI,16384.0 *20 / 2 / PI,16384.0 *20 / 2 / PI
+
         };
         double max_pos[12]
         {
-            PI,PI,PI,
+           1000* PI,PI,PI,
             PI,PI,PI,
             PI,PI,PI,
             PI,PI,PI,
         };
         double min_pos[12]
         {
-            -PI,-PI,-PI,
+            -PI*1000,-PI,-PI,
             -PI,-PI,-PI,
             -PI,-PI,-PI,
             -PI,-PI,-PI,
         };
         double max_vel[12]
         {
-            330 / 60 * 2 * PI, 330 / 60 * 2 * PI,  330 / 60 * 2 * PI,
-            330 / 60 * 2 * PI, 330 / 60 * 2 * PI,  330 / 60 * 2 * PI,
-            330 / 60 * 2 * PI, 330 / 60 * 2 * PI,  330 / 60 * 2 * PI,
-            330 / 60 * 2 * PI, 330 / 60 * 2 * PI,  330 / 60 * 2 * PI,
+            350 / 60 * 2 * PI, 350 / 60 * 2 * PI, 350 / 60 * 2 * PI,
+            350 / 60 * 2 * PI, 350 / 60 * 2 * PI, 350 / 60 * 2 * PI,
+            350 / 60 * 2 * PI, 350 / 60 * 2 * PI, 350 / 60 * 2 * PI,
+            350 / 60 * 2 * PI, 350 / 60 * 2 * PI, 350 / 60 * 2 * PI
+
+
         };
         double max_acc[12]
         {
@@ -1298,7 +1358,7 @@ auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
             3000,  3000,  3000,
         };
 
-        int phy_id[12]={2,1,0,3,4,5,8,7,6,9,10,11};
+        int phy_id[12]={1,1,0,3,4,5,8,7,6,9,10,11};
 
 
         std::string xml_str =
@@ -1375,10 +1435,11 @@ auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>
     //自己写的命令
     plan_root->planPool().add<SetMaxToq>();
     plan_root->planPool().add<DogReadJoint>();
+    plan_root->planPool().add<DogReadForce>();
     plan_root->planPool().add<DogInitPos>();
- 
     plan_root->planPool().add<DogSetWalkMode>();
     plan_root->planPool().add<DogMoveJoint>();
+    plan_root->planPool().add<DogTorqueControl>();
     plan_root->planPool().add<DogHome>();
     plan_root->planPool().add<DogSwitchPrePose>();
     plan_root->planPool().add<DogPrepare>();
