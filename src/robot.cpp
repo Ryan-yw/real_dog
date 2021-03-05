@@ -385,6 +385,7 @@ auto DogSwitchPrePose::executeRT()->int
 {
     static double begin_angle[12] = { 0 };
     double angle[12] = { 0 };
+
   
     double distance_same[12] = { 0 };
     double distance_symmetry[12] = { 0 };
@@ -408,6 +409,7 @@ auto DogSwitchPrePose::executeRT()->int
     {
         mout() << "input error" << std::endl;
     }
+
 
 
     if (count() == 1)
@@ -502,8 +504,6 @@ auto DogPrepare::executeRT()->int
     {
         distance[i] = init_pos_angle[i];
     }
-
-   
 
     if (count() == 1)
     {
@@ -672,7 +672,7 @@ auto DogTaBu::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
-    TCurve s1(1, 4);
+    TCurve s1(1, 6);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 100, 0, s1);
     int ret = 1;
@@ -754,9 +754,9 @@ auto DogForward::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
-    TCurve s1(1, 4);
+    TCurve s1(1, 6);
     s1.getCurveParam();
-    EllipseTrajectory e1(400, 100, 0, s1);
+    EllipseTrajectory e1(150, 80, 0, s1);
 
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
@@ -813,7 +813,7 @@ DogForward::DogForward(const std::string &name)
 }
 DogForward::~DogForward() = default;
 
-//后退
+//后退`
 auto DogBack::prepareNrt()->void
 {
     step_ = doubleParam("step");
@@ -839,9 +839,9 @@ auto DogBack::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
-    TCurve s1(1, 4);
+    TCurve s1(1, 6);
     s1.getCurveParam();
-    EllipseTrajectory e1(-400, 100, 0, s1);
+    EllipseTrajectory e1(-150, 80, 0, s1);
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
     {
@@ -923,9 +923,9 @@ auto DogLeft::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
     //轨迹规划
-    TCurve s1(1, 4);
+    TCurve s1(1, 6);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 100, -200, s1);
+    EllipseTrajectory e1(0, 80, -100, s1);
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
     {
@@ -1006,10 +1006,10 @@ auto DogRight::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
-    TCurve s1(1, 4);
+    TCurve s1(1, 6);
     s1.getCurveParam();
 
-    EllipseTrajectory e1(0, 100,200, s1);
+    EllipseTrajectory e1(0, 80,100, s1);
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
     {
@@ -1289,9 +1289,16 @@ DogYaw::~DogYaw() = default;
 auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
 {
     std::unique_ptr<aris::control::Controller> controller(new aris::control::EthercatController);
+
+#ifdef UNIX
+
     auto &force_slave = controller->slavePool().add<aris::control::EthercatSlave>();
     force_slave.scanInfoForCurrentSlave();
     force_slave.scanPdoForCurrentSlave();
+
+#endif // WIN32
+
+
 
     for (aris::Size i = 0; i < 1; ++i)
     {
@@ -1352,10 +1359,10 @@ auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
         };
         double max_acc[12]
         {
-            3000,  3000,  3000,
-            3000,  3000,  3000,
-            3000,  3000,  3000,
-            3000,  3000,  3000,
+            30000,  30000,  30000,
+            30000,  30000,  30000,
+            30000,  30000,  30000,
+            30000,  30000,  30000,
         };
 
         int phy_id[12]={1,1,0,3,4,5,8,7,6,9,10,11};
