@@ -266,14 +266,15 @@ auto planLegWalk(int e_1, int n, double* current_leg, int count, EllipseTrajecto
 	{
 		if (e_1 == (4 * n - 1))//减速段
 		{
-			//规划leg4
+
+			//规划leg1
 			current_leg[0] = foot_position_start_point[0] + Ellipse->get_x() / 2;
 			current_leg[1] = foot_position_start_point[1] + Ellipse->get_y();
 			current_leg[2] = foot_position_start_point[2] + Ellipse->get_z() / 2;
 		}
 		else
 		{
-			//规划leg4
+			//规划leg1
 			current_leg[0] = foot_position_start_point[0] + Ellipse->get_x();
 			current_leg[1] = foot_position_start_point[1] + Ellipse->get_y();
 			current_leg[2] = foot_position_start_point[2] + Ellipse->get_z();
@@ -397,7 +398,7 @@ auto planBodyTransformTrot(int e_1, int n, double* current_body, int count, Elli
 
 		//规划身体
 		int t = (2 * n - 1) * per_step_count + per_step_count;
-		current_body[3] = body_position_start_point[3] + 0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a
+		current_body[3] = body_position_start_point[3] + +0 - Ellipse->get_a() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_a() * n - Ellipse->get_a() / 2.0;//n * a
 		current_body[7] = body_position_start_point[7];
 		current_body[11] = body_position_start_point[11] + 0 - Ellipse->get_c() * (count - t) * (count - t) / (4.0 * per_step_count * per_step_count) + Ellipse->get_c() * n - Ellipse->get_c() / 2.0;
 	}

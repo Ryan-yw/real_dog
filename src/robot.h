@@ -231,9 +231,36 @@ namespace robot
     };
 
 
+    // cpp和adams测试 //
+    class DogDynamicTest :public aris::core::CloneObject<DogDynamicTest, aris::plan::Plan> {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int override;
+  
+        virtual ~DogDynamicTest();
+        explicit DogDynamicTest() {}
 
+    };
+
+
+    // 正弦曲线 //
+    class MoveJS : public aris::core::CloneObject<MoveJS, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+        auto virtual collectNrt()->void;
+
+        explicit MoveJS(const std::string& name = "MoveJS_plan");
+
+    };
+
+    auto createModelQuadruped()->std::unique_ptr<aris::dynamic::Model>;
     auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>;
     auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>;
+    auto setStandTopologyIK(aris::server::ControlServer& cs)->void;
+    auto setTrotTopologyIK(aris::server::ControlServer& cs)->void;
+    auto setBoundTopologyIK(aris::server::ControlServer& cs)->void;
 }
 
 #endif

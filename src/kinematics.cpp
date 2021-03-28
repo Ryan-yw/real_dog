@@ -56,19 +56,19 @@ void leg_12(double* ee_xyz_wrt_leg, double* mot_pos_3)
     A = std::acos(std::abs(z) / std::hypot(y, z)) * 180 / PI;
     B = std::acos(L1 / std::hypot(y, z)) * 180 / PI;
 
-    if (y <= 0 && z > 0)
+    if (y <= 0 && z >= 0)
     {
         mot_pos_3[0] = A - B;
     }
-    else if (y <= 0 && z < 0)
+    else if (y <= 0 && z <= 0)
     {
         mot_pos_3[0] = 180 - A - B;
     }
-    else if (y > 0 && z >= 0)
+    else if (y > 0 && z > 0)
     {
         mot_pos_3[0] = A + B;
     }
-    else if (y > 0 && z <= 0)
+    else if (y > 0 && z < 0)
     {
         mot_pos_3[0] = -180 + A - B;
     }
@@ -131,19 +131,19 @@ void leg_34(double* ee_xyz_wrt_leg, double* mot_pos_3)
     A = std::acos(std::abs(z) / std::hypot(y, z)) * 180 / PI;
     B = std::acos(L1 / std::hypot(y, z)) * 180 / PI;
 
-    if (y <= 0 && z > 0)
+    if (y <= 0 && z >= 0)
     {
         mot_pos_3[0] = A - B;
     }
-    else if (y <= 0 && z < 0)
+    else if (y <= 0 && z <= 0)
     {
         mot_pos_3[0] = 180 - A - B;
     }
-    else if (y > 0 && z >= 0)
+    else if (y > 0 && z > 0)
     {
         mot_pos_3[0] = A + B;
     }
-    else if (y > 0 && z <= 0)
+    else if (y > 0 && z < 0)
     {
         mot_pos_3[0] = -180 + A - B;
     }
