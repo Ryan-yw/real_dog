@@ -59,7 +59,7 @@ public:
 	auto get_b()->double { return b_; };
 	auto get_c()->double { return c_; };
 	auto get_s()->TCurve { return s_; };
-	EllipseTrajectory(double a, double b, double c, TCurve& s) :a_(a), b_(b), c_(c), s_(s), x_(0), y_(0), z_(0) {}
+	EllipseTrajectory(double a, double b, double c, TCurve& s) :a_(a), b_(b), c_(c), s_(s), x_(0), y_(0), z_(0) {};
 	~EllipseTrajectory() {}
 };
 

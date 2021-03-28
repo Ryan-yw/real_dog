@@ -6,6 +6,7 @@
 
 #include "robot.h"
 #include"plan.h"
+#include"kinematics.h"
 
 double input_angle[12] = {0};
 double init_pos_angle[12] = { 0 };
@@ -18,7 +19,7 @@ double time_test = 0;
 
 using namespace aris::dynamic;
 using namespace aris::plan;
-const double PI = aris::PI;
+//const double PI = aris::PI;
 namespace robot
 {
 //设置力矩
@@ -123,7 +124,7 @@ auto DogInitPos::executeRT()->int
 
     for (int i = 0; i < 12; ++i)
     {
-        mout() << init_pos_angle[i] << std::endl;
+        std::cout << init_pos_angle[i] << std::endl;
     }
     
     //输出角度，用于仿真测试
@@ -612,7 +613,7 @@ auto DogTaBu::executeRT()->int
 
     TCurve s1(1, 6);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 100, 0, s1);
+    EllipseTrajectory e1(0, 0.100, 0, s1);
     int ret = 1;
     //步态规划
     if ( prepose == "same")// same
@@ -694,7 +695,7 @@ auto DogForward::executeRT()->int
 
     TCurve s1(1, 6);
     s1.getCurveParam();
-    EllipseTrajectory e1(150, 80, 0, s1);
+    EllipseTrajectory e1(0.150,0.080, 0, s1);
 
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
@@ -734,13 +735,13 @@ auto DogForward::executeRT()->int
 
 
     //发送电机角度
-    for (int i = 0; i < 12; ++i)
-    {
-        if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-        else
-            controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }
+    //for (int i = 0; i < 12; ++i)
+    //{
+    //    if (i == 2 || i == 5 || i == 8 || i == 11)
+    //        controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+    //    else
+    //        controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    //}
 
     return ret;
 }
@@ -781,7 +782,7 @@ auto DogBack::executeRT()->int
 
     TCurve s1(1, 6);
     s1.getCurveParam();
-    EllipseTrajectory e1(-150, 80, 0, s1);
+    EllipseTrajectory e1(-0.150, 0.080, 0, s1);
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
     {
@@ -865,7 +866,7 @@ auto DogLeft::executeRT()->int
     //轨迹规划
     TCurve s1(1, 6);
     s1.getCurveParam();
-    EllipseTrajectory e1(0, 80, -100, s1);
+    EllipseTrajectory e1(0, 0.080, -0.100, s1);
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
     {
@@ -949,7 +950,7 @@ auto DogRight::executeRT()->int
     TCurve s1(1, 6);
     s1.getCurveParam();
 
-    EllipseTrajectory e1(0, 80,100, s1);
+    EllipseTrajectory e1(0, 0.080,0.100, s1);
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
     {
@@ -1226,6 +1227,480 @@ DogYaw::DogYaw(const std::string& name)
 DogYaw::~DogYaw() = default;
 
 
+// cpp和adams测试 //
+auto DogDynamicTest::prepareNrt()->void
+{
+
+}
+auto DogDynamicTest::executeRT()->int
+{
+    int ret = 0,a= 1000;
+    static double ee0[28];
+    double ee[28];
+
+    // 运动学 //
+    if (count() <= a)
+    {
+        
+        ret = 1;
+
+        //-----------------------规划轨迹-----------------------------// 
+
+        TCurve s1(5, 2);
+        s1.getCurveParam();
+        EllipseTrajectory e1(0.30, 0.150, 0, s1);
+        EllipseTrajectory e2(0, 0, 0, s1);
+        BodyPose body_s(0, 20, 0, s1); 
+
+
+        if (count() == 1) {
+            model()->getOutputPos(ee0);
+            aris::dynamic::s_vc(28, ee0, ee);
+        }
+
+        aris::dynamic::s_vc(28, ee0, ee + 0);
+
+        //aris::dynamic::dsp(4, 4, ee);
+        //aris::dynamic::dsp(4, 3, ee + 16);
+        model()->setOutputPos(ee);
+        if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+
+
+
+        model()->setTime(0.001 * count());
+
+    }
+    else
+    {
+
+
+
+        //-----------------------规划轨迹-----------------------------// 
+       
+        TCurve s1(1, 6);
+        s1.getCurveParam();
+        EllipseTrajectory e1(0.30, 0.150, 0, s1);
+        EllipseTrajectory e2(0, 0, 0, s1);
+        EllipseTrajectory e3(0, 0.150, 0, s1);
+        BodyPose body_s(0, 20, 0, s1);
+        // 前后左右 //
+        //ret = trotPlanSameLeg(5, count() - 1-a, &e1, input_angle);
+        ret = walkPlanSameLeg(5, count() - 1-a, &e1, input_angle);
+        //ret = walkPlanSymmetryLeg(5, count() - 1 - a, &e1, input_angle);
+        //原地旋转 //
+        //ret = turnPlanTrotSameLeg(5, count() - 1- a, &e3, &body_s, input_angle);
+
+
+        // 身子扭动 //
+        //ret = posePlan(count() - 1-a, &e2, &body_s, input_angle);
+
+
+
+
+
+            //// 计算 //
+        //double body_pm[16];
+        //double lf_ee[3];
+
+
+
+        //quad.generalMotionPool()[0].setP(body_pm);
+        //quad.generalMotionPool()[1].setP(lf_ee);
+        //quad.setOutputPos();
+
+
+
+
+        //quad.solverPool()[5].kinPos();
+        //quad.solverPool()[5].kinVel();
+
+
+        //quad.solverPool
+
+        //quad.motionPool()[0].updP();
+
+
+        //if (count() == 1+a) {
+        //    model()->getOutputPos(ee0);
+        //    aris::dynamic::s_vc(28, ee0, ee);
+        //}
+        //aris::dynamic::s_vc(28, ee0, ee + 0);
+        aris::dynamic::s_vc(16, file_current_body + 0, ee + 0);
+        aris::dynamic::s_vc(12, file_current_leg + 0, ee + 16);
+
+        //aris::dynamic::dsp(4, 4, ee);
+        //aris::dynamic::dsp(4, 3, ee + 16);
+        model()->setOutputPos(ee);
+        if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+
+
+
+        model()->setTime(0.001 * count());
+
+        if (ret == 1)
+            std::cout << s1.getTc() * 1000 << std::endl;
+        if (ret == 0) std::cout << count() << std::endl;
+    }
+
+    //// 动力学 //
+    //  //-----------------------规划轨迹-----------------------------// 
+
+    //  TCurve s1(1, 4);
+    //  s1.getCurveParam();
+    //  EllipseTrajectory e1(0.30, 0.150, 0, s1);
+    //  EllipseTrajectory e2(0, 0, 0, s1);
+    //  EllipseTrajectory e3(0, 0.150, 0, s1);
+    //  BodyPose body_s(0, 20, 0, s1);
+    //  // 前后左右 //
+    //  ret = trotPlanSameLeg(5, count() - 1 - a, &e1, input_angle);
+    //  //ret = walkPlanSameLeg(5, count() - 1-a, &e1, input_angle);
+    //  
+    //  //原地旋转 //
+    //  //ret = turnPlanTrotSameLeg(5, count() - 1- a, &e3, &body_s, input_angle);
+
+    //  // 身子扭动 //
+    //  //ret = posePlan(count() - 1-a, &e2, &body_s, input_angle);
+
+
+
+
+
+    //      //// 计算 //
+    //  //double body_pm[16];
+    //  //double lf_ee[3];
+
+
+
+    //  //model()->generalMotionPool()[0].setP(body_pm);
+    //  //model()->generalMotionPool()[1].setP(lf_ee);
+    //  //model()->setOutputPos();
+
+
+
+
+    //  //quad.solverPool()[5].kinPos();
+    //  //quad.solverPool()[5].kinVel();
+
+
+    //  //quad.solverPool
+
+    //  //quad.motionPool()[0].updP();
+
+
+    //  //if (count() == 1+a) {
+    //  //    model()->getOutputPos(ee0);
+    //  //    aris::dynamic::s_vc(28, ee0, ee);
+    //  //}
+
+    //  aris::dynamic::s_vc(16, file_current_body + 0, ee + 0);
+    //  aris::dynamic::s_vc(12, file_current_leg + 0, ee + 16);
+
+    //  //aris::dynamic::dsp(4, 4, ee);
+    //  //aris::dynamic::dsp(4, 3, ee + 16);
+    //  model()->setOutputPos(ee);
+    //  if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+
+
+
+    //  model()->setTime(0.001 * count());
+
+    //  if (ret == 1)
+    //      std::cout << s1.getTc() * 1000 << std::endl;
+      if (ret == 0) std::cout << count() << std::endl;
+        return ret;
+    
+
+}
+DogDynamicTest::~DogDynamicTest() = default;
+
+
+// 单关节正弦往复轨迹 //
+struct MoveJSParam
+{
+    double j1;
+    double time;
+    uint32_t timenum;
+};
+auto MoveJS::prepareNrt()->void
+{
+    MoveJSParam param;
+
+    param.j1 = 0.0;
+    param.time = 0.0;
+    param.timenum = 0;
+
+    for (auto& p : cmdParams())
+    {
+        if (p.first == "j1")
+        {
+            if (p.second == "current_pos")
+            {
+                param.j1 = controller()->motionPool()[0].actualPos();
+            }
+            else
+            {
+                param.j1 = doubleParam(p.first);
+            }
+
+        }
+        else if (p.first == "time")
+        {
+            param.time = doubleParam(p.first);
+        }
+        else if (p.first == "timenum")
+        {
+            param.timenum = int32Param(p.first);
+        }
+    }
+    this->param() = param;
+    std::vector<std::pair<std::string, std::any>> ret_value;
+    for (auto& option : motorOptions())	option |= NOT_CHECK_POS_CONTINUOUS_SECOND_ORDER | NOT_CHECK_POS_CONTINUOUS;
+    ret() = ret_value;
+}
+auto MoveJS::executeRT()->int
+{
+    auto& param = std::any_cast<MoveJSParam&>(this->param());
+    auto time = static_cast<int32_t>(param.time * 1000);
+    auto totaltime = static_cast<int32_t>(param.timenum * time);
+    static double begin_pjs;
+    static double step_pjs;
+    // 访问主站 //
+    auto& cout = controller()->mout();
+
+    if ((1 <= count()) && (count() <= time / 2))
+    {
+        // 获取当前起始点位置 //
+        if (count() == 1)
+        {
+            begin_pjs = controller()->motionPool()[0].actualPos();
+            step_pjs = controller()->motionPool()[0].actualPos();
+        }
+        step_pjs = begin_pjs + param.j1 * (1 - std::cos(2 * PI * count() / time)) / 2;
+        controller()->motionPool().at(0).setTargetPos(step_pjs);
+    }
+    else if ((time / 2 < count()) && (count() <= totaltime - time / 2))
+    {
+        // 获取当前起始点位置 //
+        if (count() == time / 2 + 1)
+        {
+            begin_pjs = controller()->motionPool()[0].actualPos();
+            step_pjs = controller()->motionPool()[0].actualPos();
+        }
+
+        step_pjs = begin_pjs - 2 * param.j1 * (1 - std::cos(2 * PI * (count() - time / 2) / time)) / 2;
+        controller()->motionPool().at(0).setTargetPos(step_pjs);
+    }
+    else if ((totaltime - time / 2 < count()) && (count() <= totaltime))
+    {
+        // 获取当前起始点位置 //
+        if (count() == totaltime - time / 2 + 1)
+        {
+            begin_pjs = controller()->motionPool()[0].actualPos();
+            step_pjs = controller()->motionPool()[0].actualPos();
+        }
+        step_pjs = begin_pjs - param.j1 * (1 - std::cos(2 * PI * (count() - totaltime + time / 2) / time)) / 2;
+        controller()->motionPool().at(0).setTargetPos(step_pjs);
+    }
+
+    // 打印 //
+    if (count() % 100 == 0)
+    {
+        cout << "pos" << ":" << controller()->motionAtAbs(0).actualPos() << "  ";
+        cout << std::endl;
+    }
+
+    // log //
+    auto& lout = controller()->lout();
+    lout << controller()->motionAtAbs(0).targetPos() << ",";
+    lout << std::endl;
+
+    return totaltime - count();
+}
+auto MoveJS::collectNrt()->void {}
+MoveJS::MoveJS(const std::string& name)
+{
+    aris::core::fromXmlString(command(),
+        "<Command name=\"moveJS\">"
+        "	<GroupParam>"
+        "		<Param name=\"j1\" default=\"current_pos\"/>"
+        "		<Param name=\"time\" default=\"1.0\" abbreviation=\"t\"/>"
+        "		<Param name=\"timenum\" default=\"2\" abbreviation=\"n\"/>"
+        "	</GroupParam>"
+        "</Command>");
+}
+
+
+
+auto createModelQuadruped()->std::unique_ptr<aris::dynamic::Model>
+{
+    std::unique_ptr<aris::dynamic::Model> quad = std::make_unique<aris::dynamic::Model>();
+
+
+    // set gravity //
+    const double gravity[6]{ 0.0,-9.8,0.0,0.0,0.0,0.0 };
+
+    quad->environment().setGravity(gravity);
+
+    //define joint pos //
+    const double leg_pe[12][3]{
+        {  kBodyLong / 2,   0, -kBodyWidth / 2      },
+        {  kBodyLong / 2,   0, -kBodyWidth / 2 - L1 },
+        {  kBodyLong / 2, -L2, -kBodyWidth / 2 - L1 },
+        { -kBodyLong / 2,   0, -kBodyWidth / 2      },
+        { -kBodyLong / 2,   0, -kBodyWidth / 2 - L1 },
+        { -kBodyLong / 2, -L2, -kBodyWidth / 2 - L1 },
+        { -kBodyLong / 2,   0,  kBodyWidth / 2      },
+        { -kBodyLong / 2,   0,  kBodyWidth / 2 + L1 },
+        { -kBodyLong / 2, -L2,  kBodyWidth / 2 + L1 },
+        {  kBodyLong / 2,   0,  kBodyWidth / 2      },
+        {  kBodyLong / 2,   0,  kBodyWidth / 2 + L1 },
+        {  kBodyLong / 2, -L2,  kBodyWidth / 2 + L1 },
+    };
+    //define ee pos //
+    const double ee_pos[4][6]{
+    { kBodyLong / 2, -L3 - L2, -(kBodyWidth / 2) - L1,0.0, 0.0, 0.0},   //leg1 ->012
+    {-kBodyLong / 2, -L3 - L2, -(kBodyWidth / 2) - L1,0.0, 0.0, 0.0},   //leg2 ->345
+    {-kBodyLong / 2, -L3 - L2,  (kBodyWidth / 2) + L1,0.0, 0.0, 0.0},   //leg3 ->678
+    { kBodyLong / 2, -L3 - L2,  (kBodyWidth / 2) + L1,0.0, 0.0, 0.0},   //leg4 ->91011
+    };
+    
+    //iv:  10x1 惯量矩阵向量[m, cx, cy, cz, Ixx, Iyy, Izz, Ixy, Ixz, Iyz]
+    // define iv param //  材料都为铝 总重25.037kg
+    const double body_iv[10]{ 11.244602964,0,0,0,0.6510608871,0.5989223304,7.9786361064E-02,0,0,0 };
+    //leg1
+    const double lf_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
+    const double lf_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
+    const double lf_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+    //leg2
+    const double lr_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
+    const double lr_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
+    const double lr_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+    //leg3
+    const double rr_p1_iv[10]{ 2.1374710037,0,0,0,5.5931718868E-03,5.4726110785E-03,2.6340502654E-03,0,0,0 };
+    const double rr_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561728E-03,4.2706985298E-03,2.3175167966E-04,0,0,0 };
+    const double rr_p3_iv[10]{ 0.814523742,0,0,0,1.0780253649E-02,1.0768928365E-02,3.6953418362E-04,0,0,0 };
+    //leg4
+    const double rf_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
+    const double rf_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
+    const double rf_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+
+    // add part //
+    auto& body = quad->partPool().add<aris::dynamic::Part>("BODY", body_iv);
+    //leg1
+    auto& lf_p1 = quad->partPool().add<aris::dynamic::Part>("LF_P1", lf_p1_iv);
+    auto& lf_p2 = quad->partPool().add<aris::dynamic::Part>("LF_P2", lf_p2_iv);
+    auto& lf_p3 = quad->partPool().add<aris::dynamic::Part>("LF_P3", lf_p3_iv);
+    //leg2
+    auto& lr_p1 = quad->partPool().add<aris::dynamic::Part>("LR_P1", lr_p1_iv);
+    auto& lr_p2 = quad->partPool().add<aris::dynamic::Part>("LR_P2", lr_p2_iv);
+    auto& lr_p3 = quad->partPool().add<aris::dynamic::Part>("LR_P3", lr_p3_iv);
+    //leg3
+    auto& rr_p1 = quad->partPool().add<aris::dynamic::Part>("RR_P1", rr_p1_iv);
+    auto& rr_p2 = quad->partPool().add<aris::dynamic::Part>("RR_P2", rr_p2_iv);
+    auto& rr_p3 = quad->partPool().add<aris::dynamic::Part>("RR_P3", rr_p3_iv);
+    //leg4
+    auto& rf_p1 = quad->partPool().add<aris::dynamic::Part>("RF_P1", rf_p1_iv);
+    auto& rf_p2 = quad->partPool().add<aris::dynamic::Part>("RF_P2", rf_p2_iv);
+    auto& rf_p3 = quad->partPool().add<aris::dynamic::Part>("RF_P3", rf_p3_iv);
+
+    // add geometry //
+    quad->ground().geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\ground.x_t");
+    body.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\body.x_t");
+    //leg1
+    lf_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l11.x_t");
+    lf_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l12.x_t");
+    lf_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l13.x_t");
+    //leg2
+    lr_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l21.x_t");
+    lr_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l22.x_t");
+    lr_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l23.x_t");
+    //leg3
+    rr_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l31.x_t");
+    rr_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l32.x_t");
+    rr_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l33.x_t");
+    //leg4
+    rf_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l41.x_t");
+    rf_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l42.x_t");
+    rf_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l43.x_t");
+
+
+
+    // add joints //
+    //leg1
+    auto& lf_r1 = quad->addRevoluteJoint(lf_p1, body, leg_pe[0], std::array<double, 3>{-1, 0, 0}.data());
+    auto& lf_r2 = quad->addRevoluteJoint(lf_p2, lf_p1, leg_pe[1], std::array<double, 3>{0, 0, -1}.data());
+    auto& lf_r3 = quad->addRevoluteJoint(lf_p3, lf_p2, leg_pe[2], std::array<double, 3>{0, 0, -1}.data());
+    //leg2
+    auto& lr_r1 = quad->addRevoluteJoint(lr_p1, body, leg_pe[3], std::array<double, 3>{-1, 0, 0}.data());
+    auto& lr_r2 = quad->addRevoluteJoint(lr_p2, lr_p1, leg_pe[4], std::array<double, 3>{0, 0, -1}.data());
+    auto& lr_r3 = quad->addRevoluteJoint(lr_p3, lr_p2, leg_pe[5], std::array<double, 3>{0, 0, -1}.data());
+    //leg3
+    auto& rr_r1 = quad->addRevoluteJoint(rr_p1, body, leg_pe[6], std::array<double, 3>{1, 0, 0}.data());
+    auto& rr_r2 = quad->addRevoluteJoint(rr_p2, rr_p1, leg_pe[7], std::array<double, 3>{0, 0, 1}.data());
+    auto& rr_r3 = quad->addRevoluteJoint(rr_p3, rr_p2, leg_pe[8], std::array<double, 3>{0, 0, 1}.data());
+    //leg4
+    auto& rf_r1 = quad->addRevoluteJoint(rf_p1, body, leg_pe[9], std::array<double, 3>{1, 0, 0}.data());
+    auto& rf_r2 = quad->addRevoluteJoint(rf_p2, rf_p1, leg_pe[10], std::array<double, 3>{0, 0, 1}.data());
+    auto& rf_r3 = quad->addRevoluteJoint(rf_p3, rf_p2, leg_pe[11], std::array<double, 3>{0, 0, 1}.data());
+
+    // add motion //
+    //leg1
+    auto& lf_m1 = quad->addMotion(lf_r1);
+    auto& lf_m2 = quad->addMotion(lf_r2);
+    auto& lf_m3 = quad->addMotion(lf_r3);
+    //leg2
+    auto& lr_m1 = quad->addMotion(lr_r1);
+    auto& lr_m2 = quad->addMotion(lr_r2);
+    auto& lr_m3 = quad->addMotion(lr_r3);
+    //leg3
+    auto& rr_m1 = quad->addMotion(rr_r1);
+    auto& rr_m2 = quad->addMotion(rr_r2);
+    auto& rr_m3 = quad->addMotion(rr_r3);
+    //leg4
+    auto& rf_m1 = quad->addMotion(rf_r1);
+    auto& rf_m2 = quad->addMotion(rf_r2);
+    auto& rf_m3 = quad->addMotion(rf_r3);
+
+
+    // add end-effector //
+    auto body_ee_maki = body.addMarker("body_ee_mak_i");
+    auto body_ee_makj = quad->ground().addMarker("body_ee_mak_j");
+
+    auto& body_ee = quad->generalMotionPool().add<aris::dynamic::GeneralMotion>("body_ee", &body_ee_maki, &body_ee_makj);
+    auto& lf_ee = quad->addPointMotion(lf_p3, quad->ground(), ee_pos[0]);
+    quad->ground().markerPool().back().setPrtPe(std::array<double, 6>{0, 0, 0, 0, 0, 0}.data());
+    auto& lr_ee = quad->addPointMotion(lr_p3, quad->ground(), ee_pos[1]);
+    quad->ground().markerPool().back().setPrtPe(std::array<double, 6>{0, 0, 0, 0, 0, 0}.data());
+    auto& rr_ee = quad->addPointMotion(rr_p3, quad->ground(), ee_pos[2]);
+    quad->ground().markerPool().back().setPrtPe(std::array<double, 6>{0, 0, 0, 0, 0, 0}.data());
+    auto& rf_ee = quad->addPointMotion(rf_p3, quad->ground(), ee_pos[3]);
+    quad->ground().markerPool().back().setPrtPe(std::array<double, 6>{0, 0, 0, 0, 0, 0}.data());
+
+
+    auto& inverse_kinematic_solver = quad->solverPool().add<aris::dynamic::InverseKinematicSolver>();
+    auto& forward_kinematic_solver = quad->solverPool().add<aris::dynamic::ForwardKinematicSolver>();
+    auto& inverse_dynamic_solver = quad->solverPool().add<aris::dynamic::InverseDynamicSolver>();
+    auto& forward_dynamic_solver = quad->solverPool().add<aris::dynamic::ForwardDynamicSolver>();
+
+    auto& stand_universal = quad->solverPool().add<aris::dynamic::UniversalSolver>();
+
+    //this->solverPool().add<aris::dynamic::UniversalSolver>();
+
+    //this->solverPool().add<aris::dynamic::UniversalSolver>();
+
+
+    // 添加仿真器和仿真结果 //
+    auto& adams = quad->simulatorPool().add<aris::dynamic::AdamsSimulator>();
+    auto& result = quad->simResultPool().add<aris::dynamic::SimResult>();
+
+    quad->init();
+
+    // 设置默认拓扑结构 //
+    for (auto& m : quad->motionPool())m.activate(true);
+    for (auto& gm : quad->generalMotionPool())gm.activate(false);
+
+    return quad;
+}
 auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
 {
     std::unique_ptr<aris::control::Controller> controller(new aris::control::EthercatController);
@@ -1339,6 +1814,8 @@ auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
         auto& s = controller->slavePool().add<aris::control::EthercatMotor>();
         aris::core::fromXmlString(s, xml_str);
 
+
+
 #ifdef WIN32
         dynamic_cast<aris::control::EthercatMotor&>(controller->slavePool().back()).setVirtual(true);
 #endif
@@ -1376,11 +1853,10 @@ auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>
     plan_root->planPool().add<aris::plan::Start>();
     plan_root->planPool().add<aris::plan::Stop>();
 
-    //自己写的命令
+    //--------------自己写的命令-------------------//
     plan_root->planPool().add<SetMaxToq>();
     plan_root->planPool().add<DogReadJoint>();
     plan_root->planPool().add<DogInitPos>();
- 
     plan_root->planPool().add<DogSetWalkMode>();
     plan_root->planPool().add<DogMoveJoint>();
     plan_root->planPool().add<DogHome>();
@@ -1395,7 +1871,59 @@ auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>
     plan_root->planPool().add<DogPitch>();
     plan_root->planPool().add<DogRoll>();
     plan_root->planPool().add<DogYaw>();
+    // cpp and adams test //
+    plan_root->planPool().add<DogDynamicTest>();
+
+    // 正玄曲线 //
+    plan_root->planPool().add<MoveJS>();
     return plan_root;
 }
+
+auto setStandTopologyIK(aris::server::ControlServer &cs)->void
+{
+
+    // 站立拓扑结构下，分配求解器内存 //
+    // 失效就是不可规划，有效可以规划
+    cs.model().generalMotionPool()[0].activate(false);//body
+    cs.model().generalMotionPool()[1].activate(false);//leg1
+    cs.model().generalMotionPool()[2].activate(false);//leg2
+    cs.model().generalMotionPool()[3].activate(false);//leg3
+    cs.model().generalMotionPool()[4].activate(false);//leg4
+
+    for(int i=0;i<12;++i)
+        cs.model().motionPool()[0].activate(true);
+    cs.model().solverPool()[0].allocateMemory();
+}
+auto setTrotTopologyIK(aris::server::ControlServer& cs)->void
+{
+
+    // bound拓扑结构下，分配求解器内存 //
+    cs.model().generalMotionPool()[0].activate(false);//body
+    cs.model().generalMotionPool()[1].activate(false);//leg1
+    cs.model().generalMotionPool()[2].activate(false);//leg2
+    cs.model().generalMotionPool()[3].activate(false);//leg3
+    cs.model().generalMotionPool()[4].activate(false);//leg4
+
+    for (int i = 0; i < 12; ++i)
+        cs.model().motionPool()[0].activate(true);
+    cs.model().solverPool()[4].allocateMemory();
+
+}
+auto setBoundTopologyIK(aris::server::ControlServer& cs)->void
+{
+
+    // bound拓扑结构下，分配求解器内存 //
+    cs.model().generalMotionPool()[0].activate(false);//body
+    cs.model().generalMotionPool()[1].activate(false);//leg1
+    cs.model().generalMotionPool()[2].activate(false);//leg2
+    cs.model().generalMotionPool()[3].activate(false);//leg3
+    cs.model().generalMotionPool()[4].activate(false);//leg4
+
+    for (int i = 0; i < 12; ++i)
+        cs.model().motionPool()[0].activate(true);
+    cs.model().solverPool()[4].allocateMemory();
+
+}
+
 
 }
