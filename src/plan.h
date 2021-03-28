@@ -58,7 +58,7 @@ public:
 	auto get_a()->double { return a_; };
 	auto get_b()->double { return b_; };
 	auto get_c()->double { return c_; };
-	auto getTcurve()->TCurve { return s_; };
+	auto get_s()->TCurve { return s_; };
 	EllipseTrajectory(double a, double b, double c, TCurve& s) :a_(a), b_(b), c_(c), s_(s), x_(0), y_(0), z_(0) {}
 	~EllipseTrajectory() {}
 };
@@ -122,8 +122,9 @@ auto walkPlanSameLeg(int n, int count, EllipseTrajectory* param, double* input)-
 auto walkPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* input)->int;
 auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose, double* input)->int;
 auto upPlan(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int;
-auto updownPlanSame(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int;
+auto updownPlanSameLeg(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int;
 auto updownPlanSymmetry(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int;
+auto turnPlanTrotSameLeg(int n, int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, double* input)->int;
 #endif
 
 
