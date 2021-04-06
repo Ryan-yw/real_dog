@@ -10,7 +10,7 @@ const double PI = 3.14159265358979323846;
 //身体长宽高设置
 const double kBodyLong = 0.652; //m  x方向
 const double kBodyWidth = 0.1250;   //m  z方向
-const double kBodyHigh = 0.500;    //m y方向
+const double kBodyHigh = 0.550;    //m y方向
 
 //初始时身体和脚在地面坐标系下的位置
 static double foot_position_start_point[12] = {

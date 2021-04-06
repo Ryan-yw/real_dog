@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
     cs.resetController(robot::createControllerQuadruped().release());
     cs.resetPlanRoot(robot::createPlanQuadruped().release());
-	cs.resetModel(robot::createModelQuadruped().release());
+//	cs.resetModel(robot::createModelQuadruped().release());
 
 
 	//网页控制代码

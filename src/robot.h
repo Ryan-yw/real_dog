@@ -154,6 +154,7 @@ namespace robot
         explicit DogForward(const std::string &name = "dog_forward");
     private:
         double step_;
+        double z_;
     };
 
     class DogBack :public aris::core::CloneObject<DogBack, aris::plan::Plan>
@@ -230,17 +231,6 @@ namespace robot
         double turn_angle_;
     };
 
-
-    // cpp和adams测试 //
-    class DogDynamicTest :public aris::core::CloneObject<DogDynamicTest, aris::plan::Plan> {
-    public:
-        auto virtual prepareNrt()->void;
-        auto virtual executeRT()->int override;
-  
-        virtual ~DogDynamicTest();
-        explicit DogDynamicTest() {}
-
-    };
 
 
     // 正弦曲线 //
