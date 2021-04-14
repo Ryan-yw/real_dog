@@ -102,7 +102,7 @@ auto DogInitPos::executeRT()->int
 
     TCurve s1(1, 4);
     s1.getCurveParam();
-    EllipseTrajectory e1(400, 100, 0, s1);
+    EllipseTrajectory e1(0.20, 0.080, 0, s1);
 
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
@@ -693,9 +693,9 @@ auto DogForward::executeRT()->int
         input_angle[11] = controller()->motionPool()[11].actualPos();
     }
 
-    TCurve s1(1, 6);
+    TCurve s1(1, 3);
     s1.getCurveParam();
-    EllipseTrajectory e1(0.150,0.080, 0, s1);
+    EllipseTrajectory e1(0.2,0.080, 0, s1);
 
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
@@ -1238,20 +1238,92 @@ auto DogDynamicTest::executeRT()->int
     static double ee0[28];
     double ee[28];
 
-    // 运动学 //
+    //// 运动学 //
+    //if (count() <= a)
+    //{
+    //    ret = 1;
+    //    //-----------------------规划轨迹-----------------------------// 
+
+    //    TCurve s1(5, 2);
+    //    s1.getCurveParam();
+    //    EllipseTrajectory e1(0.30, 0.150, 0, s1);
+    //    EllipseTrajectory e2(0, 0, 0, s1);
+    //    BodyPose body_s(0, 20, 0, s1);
+
+    //    if (count() == 1) {
+    //        model()->getOutputPos(ee0);
+    //        aris::dynamic::s_vc(28, ee0, ee);
+    //    }
+
+    //    aris::dynamic::s_vc(28, ee0, ee + 0);
+    //    
+    //    //aris::dynamic::dsp(4, 4, ee);
+    //    //aris::dynamic::dsp(4, 3, ee + 16);
+
+    //    model()->setOutputPos(ee);
+    //    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+
+    //    model()->setTime(0.001 * count());
+
+
+    //}
+    //else
+    //{
+    //    ret =  0;
+    //    //-----------------------规划轨迹-----------------------------// 
+    //   
+    //    TCurve s1(5,2 );
+    //    s1.getCurveParam();
+    //    EllipseTrajectory e1(0.20, 0.080, 0, s1);
+    //    EllipseTrajectory e2(0, 0, 0, s1);
+    //    EllipseTrajectory e3(0, 0.150, 0, s1);
+    //    BodyPose body_s(0, 15, 0, s1);
+    //    // 前后左右 //
+    //    //ret = trotPlanSameLeg(10, count() - 1-a, &e1, input_angle);
+    //    //ret = walkPlanSameLeg(10, count() - 1-a, &e1, input_angle);
+    //    //ret = walkPlanSymmetryLeg(5, count() - 1 - a, &e1, input_angle);
+    //    // 原地旋转 //
+    //    //ret = turnPlanTrotSameLeg(5, count() - 1- a, &e3, &body_s, input_angle);
+    //    // 身子扭动 //
+    //    ret = posePlan(count() - 1-a, &e2, &body_s, input_angle);
+
+    //    //quad.solverPool
+
+    //    //quad.motionPool()[0].updP();
+
+
+    //    //if (count() == 1+a) {
+    //    //    model()->getOutputPos(ee0);
+    //    //    aris::dynamic::s_vc(28, ee0, ee);
+    //    //}
+    //    //aris::dynamic::s_vc(28, ee0, ee + 0);
+    //    aris::dynamic::s_vc(16, file_current_body + 0, ee + 0);
+    //    aris::dynamic::s_vc(12, file_current_leg + 0, ee + 16);
+
+    //    //aris::dynamic::dsp(4, 4, ee);
+    //    //aris::dynamic::dsp(4, 3, ee + 16);
+    //    model()->setOutputPos(ee);
+    //    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    //    model()->setTime(0.001 * count());
+
+    //    if (ret == 1)
+    //        std::cout << s1.getTc() * 1000 << std::endl;
+    //    if (ret == 0) std::cout << count() << std::endl;
+    //}
+
+    // 动力学 //
+
+      //-----------------------规划轨迹-----------------------------// 
     if (count() <= a)
     {
-        
         ret = 1;
-
         //-----------------------规划轨迹-----------------------------// 
 
         TCurve s1(5, 2);
         s1.getCurveParam();
         EllipseTrajectory e1(0.30, 0.150, 0, s1);
         EllipseTrajectory e2(0, 0, 0, s1);
-        BodyPose body_s(0, 20, 0, s1); 
-
+        BodyPose body_s(0, 20, 0, s1);
 
         if (count() == 1) {
             model()->getOutputPos(ee0);
@@ -1262,151 +1334,70 @@ auto DogDynamicTest::executeRT()->int
 
         //aris::dynamic::dsp(4, 4, ee);
         //aris::dynamic::dsp(4, 3, ee + 16);
+
         model()->setOutputPos(ee);
         if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
-
-
 
         model()->setTime(0.001 * count());
 
     }
     else
     {
-
-
-
         //-----------------------规划轨迹-----------------------------// 
-       
+
         TCurve s1(1, 6);
         s1.getCurveParam();
-        EllipseTrajectory e1(0.30, 0.150, 0, s1);
+        EllipseTrajectory e1(0.20, 0.080, 0, s1);
         EllipseTrajectory e2(0, 0, 0, s1);
         EllipseTrajectory e3(0, 0.150, 0, s1);
         BodyPose body_s(0, 20, 0, s1);
         // 前后左右 //
-        //ret = trotPlanSameLeg(5, count() - 1-a, &e1, input_angle);
-        ret = walkPlanSameLeg(5, count() - 1-a, &e1, input_angle);
+        ret = trotPlanSameLeg(10, count() - 1 - a, &e1, input_angle);
+        //ret = walkPlanSameLeg(10, count() - 1-a, &e1, input_angle);
         //ret = walkPlanSymmetryLeg(5, count() - 1 - a, &e1, input_angle);
-        //原地旋转 //
+        // 原地旋转 //
         //ret = turnPlanTrotSameLeg(5, count() - 1- a, &e3, &body_s, input_angle);
-
-
         // 身子扭动 //
         //ret = posePlan(count() - 1-a, &e2, &body_s, input_angle);
 
+        aris::dynamic::s_vc(16, file_current_body + 0, ee + 0);
+        aris::dynamic::s_vc(12, file_current_leg + 0, ee + 16);
+
+        model()->setOutputPos(ee);
+
+        if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
 
 
 
+        for (auto& m : model()->motionPool())
+        {
+            m.updP(); m.updV();
+        }
 
-            //// 计算 //
-        //double body_pm[16];
-        //double lf_ee[3];
 
-
-
-        //quad.generalMotionPool()[0].setP(body_pm);
-        //quad.generalMotionPool()[1].setP(lf_ee);
-        //quad.setOutputPos();
+        model()->setTime(0.001 * count());
 
 
 
+        
+        
 
         //quad.solverPool()[5].kinPos();
         //quad.solverPool()[5].kinVel();
 
 
-        //quad.solverPool
+
+
 
         //quad.motionPool()[0].updP();
 
 
-        //if (count() == 1+a) {
-        //    model()->getOutputPos(ee0);
-        //    aris::dynamic::s_vc(28, ee0, ee);
-        //}
-        //aris::dynamic::s_vc(28, ee0, ee + 0);
-        aris::dynamic::s_vc(16, file_current_body + 0, ee + 0);
-        aris::dynamic::s_vc(12, file_current_leg + 0, ee + 16);
-
-        //aris::dynamic::dsp(4, 4, ee);
-        //aris::dynamic::dsp(4, 3, ee + 16);
-        model()->setOutputPos(ee);
-        if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
-
-
-
-        model()->setTime(0.001 * count());
 
         if (ret == 1)
             std::cout << s1.getTc() * 1000 << std::endl;
         if (ret == 0) std::cout << count() << std::endl;
     }
 
-    //// 动力学 //
-    //  //-----------------------规划轨迹-----------------------------// 
-
-    //  TCurve s1(1, 4);
-    //  s1.getCurveParam();
-    //  EllipseTrajectory e1(0.30, 0.150, 0, s1);
-    //  EllipseTrajectory e2(0, 0, 0, s1);
-    //  EllipseTrajectory e3(0, 0.150, 0, s1);
-    //  BodyPose body_s(0, 20, 0, s1);
-    //  // 前后左右 //
-    //  ret = trotPlanSameLeg(5, count() - 1 - a, &e1, input_angle);
-    //  //ret = walkPlanSameLeg(5, count() - 1-a, &e1, input_angle);
-    //  
-    //  //原地旋转 //
-    //  //ret = turnPlanTrotSameLeg(5, count() - 1- a, &e3, &body_s, input_angle);
-
-    //  // 身子扭动 //
-    //  //ret = posePlan(count() - 1-a, &e2, &body_s, input_angle);
-
-
-
-
-
-    //      //// 计算 //
-    //  //double body_pm[16];
-    //  //double lf_ee[3];
-
-
-
-    //  //model()->generalMotionPool()[0].setP(body_pm);
-    //  //model()->generalMotionPool()[1].setP(lf_ee);
-    //  //model()->setOutputPos();
-
-
-
-
-    //  //quad.solverPool()[5].kinPos();
-    //  //quad.solverPool()[5].kinVel();
-
-
-    //  //quad.solverPool
-
-    //  //quad.motionPool()[0].updP();
-
-
-    //  //if (count() == 1+a) {
-    //  //    model()->getOutputPos(ee0);
-    //  //    aris::dynamic::s_vc(28, ee0, ee);
-    //  //}
-
-    //  aris::dynamic::s_vc(16, file_current_body + 0, ee + 0);
-    //  aris::dynamic::s_vc(12, file_current_leg + 0, ee + 16);
-
-    //  //aris::dynamic::dsp(4, 4, ee);
-    //  //aris::dynamic::dsp(4, 3, ee + 16);
-    //  model()->setOutputPos(ee);
-    //  if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
-
-
-
-    //  model()->setTime(0.001 * count());
-
-    //  if (ret == 1)
-    //      std::cout << s1.getTc() * 1000 << std::endl;
-      if (ret == 0) std::cout << count() << std::endl;
         return ret;
     
 
@@ -1530,6 +1521,213 @@ MoveJS::MoveJS(const std::string& name)
 }
 
 
+class Quad :public aris::dynamic::Model {
+
+    auto virtual init()->void {
+    
+    
+    
+    }
+
+
+
+    Quad() 
+    {
+        // set gravity //
+        const double gravity[6]{ 0.0,-9.8,0.0,0.0,0.0,0.0 };
+
+        this->environment().setGravity(gravity);
+
+        //define joint pos //
+        const double leg_pe[12][3]{
+            {  kBodyLong / 2,   0, -kBodyWidth / 2      },
+            {  kBodyLong / 2,   0, -kBodyWidth / 2 - L1 },
+            {  kBodyLong / 2, -L2, -kBodyWidth / 2 - L1 },
+            { -kBodyLong / 2,   0, -kBodyWidth / 2      },
+            { -kBodyLong / 2,   0, -kBodyWidth / 2 - L1 },
+            { -kBodyLong / 2, -L2, -kBodyWidth / 2 - L1 },
+            { -kBodyLong / 2,   0,  kBodyWidth / 2      },
+            { -kBodyLong / 2,   0,  kBodyWidth / 2 + L1 },
+            { -kBodyLong / 2, -L2,  kBodyWidth / 2 + L1 },
+            {  kBodyLong / 2,   0,  kBodyWidth / 2      },
+            {  kBodyLong / 2,   0,  kBodyWidth / 2 + L1 },
+            {  kBodyLong / 2, -L2,  kBodyWidth / 2 + L1 },
+        };
+        //define ee pos //
+        const double ee_pos[4][6]{
+        { kBodyLong / 2, -L3 - L2, -(kBodyWidth / 2) - L1,0.0, 0.0, 0.0},   //leg1 ->012
+        {-kBodyLong / 2, -L3 - L2, -(kBodyWidth / 2) - L1,0.0, 0.0, 0.0},   //leg2 ->345
+        {-kBodyLong / 2, -L3 - L2,  (kBodyWidth / 2) + L1,0.0, 0.0, 0.0},   //leg3 ->678
+        { kBodyLong / 2, -L3 - L2,  (kBodyWidth / 2) + L1,0.0, 0.0, 0.0},   //leg4 ->91011
+        };
+
+        ////iv:  10x1 惯量矩阵向量[m, cx, cy, cz, Ixx, Iyy, Izz, Ixy, Ixz, Iyz]
+        //// define iv param //  材料都为铝 总重25.037kg  第二代
+        //const double body_iv[10]{ 11.244602964,0,0,0,0.6510608871,0.5989223304,7.9786361064E-02,0,0,0 };
+        ////leg1
+        //const double lf_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
+        //const double lf_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
+        //const double lf_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+        ////leg2
+        //const double lr_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
+        //const double lr_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
+        //const double lr_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+        ////leg3
+        //const double rr_p1_iv[10]{ 2.1374710037,0,0,0,5.5931718868E-03,5.4726110785E-03,2.6340502654E-03,0,0,0 };
+        //const double rr_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561728E-03,4.2706985298E-03,2.3175167966E-04,0,0,0 };
+        //const double rr_p3_iv[10]{ 0.814523742,0,0,0,1.0780253649E-02,1.0768928365E-02,3.6953418362E-04,0,0,0 };
+        ////leg4
+        //const double rf_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
+        //const double rf_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
+        //const double rf_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+
+
+        //iv:  10x1 惯量矩阵向量[m, cx, cy, cz, Ixx, Iyy, Izz, Ixy, Ixz, Iyz]
+        // define iv param //  材料都为铝 总重30.86kg  第2.5代
+        const double body_iv[10]{ 15.1007177439,0,0,0,0.68976308,0.612989762,0.1389151407,0,0,0 };
+        //leg1
+        const double lf_p1_iv[10]{ 2.3523814491,0,0,0,1.0480809884E-02,8.8825903772E-03,4.266754639E-03,0,0,0 };
+        const double lf_p2_iv[10]{ 0.5868045476,0,0,0,6.9738871315E-03,6.8932585512E-03,5.6065308443E-04,0,0,0 };
+        const double lf_p3_iv[10]{ 1.0111367876,0,0,0,1.1955933401E-02,1.1656650714E-02,5.8819775854E-04,0,0,0 };
+        //leg2
+        const double lr_p1_iv[10]{ 2.3523814491,0,0,0,1.0480809884E-02,8.8825903772E-03,4.266754639E-03,0,0,0 };
+        const double lr_p2_iv[10]{ 0.5868045476,0,0,0,6.9738871315E-03,6.8932585512E-03,5.6065308443E-04,0,0,0 };
+        const double lr_p3_iv[10]{ 1.0111367876,0,0,0,1.1955933401E-02,1.1656650714E-02,5.8819775854E-04,0,0,0 };
+        //leg3
+        const double rr_p1_iv[10]{ 2.3523814491,0,0,0,1.0480809884E-02,8.8825903772E-03,4.266754639E-03,0,0,0 };
+        const double rr_p2_iv[10]{ 0.5868045476,0,0,0,6.9738871315E-03,6.8932585512E-03,5.6065308443E-04,0,0,0 };
+        const double rr_p3_iv[10]{ 1.0111367876,0,0,0,1.1955933401E-02,1.1656650714E-02,5.8819775854E-04,0,0,0 };
+        //leg4
+        const double rf_p1_iv[10]{ 2.3523814491,0,0,0,1.0480809884E-02,8.8825903772E-03,4.266754639E-03,0,0,0 };
+        const double rf_p2_iv[10]{ 0.5868045476,0,0,0,6.9738871315E-03,6.8932585512E-03,5.6065308443E-04,0,0,0 };
+        const double rf_p3_iv[10]{ 1.0111367876,0,0,0,1.1955933401E-02,1.1656650714E-02,5.8819775854E-04,0,0,0 };
+
+
+
+        // add part //
+        auto& body = this->partPool().add<aris::dynamic::Part>("BODY", body_iv);
+        //leg1
+        auto& lf_p1 = this->partPool().add<aris::dynamic::Part>("LF_P1", lf_p1_iv);
+        auto& lf_p2 = this->partPool().add<aris::dynamic::Part>("LF_P2", lf_p2_iv);
+        auto& lf_p3 = this->partPool().add<aris::dynamic::Part>("LF_P3", lf_p3_iv);
+        //leg2
+        auto& lr_p1 = this->partPool().add<aris::dynamic::Part>("LR_P1", lr_p1_iv);
+        auto& lr_p2 = this->partPool().add<aris::dynamic::Part>("LR_P2", lr_p2_iv);
+        auto& lr_p3 = this->partPool().add<aris::dynamic::Part>("LR_P3", lr_p3_iv);
+        //leg3
+        auto& rr_p1 = this->partPool().add<aris::dynamic::Part>("RR_P1", rr_p1_iv);
+        auto& rr_p2 = this->partPool().add<aris::dynamic::Part>("RR_P2", rr_p2_iv);
+        auto& rr_p3 = this->partPool().add<aris::dynamic::Part>("RR_P3", rr_p3_iv);
+        //leg4
+        auto& rf_p1 = this->partPool().add<aris::dynamic::Part>("RF_P1", rf_p1_iv);
+        auto& rf_p2 = this->partPool().add<aris::dynamic::Part>("RF_P2", rf_p2_iv);
+        auto& rf_p3 = this->partPool().add<aris::dynamic::Part>("RF_P3", rf_p3_iv);
+
+        // add geometry //
+        this->ground().geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\ground.x_t");
+        body.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\body.x_t");
+        //leg1
+        lf_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l11.x_t");
+        lf_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l12.x_t");
+        lf_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l13.x_t");
+        //leg2
+        lr_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l21.x_t");
+        lr_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l22.x_t");
+        lr_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l23.x_t");
+        //leg3
+        rr_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l31.x_t");
+        rr_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l32.x_t");
+        rr_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l33.x_t");
+        //leg4
+        rf_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l41.x_t");
+        rf_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l42.x_t");
+        rf_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l43.x_t");
+
+
+
+        // add joints //
+        //leg1
+        auto& lf_r1 = this->addRevoluteJoint(lf_p1, body, leg_pe[0], std::array<double, 3>{-1, 0, 0}.data());
+        auto& lf_r2 = this->addRevoluteJoint(lf_p2, lf_p1, leg_pe[1], std::array<double, 3>{0, 0, -1}.data());
+        auto& lf_r3 = this->addRevoluteJoint(lf_p3, lf_p2, leg_pe[2], std::array<double, 3>{0, 0, -1}.data());
+        //leg2
+        auto& lr_r1 = this->addRevoluteJoint(lr_p1, body, leg_pe[3], std::array<double, 3>{-1, 0, 0}.data());
+        auto& lr_r2 = this->addRevoluteJoint(lr_p2, lr_p1, leg_pe[4], std::array<double, 3>{0, 0, -1}.data());
+        auto& lr_r3 = this->addRevoluteJoint(lr_p3, lr_p2, leg_pe[5], std::array<double, 3>{0, 0, -1}.data());
+        //leg3
+        auto& rr_r1 = this->addRevoluteJoint(rr_p1, body, leg_pe[6], std::array<double, 3>{1, 0, 0}.data());
+        auto& rr_r2 = this->addRevoluteJoint(rr_p2, rr_p1, leg_pe[7], std::array<double, 3>{0, 0, 1}.data());
+        auto& rr_r3 = this->addRevoluteJoint(rr_p3, rr_p2, leg_pe[8], std::array<double, 3>{0, 0, 1}.data());
+        //leg4
+        auto& rf_r1 = this->addRevoluteJoint(rf_p1, body, leg_pe[9], std::array<double, 3>{1, 0, 0}.data());
+        auto& rf_r2 = this->addRevoluteJoint(rf_p2, rf_p1, leg_pe[10], std::array<double, 3>{0, 0, 1}.data());
+        auto& rf_r3 = this->addRevoluteJoint(rf_p3, rf_p2, leg_pe[11], std::array<double, 3>{0, 0, 1}.data());
+
+
+        // add motion //
+        //leg1
+        auto& lf_m1 = this->addMotion(lf_r1);
+        auto& lf_m2 = this->addMotion(lf_r2);
+        auto& lf_m3 = this->addMotion(lf_r3);
+        //leg2
+        auto& lr_m1 = this->addMotion(lr_r1);
+        auto& lr_m2 = this->addMotion(lr_r2);
+        auto& lr_m3 = this->addMotion(lr_r3);
+        //leg3
+        auto& rr_m1 = this->addMotion(rr_r1);
+        auto& rr_m2 = this->addMotion(rr_r2);
+        auto& rr_m3 = this->addMotion(rr_r3);
+        //leg4
+        auto& rf_m1 = this->addMotion(rf_r1);
+        auto& rf_m2 = this->addMotion(rf_r2);
+        auto& rf_m3 = this->addMotion(rf_r3);
+
+
+        // add end-effector //
+        auto body_ee_maki = body.addMarker("body_ee_mak_i");
+        auto body_ee_makj = this->ground().addMarker("body_ee_mak_j");
+
+        auto& body_ee = this->generalMotionPool().add<aris::dynamic::GeneralMotion>("body_ee", &body_ee_maki, &body_ee_makj);
+        auto& lf_ee = this->addPointMotion(lf_p3, this->ground(), ee_pos[0]);
+        this->ground().markerPool().back().setPrtPe(std::array<double, 6>{0, 0, 0, 0, 0, 0}.data());
+        auto& lr_ee = this->addPointMotion(lr_p3, this->ground(), ee_pos[1]);
+        this->ground().markerPool().back().setPrtPe(std::array<double, 6>{0, 0, 0, 0, 0, 0}.data());
+        auto& rr_ee = this->addPointMotion(rr_p3, this->ground(), ee_pos[2]);
+        this->ground().markerPool().back().setPrtPe(std::array<double, 6>{0, 0, 0, 0, 0, 0}.data());
+        auto& rf_ee = this->addPointMotion(rf_p3, this->ground(), ee_pos[3]);
+        this->ground().markerPool().back().setPrtPe(std::array<double, 6>{0, 0, 0, 0, 0, 0}.data());
+
+
+        auto& inverse_kinematic_solver = this->solverPool().add<aris::dynamic::InverseKinematicSolver>();
+        auto& forward_kinematic_solver = this->solverPool().add<aris::dynamic::ForwardKinematicSolver>();
+        auto& inverse_dynamic_solver = this->solverPool().add<aris::dynamic::InverseDynamicSolver>();
+        auto& forward_dynamic_solver = this->solverPool().add<aris::dynamic::ForwardDynamicSolver>();
+
+        auto& stand_universal = this->solverPool().add<aris::dynamic::UniversalSolver>();
+
+        //this->solverPool().add<aris::dynamic::UniversalSolver>();
+
+        //this->solverPool().add<aris::dynamic::UniversalSolver>();
+
+
+        // 添加仿真器和仿真结果 //
+        auto& adams = this->simulatorPool().add<aris::dynamic::AdamsSimulator>();
+        auto& result = this->simResultPool().add<aris::dynamic::SimResult>();
+
+        this->init();
+
+        // 设置默认拓扑结构 //
+        for (auto& m : this->motionPool())m.activate(true);
+        for (auto& gm : this->generalMotionPool())gm.activate(false);
+
+    }
+  
+
+
+
+};
+
+
 
 auto createModelQuadruped()->std::unique_ptr<aris::dynamic::Model>
 {
@@ -1564,25 +1762,48 @@ auto createModelQuadruped()->std::unique_ptr<aris::dynamic::Model>
     { kBodyLong / 2, -L3 - L2,  (kBodyWidth / 2) + L1,0.0, 0.0, 0.0},   //leg4 ->91011
     };
     
+    ////iv:  10x1 惯量矩阵向量[m, cx, cy, cz, Ixx, Iyy, Izz, Ixy, Ixz, Iyz]
+    //// define iv param //  材料都为铝 总重25.037kg  第二代
+    //const double body_iv[10]{ 11.244602964,0,0,0,0.6510608871,0.5989223304,7.9786361064E-02,0,0,0 };
+    ////leg1
+    //const double lf_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
+    //const double lf_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
+    //const double lf_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+    ////leg2
+    //const double lr_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
+    //const double lr_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
+    //const double lr_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+    ////leg3
+    //const double rr_p1_iv[10]{ 2.1374710037,0,0,0,5.5931718868E-03,5.4726110785E-03,2.6340502654E-03,0,0,0 };
+    //const double rr_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561728E-03,4.2706985298E-03,2.3175167966E-04,0,0,0 };
+    //const double rr_p3_iv[10]{ 0.814523742,0,0,0,1.0780253649E-02,1.0768928365E-02,3.6953418362E-04,0,0,0 };
+    ////leg4
+    //const double rf_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
+    //const double rf_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
+    //const double rf_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+
+
     //iv:  10x1 惯量矩阵向量[m, cx, cy, cz, Ixx, Iyy, Izz, Ixy, Ixz, Iyz]
-    // define iv param //  材料都为铝 总重25.037kg
-    const double body_iv[10]{ 11.244602964,0,0,0,0.6510608871,0.5989223304,7.9786361064E-02,0,0,0 };
+    // define iv param //  材料都为铝 总重30.86kg  第2.5代
+    const double body_iv[10]{ 15.1007177439,0,0,0,0.68976308,0.612989762,0.1389151407,0,0,0 };
     //leg1
-    const double lf_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
-    const double lf_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
-    const double lf_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+    const double lf_p1_iv[10]{ 2.3523814491,0,0,0,1.0480809884E-02,8.8825903772E-03,4.266754639E-03,0,0,0 };
+    const double lf_p2_iv[10]{ 0.5868045476,0,0,0,6.9738871315E-03,6.8932585512E-03,5.6065308443E-04,0,0,0 };
+    const double lf_p3_iv[10]{ 1.0111367876,0,0,0,1.1955933401E-02,1.1656650714E-02,5.8819775854E-04,0,0,0 };
     //leg2
-    const double lr_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
-    const double lr_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
-    const double lr_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+    const double lr_p1_iv[10]{ 2.3523814491,0,0,0,1.0480809884E-02,8.8825903772E-03,4.266754639E-03,0,0,0 };
+    const double lr_p2_iv[10]{ 0.5868045476,0,0,0,6.9738871315E-03,6.8932585512E-03,5.6065308443E-04,0,0,0 };
+    const double lr_p3_iv[10]{ 1.0111367876,0,0,0,1.1955933401E-02,1.1656650714E-02,5.8819775854E-04,0,0,0 };
     //leg3
-    const double rr_p1_iv[10]{ 2.1374710037,0,0,0,5.5931718868E-03,5.4726110785E-03,2.6340502654E-03,0,0,0 };
-    const double rr_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561728E-03,4.2706985298E-03,2.3175167966E-04,0,0,0 };
-    const double rr_p3_iv[10]{ 0.814523742,0,0,0,1.0780253649E-02,1.0768928365E-02,3.6953418362E-04,0,0,0 };
+    const double rr_p1_iv[10]{ 2.3523814491,0,0,0,1.0480809884E-02,8.8825903772E-03,4.266754639E-03,0,0,0 };
+    const double rr_p2_iv[10]{ 0.5868045476,0,0,0,6.9738871315E-03,6.8932585512E-03,5.6065308443E-04,0,0,0 };
+    const double rr_p3_iv[10]{ 1.0111367876,0,0,0,1.1955933401E-02,1.1656650714E-02,5.8819775854E-04,0,0,0 };
     //leg4
-    const double rf_p1_iv[10]{ 2.1374710038,0,0,0,5.5931718868E-03,5.472611078E-03,2.6340502655E-03,0,0,0 };
-    const double rf_p2_iv[10]{ 0.4968154968,0,0,0,4.3644561758E-03,4.270698531E-03,2.3175168139E-04,0,0,0 };
-    const double rf_p3_iv[10]{ 0.8145237429,0,0,0,1.0780253535E-02,1.076892825E-02,03.695341839E-04,0,0,0 };
+    const double rf_p1_iv[10]{ 2.3523814491,0,0,0,1.0480809884E-02,8.8825903772E-03,4.266754639E-03,0,0,0 };
+    const double rf_p2_iv[10]{ 0.5868045476,0,0,0,6.9738871315E-03,6.8932585512E-03,5.6065308443E-04,0,0,0 };
+    const double rf_p3_iv[10]{ 1.0111367876,0,0,0,1.1955933401E-02,1.1656650714E-02,5.8819775854E-04,0,0,0 };
+
+
 
     // add part //
     auto& body = quad->partPool().add<aris::dynamic::Part>("BODY", body_iv);
@@ -1604,24 +1825,24 @@ auto createModelQuadruped()->std::unique_ptr<aris::dynamic::Model>
     auto& rf_p3 = quad->partPool().add<aris::dynamic::Part>("RF_P3", rf_p3_iv);
 
     // add geometry //
-    quad->ground().geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\ground.x_t");
-    body.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\body.x_t");
+    quad->ground().geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\ground.x_t");
+    body.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\body.x_t");
     //leg1
-    lf_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l11.x_t");
-    lf_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l12.x_t");
-    lf_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l13.x_t");
+    lf_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l11.x_t");
+    lf_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l12.x_t");
+    lf_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l13.x_t");
     //leg2
-    lr_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l21.x_t");
-    lr_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l22.x_t");
-    lr_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l23.x_t");
+    lr_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l21.x_t");
+    lr_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l22.x_t");
+    lr_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l23.x_t");
     //leg3
-    rr_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l31.x_t");
-    rr_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l32.x_t");
-    rr_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l33.x_t");
+    rr_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l31.x_t");
+    rr_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l32.x_t");
+    rr_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l33.x_t");
     //leg4
-    rf_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l41.x_t");
-    rf_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l42.x_t");
-    rf_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\l43.x_t");
+    rf_p1.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l41.x_t");
+    rf_p2.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l42.x_t");
+    rf_p3.geometryPool().add<aris::dynamic::ParasolidGeometry>("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\l43.x_t");
 
 
 
@@ -1642,6 +1863,7 @@ auto createModelQuadruped()->std::unique_ptr<aris::dynamic::Model>
     auto& rf_r1 = quad->addRevoluteJoint(rf_p1, body, leg_pe[9], std::array<double, 3>{1, 0, 0}.data());
     auto& rf_r2 = quad->addRevoluteJoint(rf_p2, rf_p1, leg_pe[10], std::array<double, 3>{0, 0, 1}.data());
     auto& rf_r3 = quad->addRevoluteJoint(rf_p3, rf_p2, leg_pe[11], std::array<double, 3>{0, 0, 1}.data());
+    
 
     // add motion //
     //leg1

@@ -21,45 +21,42 @@ int main(int argc, char *argv[])
 	// 设置模型初始位置，给关节角度  注：相对的位置是模型Quad里设置的关节轴和末端 //
 
 	double set_init_position[12] = {
-0,0.7299607015,-1.373657219,
-0,0.7299380908,-1.3736156494,
-0,-0.7299607015,1.373657219,
-0,-0.7299380908,1.3736156494 };
-//	double set_init_position[12] = {
-//
-//	0.133743,
-//0.771029,
-//- 1.44897,
-//0.133055,
-//0.76439,
-//- 1.43682,
-//0.133743,
-//- 0.771029,
-//1.44897,
-//0.133055,
-//- 0.76439,
-//1.43682 };
+	0,0.538643,-1.0696,
+	0,0.538637,-1.06958,
+	0,-0.538643,1.0696,
+	0,-0.538637,1.06958
+ };
+	cs.model().setInputPos(set_init_position);
+	if (cs.model().forwardKinematics()) THROW_FILE_LINE("forward failed");
 
-	//cs.model().setInputPos(set_init_position);
-	//if (cs.model().forwardKinematics()) THROW_FILE_LINE("forward failed");
-
+	// 运动学和动力学adams测试 //
 	//robot::setStandTopologyIK(cs);
-	////robot::setBoundTopologyIK(cs);
-	//
-	//auto& adams = dynamic_cast<aris::dynamic::AdamsSimulator&>(cs.model().simulatorPool().front());
-	////adams.saveAdams("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\quad_simulation.cmd");
-	//
-	//robot::DogDynamicTest plan;
-	//adams.simulate(plan, cs.model().simResultPool().front());
-	//adams.saveAdams("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\quad_simulation.cmd", cs.model().simResultPool().front());
+	//robot::setBoundTopologyIK(cs);
+	
+	auto& adams = dynamic_cast<aris::dynamic::AdamsSimulator&>(cs.model().simulatorPool().front());
+	//adams.saveAdams("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2\\quad_simulation.cmd");
+	
+	robot::DogDynamicTest plan;
+	adams.simulate(plan, cs.model().simResultPool().front());
+	adams.saveAdams("C:\\Users\\DELL1\\Desktop\\ADAMS_model\\cpp_adams_dogv2_5\\quad_simulation.cmd", cs.model().simResultPool().front());
 
-	//std::cout << "simulate finished" << std::endl;
+	std::cout << "simulate finished" << std::endl;
 
 	//网页控制代码
 	cs.interfacePool().add<aris::server::ProgramWebInterface>("", "5866", aris::core::Socket::WEB);
 	cs.interfacePool().add<aris::server::HttpInterface>("", "8001", "D:/UI/www");
 
     cs.init();
+
+
+	// set topology //
+
+
+
+
+
+
+
  
 	//开启WebSocket/socket服务器//
     cs.open(); 

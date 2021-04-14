@@ -1,15 +1,15 @@
 #ifndef KINEMATICS_H_
 #define KINEMATICS_H_
 // 连杆长度 //
-const double L1 = 0.1315;  //单位m
+const double L1 = 0.134;  //单位m
 const double L2 = 0.306;
-const double L3 = 0.340;
+const double L3 = 0.310;
 const double PI = 3.14159265358979323846;
 
 //身体长宽高设置
-const double kBodyLong = 0.652; //m  x方向
-const double kBodyWidth = 0.1250;   //m  z方向
-const double kBodyHigh = 0.500;    //m y方向
+const double kBodyLong = 0.60398; //m  x方向
+const double kBodyWidth = 0.126;   //m  z方向
+const double kBodyHigh = 0.530;    //m y方向
 
 //初始时身体和脚在地面坐标系下的位置
 static double foot_position_start_point[12] = {
