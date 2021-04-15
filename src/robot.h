@@ -6,6 +6,20 @@
 
 namespace robot
 {
+
+
+    class TestFilter : public aris::core::CloneObject<TestFilter, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+        auto virtual collectNrt()->void;
+
+        virtual ~TestFilter();
+        explicit TestFilter(const std::string& name = "test_filter");
+    };
+
+
     class SetMaxToq : public aris::core::CloneObject<SetMaxToq, aris::plan::Plan>
     {
     public:

@@ -8,6 +8,9 @@
 #include"plan.h"
 #include"kinematics.h"
 
+
+#include"filter.h"
+
 double input_angle[12] = {0};
 double init_pos_angle[12] = { 0 };
 std::string gait="trot";
@@ -24,6 +27,33 @@ using namespace aris::plan;
 //const double PI = aris::PI;
 namespace robot
 {
+
+//测试滤波算法 //
+auto TestFilter::prepareNrt()->void
+{
+    for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
+}
+auto TestFilter::executeRT()->int
+{
+    if (count() == 1) this->master()->logFileRawName("filter");
+    double input_value, output_value,sin;
+    sin = std::sin(count() / 1000.0);
+    input_value = std::sin(count() / 1000.0) + std::rand() * 0.25 / RAND_MAX ;
+    filter_limit_average(input_value, output_value);
+    lout() << sin << "\t" << input_value << "\t" << output_value << std::endl;
+    
+
+    return PI*1000 - count();
+}
+auto TestFilter::collectNrt()->void {}
+TestFilter::~TestFilter() = default;
+TestFilter::TestFilter(const std::string & name) {
+    aris::core::fromXmlString(command(),
+        "<Command name=\"test_filter\"/>");
+}
+
+
+
 //设置力矩
 auto SetMaxToq::prepareNrt()->void
 {
@@ -1767,6 +1797,7 @@ auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>
 
     // 正玄曲线 //
     plan_root->planPool().add<MoveJS>();
+    plan_root->planPool().add<TestFilter>();
     return plan_root;
 }
 
