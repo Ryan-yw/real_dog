@@ -215,7 +215,7 @@ namespace robot
         auto virtual executeRT()->int override;
   
         virtual ~DogDynamicTest();
-        explicit DogDynamicTest() {}
+        explicit DogDynamicTest(const std::string& name = "dog_dynamic");
 
     };
 
@@ -235,9 +235,7 @@ namespace robot
     auto createModelQuadruped()->std::unique_ptr<aris::dynamic::Model>;
     auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>;
     auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>;
-    auto setStandTopologyIK(aris::server::ControlServer& cs)->void;
-    auto setTrotTopologyIK(aris::server::ControlServer& cs)->void;
-    auto setBoundTopologyIK(aris::server::ControlServer& cs)->void;
+
 }
 
 #endif

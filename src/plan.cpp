@@ -462,6 +462,7 @@ auto planBodyTransformWalk(int e_1, int n, double* current_body, int count, Elli
 		for (int i = 0; i < 16; ++i)
 		{
 			body_position_start_point[i] = current_body[i];
+
 		}
 	}
 }
