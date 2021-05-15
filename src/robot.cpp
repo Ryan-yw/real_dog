@@ -102,52 +102,67 @@ auto DogInitPos::prepareNrt()->void
 }
 auto DogInitPos::executeRT()->int
 {
-
-
-    TCurve s1(1, 4);
-    s1.getCurveParam();
-    EllipseTrajectory e1(0.20, 0.080, 0, s1);
-
-    //步态规划
-    if (gait == "trot" && prepose == "same")//trot & same
+    double ee_p[28] = { 0 };
+    for (int i = 0; i < 16; ++i)
     {
-        trotPlanSameLeg(1, count()-1, &e1,init_pos_angle );
+        ee_p[i] = body_position_start_point[i];
     }
-    else if (gait == "walk" && prepose == "same") //walk & same
-    {
-        walkPlanSameLeg(1, count()-1, &e1, init_pos_angle);
-    }
-    else if (gait == "walk" && prepose == "symmetry")  //walk & symmetry
-    {
-        walkPlanSymmetryLeg(1, count()-1, &e1, init_pos_angle);
-    }
-    else //
-    {
-        mout() << "input dog_error" << std::endl;
-    }
-
     for (int i = 0; i < 12; ++i)
     {
-        mout() << init_pos_angle[i] << std::endl;
+        ee_p[i+16] = foot_position_start_point[i];
     }
-    
-    //输出角度，用于仿真测试
-    //{
-    //    输出电机角度
-    //    for (int i = 0; i < 12; ++i)
-    //    {
-    //        lout() << input_angle[i] << "\t";
-    //    }
-    //    time_test += 0.001;
-    //    lout() << time_test << "\t";
+    model()->setOutputPos(ee_p);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool()) m.updP();
+    model()->getInputPos(init_pos_angle);
 
-    //    输出身体和足尖曲线
-    //    for (int i = 0; i < 12; ++i)
-    //    {
-    //        lout() << file_current_leg[i] << "\t";
-    //    }
-    //    lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+
+    aris::dynamic::dsp(4, 3, init_pos_angle);
+    //TCurve s1(1, 4);
+    //s1.getCurveParam();
+    //EllipseTrajectory e1(0.20, 0.080, 0, s1);
+
+    ////步态规划
+    //if (gait == "trot" && prepose == "same")//trot & same
+    //{
+    //    trotPlanSameLeg(1, count()-1, &e1,init_pos_angle );
     //}
+    //else if (gait == "walk" && prepose == "same") //walk & same
+    //{
+    //    walkPlanSameLeg(1, count()-1, &e1, init_pos_angle);
+    //}
+    //else if (gait == "walk" && prepose == "symmetry")  //walk & symmetry
+    //{
+    //    walkPlanSymmetryLeg(1, count()-1, &e1, init_pos_angle);
+    //}
+    //else //
+    //{
+    //    mout() << "input dog_error" << std::endl;
+    //}
+
+    //for (int i = 0; i < 12; ++i)
+    //{
+    //    mout() << init_pos_angle[i] << std::endl;
+    //}
+    //
+    ////输出角度，用于仿真测试
+    ////{
+    ////    输出电机角度
+    ////    for (int i = 0; i < 12; ++i)
+    ////    {
+    ////        lout() << input_angle[i] << "\t";
+    ////    }
+    ////    time_test += 0.001;
+    ////    lout() << time_test << "\t";
+
+
+    ////    输出身体和足尖曲线
+    ////    for (int i = 0; i < 12; ++i)
+    ////    {
+    ////        lout() << file_current_leg[i] << "\t";
+    ////    }
+    ////    lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+    ////}
 
     return 0;
 }
@@ -941,6 +956,80 @@ DogRight::DogRight(const std::string& name)
 }
 DogRight::~DogRight() = default;
 
+//原地旋转
+auto DogTurn::prepareNrt()->void
+{
+    step_ = doubleParam("step");
+    turn_angle_ = doubleParam("angle");
+    for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
+}
+auto DogTurn::executeRT()->int
+{
+    int ret = 0;
+    if (count() == 1)  this->master()->logFileRawName("right");
+
+    TCurve s1(1, 6);
+    s1.getCurveParam();
+    EllipseTrajectory e1(0.0, 0.015, 0.0, s1);
+    BodyPose body_s(0, turn_angle_, 0, s1);
+    //步态规划
+    if (gait == "trot" && prepose == "same")//trot & same
+    {
+        ret = turnPlanTrotSameLeg(step_, count() - 1, &e1, &body_s, current_body_and_leg);
+    }
+    else //
+    {
+        mout() << "input error" << std::endl;
+    }
+
+
+    //计算逆运动学
+    model()->setOutputPos(current_body_and_leg);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool())
+        m.updP();
+    model()->getInputPos(input_angle);
+
+    //输出角度，用于仿真测试
+    {
+        for (int i = 0; i < 12; ++i)
+        {
+            lout() << input_angle[i] << "\t";
+        }
+
+        //输出身体和足尖曲线
+        for (int i = 0; i < 12; ++i)
+        {
+            lout() << current_body_and_leg[i + 16] << "\t";
+        }
+        lout() << current_body_and_leg[3] << "\t" << current_body_and_leg[7] << "\t" << current_body_and_leg[11] << std::endl;
+    }
+    //发送电机角度
+    for (int i = 0; i < 12; ++i)
+    {
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(2 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    }
+    return ret;
+}
+DogTurn::DogTurn(const std::string& name)
+{
+    aris::core::fromXmlString(command(),
+        "<Command name=\"dog_right\">"
+        "</GroupParam>"
+        "<Param name=\"step\" default=\"3\" abbreviation=\"n\"/>"
+        "<Param name = \"angle\" default=\"10\" abbreviation=\"d\"/>"
+        "</GroupParam>"
+        "</Command>");
+}
+DogTurn::~DogTurn() = default;
+
+
+
+
+
 //pitch
 auto DogPitch::prepareNrt()->void
 {
@@ -1148,6 +1237,9 @@ DogYaw::DogYaw(const std::string& name)
 DogYaw::~DogYaw() = default;
 
 
+
+
+
 // cpp和adams测试 //
 auto DogDynamicTest::prepareNrt()->void
 {
@@ -1199,25 +1291,15 @@ auto DogDynamicTest::executeRT()->int
         EllipseTrajectory e3(0, 0.150, 0, s1);
         BodyPose body_s(0, 15, 0, s1);
         // 前后左右 //
-        //ret = trotPlanSameLeg(10, count() - 1-a, &e1, input_angle);
-        ret = walkPlanSameLeg(10, count() - 1-a, &e1, current_body_and_leg);
-        //ret = walkPlanSymmetryLeg(5, count() - 1 - a, &e1, input_angle);
+        //ret = trotPlanSameLeg(10, count() - 1-a, &e1, current_body_and_leg);
+        //ret = walkPlanSameLeg(10, count() - 1-a, &e1, current_body_and_leg);
+        //ret = walkPlanSymmetryLeg(5, count() - 1 - a, &e1, current_body_and_leg);
         // 原地旋转 //
-        //ret = turnPlanTrotSameLeg(5, count() - 1- a, &e3, &body_s, input_angle);
+        ret = turnPlanTrotSameLeg(5, count() - 1- a, &e3, &body_s, current_body_and_leg);
         // 身子扭动 //
-        //ret = posePlan(count() - 1-a, &e2, &body_s, input_angle);
-        //quad.solverPool
-        //quad.motionPool()[0].updP();
-        //if (count() == 1+a) {
-        //    model()->getOutputPos(ee0);
-        //    aris::dynamic::s_vc(28, ee0, ee);
-        //}
-        //aris::dynamic::s_vc(28, ee0, ee + 0);
-        aris::dynamic::s_vc(16, current_body_and_leg + 0, ee_p + 0);
-        aris::dynamic::s_vc(12, current_body_and_leg + 0, ee_p + 16);
-        //aris::dynamic::dsp(4, 4, ee);
-        //aris::dynamic::dsp(4, 3, ee + 16);  
-        model()->setOutputPos(ee_p);
+        //ret = posePlan(count() - 1-a, &e2, &body_s, current_body_and_leg);
+
+        model()->setOutputPos(current_body_and_leg);
         if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
 
 
@@ -1630,11 +1712,11 @@ public:
         this->solverPool()[5].allocateMemory();
 
         // 其他尝试
-        //for (auto& m : this->motionPool())m.activate(true);
-        //for (auto& gm : this->generalMotionPool())gm.activate(false);
-        //for (auto& f : this->forcePool())f.activate(false);
-        //this->generalMotionPool()[0].activate(false);
-        //this->solverPool()[6].allocateMemory();
+        for (auto& m : this->motionPool())m.activate(true);
+        for (auto& gm : this->generalMotionPool())gm.activate(false);
+        for (auto& f : this->forcePool())f.activate(false);
+        this->generalMotionPool()[0].activate(false);
+        this->solverPool()[6].allocateMemory();
 
     }
 

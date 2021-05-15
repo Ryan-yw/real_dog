@@ -169,6 +169,19 @@ namespace robot
         double step_;
     };
 
+    class DogTurn :public aris::core::CloneObject<DogTurn, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+
+        virtual ~DogTurn();
+        explicit DogTurn(const std::string& name = "dog_turn");
+    private:
+        double step_;
+        double turn_angle_;
+    };
+
     class DogPitch :public aris::core::CloneObject<DogPitch, aris::plan::Plan>
     {
     public:
