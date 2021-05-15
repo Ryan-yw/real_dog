@@ -8,14 +8,18 @@
 #include"plan.h"
 #include"kinematics.h"
 
-double input_angle[12] = {0};
-double init_pos_angle[12] = { 0 };
+double input_angle[12] = {0};      //任意时刻关节角度
+double init_pos_angle[12] = { 0 }; //初始位置下的关节角度
 std::string gait="trot";
 std::string prepose="same";
 //输出参数，模型曲线测试使用
-double file_current_leg[12] = { 0 };
-double file_current_body[16] = { 0 };
-double time_test = 0;
+double current_body_and_leg[28] = { 
+    1,0,0,0,
+    0,1,0,0,
+    0,0,1,0,
+    0,0,0,1
+};
+
 
 using namespace aris::dynamic;
 using namespace aris::plan;
@@ -124,7 +128,7 @@ auto DogInitPos::executeRT()->int
 
     for (int i = 0; i < 12; ++i)
     {
-        std::cout << init_pos_angle[i] << std::endl;
+        mout() << init_pos_angle[i] << std::endl;
     }
     
     //输出角度，用于仿真测试
@@ -282,7 +286,7 @@ DogHome::DogHome(const std::string &name)
 }
 DogHome::~DogHome() = default;
 
-//行走步态和曲腿模式设置
+//行走步态和（曲腿）模式设置
 auto DogSetWalkMode::prepareNrt()->void
 {
     gait_ = cmdParams().at("gait");
@@ -315,115 +319,115 @@ DogSetWalkMode::~DogSetWalkMode() = default;
 
 
 //轴空间初始位姿切换
-auto DogSwitchPrePose::prepareNrt()->void
-{
-    prepose_ = cmdParams().at("prepose");
-    for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
-}
-auto DogSwitchPrePose::executeRT()->int
-{
-    static double begin_angle[12] = { 0 };
-    double angle[12] = { 0 };
-  
-    double distance_same[12] = { 0 };
-    double distance_symmetry[12] = { 0 };
-
-    if (prepose_ == "same")
-    {
-        for (int i = 0; i < 12; ++i)
-        {
-            distance_same[i] = init_pos_angle[i];
-            distance_symmetry[i] = init_pos_angle[i];
-        }
-    }
-    else if (prepose_ == "symmetry")//symmetry
-    {
-        distance_symmetry[4] = -distance_symmetry[4]; //前后腿对称，14相同，23相同
-        distance_symmetry[5] = -distance_symmetry[5];
-        distance_symmetry[7] = -distance_symmetry[7];
-        distance_symmetry[8] = -distance_symmetry[8];
-    }
-    else
-    {
-        mout() << "input error" << std::endl;
-    }
-
-
-    if (count() == 1)
-    {
-        this->master()->logFileRawName("switchpose");
-        begin_angle[0] = controller()->motionPool()[0].actualPos();
-        begin_angle[1] = controller()->motionPool()[1].actualPos();
-        begin_angle[2] = controller()->motionPool()[2].actualPos()/1.5;
-        begin_angle[3] = controller()->motionPool()[3].actualPos();
-        begin_angle[4] = controller()->motionPool()[4].actualPos();
-        begin_angle[5] = controller()->motionPool()[5].actualPos()/1.5;
-        begin_angle[6] = controller()->motionPool()[6].actualPos();
-        begin_angle[7] = controller()->motionPool()[7].actualPos();
-        begin_angle[8] = controller()->motionPool()[8].actualPos()/1.5;
-        begin_angle[9] = controller()->motionPool()[9].actualPos();
-        begin_angle[10] = controller()->motionPool()[10].actualPos();
-        begin_angle[11] = controller()->motionPool()[11].actualPos()/1.5;
-    }
-
-
-    TCurve s1(5, 2);//0.9s
-    s1.getCurveParam();
-
-    if (prepose_ == "same")//same
-    {
-        for (int i = 0; i < 12; ++i)
-        {
-            angle[i] = begin_angle[i] + (distance_same[i] - begin_angle[i]) * s1.getTCurve(count());
-        }
-    }
-    else if(prepose_=="symmetry")//symmetry
-    {
-        for (int i = 0; i < 12; ++i)
-        {
-            angle[i] = begin_angle[i] + (distance_symmetry[i] - begin_angle[i]) * s1.getTCurve(count());
-        }
-    }
-    else
-    {
-        mout() << "input error" << std::endl;
-    }
-
-    prepose = prepose_;
-
-    //输出角度，用于仿真测试
-    {
-        for (int i = 0; i < 12; ++i)
-        {
-            lout() << angle[i] << "\t";
-        }
-        time_test += 0.001;
-        lout() << time_test << "\t";
-        //输出身体和足尖曲线
-        for (int i = 0; i < 12; ++i)
-        {
-            lout() << file_current_leg[i] << "\t";
-        }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-    }
-    //发送电机角度
-    for (int i = 0; i < 12; ++i)
-    {
-        if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * angle[i]);
-        else
-            controller()->motionPool()[i].setTargetPos(angle[i]);
-    }
-    return s1.getTc() * 1000 - count();
-}
-DogSwitchPrePose::DogSwitchPrePose(const std::string& name) 
-{
-    aris::core::fromXmlString(command(),
-        "<Command name=\"dog_switchpose\">"
-        "<Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
-        "</Command>");
-}
-DogSwitchPrePose::~DogSwitchPrePose() = default;
+//auto DogSwitchPrePose::prepareNrt()->void
+//{
+//    prepose_ = cmdParams().at("prepose");
+//    for (auto& m : motorOptions()) m = aris::plan::Plan::NOT_CHECK_ENABLE;
+//}
+//auto DogSwitchPrePose::executeRT()->int
+//{
+//    static double begin_angle[12] = { 0 };
+//    double angle[12] = { 0 };
+//  
+//    double distance_same[12] = { 0 };
+//    double distance_symmetry[12] = { 0 };
+//
+//    if (prepose_ == "same")
+//    {
+//        for (int i = 0; i < 12; ++i)
+//        {
+//            distance_same[i] = init_pos_angle[i];
+//            distance_symmetry[i] = init_pos_angle[i];
+//        }
+//    }
+//    else if (prepose_ == "symmetry")//symmetry
+//    {
+//        distance_symmetry[4] = -distance_symmetry[4]; //前后腿对称，14相同，23相同
+//        distance_symmetry[5] = -distance_symmetry[5];
+//        distance_symmetry[7] = -distance_symmetry[7];
+//        distance_symmetry[8] = -distance_symmetry[8];
+//    }
+//    else
+//    {
+//        mout() << "input error" << std::endl;
+//    }
+//
+//
+//    if (count() == 1)
+//    {
+//        this->master()->logFileRawName("switchpose");
+//        begin_angle[0] = controller()->motionPool()[0].actualPos();
+//        begin_angle[1] = controller()->motionPool()[1].actualPos();
+//        begin_angle[2] = controller()->motionPool()[2].actualPos()/1.5;
+//        begin_angle[3] = controller()->motionPool()[3].actualPos();
+//        begin_angle[4] = controller()->motionPool()[4].actualPos();
+//        begin_angle[5] = controller()->motionPool()[5].actualPos()/1.5;
+//        begin_angle[6] = controller()->motionPool()[6].actualPos();
+//        begin_angle[7] = controller()->motionPool()[7].actualPos();
+//        begin_angle[8] = controller()->motionPool()[8].actualPos()/1.5;
+//        begin_angle[9] = controller()->motionPool()[9].actualPos();
+//        begin_angle[10] = controller()->motionPool()[10].actualPos();
+//        begin_angle[11] = controller()->motionPool()[11].actualPos()/1.5;
+//    }
+//
+//
+//    TCurve s1(5, 2);//0.9s
+//    s1.getCurveParam();
+//
+//    if (prepose_ == "same")//same
+//    {
+//        for (int i = 0; i < 12; ++i)
+//        {
+//            angle[i] = begin_angle[i] + (distance_same[i] - begin_angle[i]) * s1.getTCurve(count());
+//        }
+//    }
+//    else if(prepose_=="symmetry")//symmetry
+//    {
+//        for (int i = 0; i < 12; ++i)
+//        {
+//            angle[i] = begin_angle[i] + (distance_symmetry[i] - begin_angle[i]) * s1.getTCurve(count());
+//        }
+//    }
+//    else
+//    {
+//        mout() << "input error" << std::endl;
+//    }
+//
+//    prepose = prepose_;
+//
+//    //输出角度，用于仿真测试
+//    {
+//        for (int i = 0; i < 12; ++i)
+//        {
+//            lout() << angle[i] << "\t";
+//        }
+//        time_test += 0.001;
+//        lout() << time_test << "\t";
+//        //输出身体和足尖曲线
+//        for (int i = 0; i < 12; ++i)
+//        {
+//            lout() << file_current_leg[i] << "\t";
+//        }
+//        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+//    }
+//    //发送电机角度
+//    for (int i = 0; i < 12; ++i)
+//    {
+//        if (i == 2 || i == 5 || i == 8 || i == 11)
+//            controller()->motionPool()[i].setTargetPos(2 * angle[i]);
+//        else
+//            controller()->motionPool()[i].setTargetPos(angle[i]);
+//    }
+//    return s1.getTc() * 1000 - count();
+//}
+//DogSwitchPrePose::DogSwitchPrePose(const std::string& name) 
+//{
+//    aris::core::fromXmlString(command(),
+//        "<Command name=\"dog_switchpose\">"
+//        "<Param name=\"prepose\" default=\"same\" abbreviation=\"p\"/>"
+//        "</Command>");
+//}
+//DogSwitchPrePose::~DogSwitchPrePose() = default;
 
 
 //轴空间准备
@@ -470,27 +474,15 @@ auto DogPrepare::executeRT()->int
     {
         angle[i] = begin_angle[i] + distance[i] * s1.getTCurve(count());
     }
-
-    //输出角度，用于仿真测试
-    {
-        for (int i = 0; i < 12; ++i)
-        {
-            lout() << angle[i] << "\t";
-        }
-        time_test += 0.001;
-        lout() << time_test << "\t";
-        //输出身体和足尖曲线
-        for (int i = 0; i < 12; ++i)
-        {
-            lout() << file_current_leg[i] << "\t";
-        }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
-    }
+    this->model()->setInputPos(angle);
+    if (this->model()->forwardKinematics()) THROW_FILE_LINE("forward failed");
+    
+      
     //发送电机角度
     for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * angle[i]);
+            controller()->motionPool()[i].setTargetPos(2 * angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(angle[i]);
     }
@@ -515,36 +507,20 @@ auto DogUpDown::executeRT()->int
 
     int ret = 1;
 
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        input_angle[10] = controller()->motionPool()[10].actualPos();
-        input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
+
     TCurve s1(5, 2);//0.9s
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
 
-    
-
-
+   
     //步态规划
     if (prepose == "same")// same
     {
-        ret = updownPlanSameLeg(count() - 1, &e1, distance_, input_angle);
+        ret = updownPlanSameLeg(count() - 1, &e1, distance_, current_body_and_leg);
     }
     else if (prepose == "symmetry")  //symmetry
     {
-        ret = updownPlanSymmetry(count() - 1, &e1, distance_, input_angle);
+        ret = updownPlanSymmetry(count() - 1, &e1, distance_, current_body_and_leg);
     }
     else //
     {
@@ -552,27 +528,32 @@ auto DogUpDown::executeRT()->int
     }
 
 
+    //计算逆运动学
+    model()->setOutputPos(current_body_and_leg);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool())
+        m.updP();
+    model()->getInputPos(input_angle);
+
     //输出角度，用于仿真测试
     {
         for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
-        time_test += 0.001;
-        lout() << time_test << "\t";
 
         //输出身体和足尖曲线
         for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[i] << "\t";
+            lout() << current_body_and_leg[i + 16] << "\t";
         }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        lout() << current_body_and_leg[3] << "\t" << current_body_and_leg[7] << "\t" << current_body_and_leg[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+            controller()->motionPool()[i].setTargetPos(2 * input_angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
@@ -596,21 +577,6 @@ auto DogTaBu::prepareNrt()->void
 auto DogTaBu::executeRT()->int
 {    
     if (count() == 1)this->master()->logFileRawName("tabu");
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        input_angle[10] = controller()->motionPool()[10].actualPos();
-        input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
 
     TCurve s1(1, 6);
     s1.getCurveParam();
@@ -619,16 +585,23 @@ auto DogTaBu::executeRT()->int
     //步态规划
     if ( prepose == "same")// same
     {
-        ret = trotPlanSameLeg(step_, count() - 1, &e1, input_angle);
+        ret = trotPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else if (prepose == "symmetry")  //symmetry
     {
-        ret = trotPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
+        ret = trotPlanSymmetryLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else //
     {
         mout() << "input error" << std::endl;
     }
+
+    //计算逆运动学
+    model()->setOutputPos(current_body_and_leg);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool())
+        m.updP();
+    model()->getInputPos(input_angle);
 
     //输出角度，用于仿真测试
     {
@@ -636,21 +609,19 @@ auto DogTaBu::executeRT()->int
         {
             lout() << input_angle[i] << "\t";
         }
-        time_test += 0.001;
-        lout() << time_test << "\t";
 
         //输出身体和足尖曲线
         for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[i] << "\t";
+            lout() << current_body_and_leg[i+16] << "\t";
         }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        lout() << current_body_and_leg[3] << "\t" << current_body_and_leg[7] << "\t" << current_body_and_leg[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+            controller()->motionPool()[i].setTargetPos(2 * input_angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
@@ -678,21 +649,6 @@ auto DogForward::executeRT()->int
     
     int ret=0;
 
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        input_angle[10] = controller()->motionPool()[10].actualPos();
-        input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
 
     TCurve s1(1, 3);
     s1.getCurveParam();
@@ -701,48 +657,54 @@ auto DogForward::executeRT()->int
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
     {
-        ret = trotPlanSameLeg(step_, count() - 1, &e1, input_angle);
+        ret = trotPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else if (gait =="walk"  && prepose == "same") //walk & same
     {
-        ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else if (gait == "walk" && prepose == "symmetry")  //walk & symmetry
     {
-        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else //
     {
         mout() << "input error" << std::endl;
     }
 
+
+
+    //计算逆运动学
+    model()->setOutputPos(current_body_and_leg);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool())
+        m.updP();
+    model()->getInputPos(input_angle);
+
     //输出角度，用于仿真测试
     {
-        //输出电机角度
         for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
-        time_test += 0.001;
-        lout() << time_test << "\t";
 
         //输出身体和足尖曲线
         for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[i] << "\t";
+            lout() << current_body_and_leg[i + 16] << "\t";
         }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        lout() << current_body_and_leg[3] << "\t" << current_body_and_leg[7] << "\t" << current_body_and_leg[11] << std::endl;
     }
 
 
     //发送电机角度
-    //for (int i = 0; i < 12; ++i)
-    //{
-    //    if (i == 2 || i == 5 || i == 8 || i == 11)
-    //        controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
-    //    else
-    //        controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    //}
+    for (int i = 0; i < 12; ++i)
+    {
+        if (i == 2 || i == 5 || i == 8 || i == 11)
+            controller()->motionPool()[i].setTargetPos(2 * input_angle[i]);
+        else
+            controller()->motionPool()[i].setTargetPos(input_angle[i]);
+    }
 
     return ret;
 }
@@ -765,21 +727,7 @@ auto DogBack::executeRT()->int
 {
     if (count() == 1)this->master()->logFileRawName("back");
     int ret = 0;
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        input_angle[10] = controller()->motionPool()[10].actualPos();
-        input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
+
 
     TCurve s1(1, 6);
     s1.getCurveParam();
@@ -787,43 +735,49 @@ auto DogBack::executeRT()->int
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
     {
-        ret = trotPlanSameLeg(step_, count() - 1, &e1, input_angle);
+        ret = trotPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else if (gait == "walk" && prepose == "same") //walk & same
     {
-        ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else if (gait == "walk" && prepose == "symmetry")  //walk & symmetry
     {
-        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else //
     {
         mout() << "input error" << std::endl;
     }
 
+
+    //计算逆运动学
+    model()->setOutputPos(current_body_and_leg);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool())
+        m.updP();
+    model()->getInputPos(input_angle);
+
     //输出角度，用于仿真测试
     {
-        //输出电机角度
         for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
-        time_test += 0.001;
-        lout() << time_test << "\t";
 
         //输出身体和足尖曲线
         for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[i] << "\t";
+            lout() << current_body_and_leg[i + 16] << "\t";
         }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        lout() << current_body_and_leg[3] << "\t" << current_body_and_leg[7] << "\t" << current_body_and_leg[11] << std::endl;
     }
+
     //发送电机角度
     for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+            controller()->motionPool()[i].setTargetPos(2 * input_angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
@@ -848,22 +802,7 @@ auto DogLeft::prepareNrt()->void
 auto DogLeft::executeRT()->int
 {
     int ret = 0;
-    if (count() == 1)
-    {
-        this->master()->logFileRawName("left");
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        input_angle[10] = controller()->motionPool()[10].actualPos();
-        input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
+
     //轨迹规划
     TCurve s1(1, 6);
     s1.getCurveParam();
@@ -871,43 +810,49 @@ auto DogLeft::executeRT()->int
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
     {
-        ret = trotPlanSameLeg(step_, count() - 1, &e1, input_angle);
+        ret = trotPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else if (gait == "walk" && prepose == "same") //walk & same
     {
-        ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else if (gait == "walk" && prepose == "symmetry")  //walk & symmetry
     {
-        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else //
     {
         mout() << "input error" << std::endl;
     }
 
+
+    //计算逆运动学
+    model()->setOutputPos(current_body_and_leg);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool())
+        m.updP();
+    model()->getInputPos(input_angle);
+
     //输出角度，用于仿真测试
     {
-        //输出电机角度
         for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
-        time_test += 0.001;
-        lout() << time_test << "\t";
 
         //输出身体和足尖曲线
         for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[i] << "\t";
+            lout() << current_body_and_leg[i + 16] << "\t";
         }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        lout() << current_body_and_leg[3] << "\t" << current_body_and_leg[7] << "\t" << current_body_and_leg[11] << std::endl;
     }
+
     //发送电机角度
     for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+            controller()->motionPool()[i].setTargetPos(2 * input_angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
@@ -931,22 +876,7 @@ auto DogRight::prepareNrt()->void
 auto DogRight::executeRT()->int
 {
     int ret = 0;
-    if (count() == 1)
-    {
-        this->master()->logFileRawName("right");
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        input_angle[10] = controller()->motionPool()[10].actualPos();
-        input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
+    if (count() == 1)  this->master()->logFileRawName("right");   
 
     TCurve s1(1, 6);
     s1.getCurveParam();
@@ -955,43 +885,48 @@ auto DogRight::executeRT()->int
     //步态规划
     if (gait == "trot" && prepose == "same")//trot & same
     {
-        ret = trotPlanSameLeg(step_, count() - 1, &e1, input_angle);
+        ret = trotPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else if (gait == "walk" && prepose == "same") //walk & same
     {
-        ret = walkPlanSameLeg(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else if (gait == "walk" && prepose == "symmetry")  //walk & symmetry
     {
-        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, input_angle);
+        ret = walkPlanSymmetryLeg(step_, count() - 1, &e1, current_body_and_leg);
     }
     else //
     {
         mout() << "input error" << std::endl;
     }
 
+
+    //计算逆运动学
+    model()->setOutputPos(current_body_and_leg);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool())
+        m.updP();
+    model()->getInputPos(input_angle);
+
     //输出角度，用于仿真测试
     {
-        //输出电机角度
         for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
-        time_test += 0.001;
-        lout() << time_test << "\t";
 
         //输出身体和足尖曲线
         for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[i] << "\t";
+            lout() << current_body_and_leg[i + 16] << "\t";
         }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        lout() << current_body_and_leg[3] << "\t" << current_body_and_leg[7] << "\t" << current_body_and_leg[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+            controller()->motionPool()[i].setTargetPos(2 * input_angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
@@ -1016,58 +951,50 @@ auto DogPitch::executeRT()->int
 {
     if (count() == 1)this->master()->logFileRawName("pitch");
     int ret = 0;
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        input_angle[10] = controller()->motionPool()[10].actualPos();
-        input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
+
 
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-
-    if (std::abs(turn_angle_) > 10)
+    BodyPose body_pose(0, 0, turn_angle_, s1);
+    //步态规划
+    if (std::abs(turn_angle_) > 5)
     {
         mout() << "input exceed mas value" << std::endl;
+        return 0;
     }
     else
     {
-        BodyPose body_pose(0, 0, turn_angle_, s1);
-        ret = posePlan(count() - 1, &e1, &body_pose, input_angle);
+        ret = posePlan(count() - 1, &e1, &body_pose, current_body_and_leg);
     }
+
+
+    //计算逆运动学
+    model()->setOutputPos(current_body_and_leg);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool())
+        m.updP();
+    model()->getInputPos(input_angle);
 
     //输出角度，用于仿真测试
     {
-        //输出电机角度
         for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
-        time_test += 0.001;
-        lout() << time_test << "\t";
 
         //输出身体和足尖曲线
         for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[i] << "\t";
+            lout() << current_body_and_leg[i + 16] << "\t";
         }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        lout() << current_body_and_leg[3] << "\t" << current_body_and_leg[7] << "\t" << current_body_and_leg[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+            controller()->motionPool()[i].setTargetPos(2 * input_angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
@@ -1077,7 +1004,7 @@ DogPitch::DogPitch(const std::string& name)
 {
     aris::core::fromXmlString(command(),
         "<Command name=\"dog_pitch\">"
-        "	<Param name=\"angle\" default=\"10\" abbreviation=\"d\"/>"
+        "	<Param name=\"angle\" default=\"5\" abbreviation=\"d\"/>"
         "</Command>");
 }
 DogPitch::~DogPitch() = default;
@@ -1092,58 +1019,49 @@ auto DogRoll::executeRT()->int
 {
     if (count() == 1)this->master()->logFileRawName("roll");
     int ret = 0;
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        input_angle[10] = controller()->motionPool()[10].actualPos();
-        input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
+
 
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
-    if (std::abs(turn_angle_) > 20)
+    BodyPose body_pose(turn_angle_, 0, 0, s1);
+    //步态规划
+    if (std::abs(turn_angle_) > 10)
     {
         mout() << "input exceed mas value" << std::endl;
+        return 0;
     }
     else
     {
-        BodyPose body_pose(turn_angle_, 0, 0, s1);
-        ret = posePlan(count() - 1, &e1, &body_pose, input_angle);
+        ret = posePlan(count() - 1, &e1, &body_pose, current_body_and_leg);
     }
     
-   
+    //计算逆运动学
+    model()->setOutputPos(current_body_and_leg);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool())
+        m.updP();
+    model()->getInputPos(input_angle);
+
     //输出角度，用于仿真测试
     {
-        //输出电机角度
         for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
-        time_test += 0.001;
-        lout() << time_test << "\t";
 
         //输出身体和足尖曲线
         for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[i] << "\t";
+            lout() << current_body_and_leg[i + 16] << "\t";
         }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        lout() << current_body_and_leg[3] << "\t" << current_body_and_leg[7] << "\t" << current_body_and_leg[11] << std::endl;
     }
     //发送电机角度
     for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+            controller()->motionPool()[i].setTargetPos(2 * input_angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
@@ -1169,50 +1087,52 @@ auto DogYaw::executeRT()->int
 {
     if (count() == 1)this->master()->logFileRawName("yaw");
     int ret = 0;
-    if (count() == 1)
-    {
-        input_angle[0] = controller()->motionPool()[0].actualPos();
-        input_angle[1] = controller()->motionPool()[1].actualPos();
-        input_angle[2] = controller()->motionPool()[2].actualPos();
-        input_angle[3] = controller()->motionPool()[3].actualPos();
-        input_angle[4] = controller()->motionPool()[4].actualPos();
-        input_angle[5] = controller()->motionPool()[5].actualPos();
-        input_angle[6] = controller()->motionPool()[6].actualPos();
-        input_angle[7] = controller()->motionPool()[7].actualPos();
-        input_angle[8] = controller()->motionPool()[8].actualPos();
-        input_angle[9] = controller()->motionPool()[9].actualPos();
-        input_angle[10] = controller()->motionPool()[10].actualPos();
-        input_angle[11] = controller()->motionPool()[11].actualPos();
-    }
+
 
     TCurve s1(5, 2);
     s1.getCurveParam();
     EllipseTrajectory e1(0, 0, 0, s1);
     BodyPose body_pose(0, turn_angle_, 0, s1);
+    //步态规划
     ret = posePlan(count()-1, &e1, &body_pose, input_angle);
+
+    if (std::abs(turn_angle_) > 20)
+    {
+        mout() << "input exceed mas value" << std::endl;
+        return 0;
+    }
+    else
+    {
+        ret = posePlan(count() - 1, &e1, &body_pose, current_body_and_leg);
+    }
+
+    //计算逆运动学
+    model()->setOutputPos(current_body_and_leg);
+    if (model()->inverseKinematics())std::cout << "inverse failed" << std::endl;
+    for (auto m : model()->motionPool())
+        m.updP();
+    model()->getInputPos(input_angle);
 
     //输出角度，用于仿真测试
     {
-        //输出电机角度
         for (int i = 0; i < 12; ++i)
         {
             lout() << input_angle[i] << "\t";
         }
-        time_test += 0.001;
-        lout() << time_test << "\t";
 
         //输出身体和足尖曲线
         for (int i = 0; i < 12; ++i)
         {
-            lout() << file_current_leg[i] << "\t";
+            lout() << current_body_and_leg[i + 16] << "\t";
         }
-        lout() << file_current_body[3] << "\t" << file_current_body[7] << "\t" << file_current_body[11] << std::endl;
+        lout() << current_body_and_leg[3] << "\t" << current_body_and_leg[7] << "\t" << current_body_and_leg[11] << std::endl;
     }
+
     //发送电机角度
     for (int i = 0; i < 12; ++i)
     {
         if (i == 2 || i == 5 || i == 8 || i == 11)
-            controller()->motionPool()[i].setTargetPos(1.5 * input_angle[i]);
+            controller()->motionPool()[i].setTargetPos(2 * input_angle[i]);
         else
             controller()->motionPool()[i].setTargetPos(input_angle[i]);
     }
@@ -1237,8 +1157,6 @@ auto DogDynamicTest::executeRT()->int
 {
     //if (count() == 1) this->master()->logFileRawName("dynamic");
 
-
-
     int ret = 0,a= 1000;
     static double ee0[28];
     double ee_p[28];
@@ -1247,7 +1165,7 @@ auto DogDynamicTest::executeRT()->int
     double mf[12];
     static double pre_leg_pos[28] = 
     { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0.30199000000000,-0.52999937168147,-0.19700000000000,
+      0.30199000000000,-0.52999937168147,-0.19700000000000,
      -0.30199000000000,-0.53000000000000,-0.19700000000000,
      -0.30199000000000,-0.52999937168147, 0.19700000000000,
       0.30199000000000,-0.53000000000000, 0.19700000000000 };
@@ -1282,7 +1200,7 @@ auto DogDynamicTest::executeRT()->int
         BodyPose body_s(0, 15, 0, s1);
         // 前后左右 //
         //ret = trotPlanSameLeg(10, count() - 1-a, &e1, input_angle);
-        ret = walkPlanSameLeg(10, count() - 1-a, &e1, input_angle);
+        ret = walkPlanSameLeg(10, count() - 1-a, &e1, current_body_and_leg);
         //ret = walkPlanSymmetryLeg(5, count() - 1 - a, &e1, input_angle);
         // 原地旋转 //
         //ret = turnPlanTrotSameLeg(5, count() - 1- a, &e3, &body_s, input_angle);
@@ -1295,8 +1213,8 @@ auto DogDynamicTest::executeRT()->int
         //    aris::dynamic::s_vc(28, ee0, ee);
         //}
         //aris::dynamic::s_vc(28, ee0, ee + 0);
-        aris::dynamic::s_vc(16, file_current_body + 0, ee_p + 0);
-        aris::dynamic::s_vc(12, file_current_leg + 0, ee_p + 16);
+        aris::dynamic::s_vc(16, current_body_and_leg + 0, ee_p + 0);
+        aris::dynamic::s_vc(12, current_body_and_leg + 0, ee_p + 16);
         //aris::dynamic::dsp(4, 4, ee);
         //aris::dynamic::dsp(4, 3, ee + 16);  
         model()->setOutputPos(ee_p);
@@ -2078,7 +1996,7 @@ auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>
     plan_root->planPool().add<DogSetWalkMode>();
     plan_root->planPool().add<DogMoveJoint>();
     plan_root->planPool().add<DogHome>();
-    plan_root->planPool().add<DogSwitchPrePose>();
+  //  plan_root->planPool().add<DogSwitchPrePose>();
     plan_root->planPool().add<DogPrepare>();
     plan_root->planPool().add<DogUpDown>();
     plan_root->planPool().add<DogTaBu>();

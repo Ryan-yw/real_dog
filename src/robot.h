@@ -73,17 +73,17 @@ namespace robot
         explicit DogHome(const std::string &name = "dog_home");
     };
 
-    class DogSwitchPrePose :public aris::core::CloneObject<DogSwitchPrePose, aris::plan::Plan>
-    {
-    public:
-        auto virtual prepareNrt()->void;
-        auto virtual executeRT()->int;
+    //class DogSwitchPrePose :public aris::core::CloneObject<DogSwitchPrePose, aris::plan::Plan>
+    //{
+    //public:
+    //    auto virtual prepareNrt()->void;
+    //    auto virtual executeRT()->int;
 
-        virtual ~DogSwitchPrePose();
-        explicit DogSwitchPrePose(const std::string& name = "dog_switchpose");
-    private:
-        std::string prepose_;
-    };
+    //    virtual ~DogSwitchPrePose();
+    //    explicit DogSwitchPrePose(const std::string& name = "dog_switchpose");
+    //private:
+    //    std::string prepose_;
+    //};
 
     class DogPrepare :public aris::core::CloneObject<DogPrepare, aris::plan::Plan>
     {

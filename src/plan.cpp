@@ -14,8 +14,6 @@ static double body_pose_start_yaw = 0;
 static double body_pose_start_roll = 0;
 
 
-extern double file_current_leg[12];
-extern double file_current_body[16];
 //-------------------------------------------------------梯形曲线----------------------------------------------------//
 
 //生成梯形曲线0->1
@@ -617,35 +615,20 @@ auto planBodyTurn(int count, double* current_body, BodyPose* body_pose_param)->v
 //以下函数在robot.cpp中被调用
 //机器人原地扭动步态，包括原地俯仰，横滚，偏航
 //#注意：只能完成单独的一项，比如要实现先俯仰后偏航，必须等俯仰结束后恢复到初始位置才能进行偏航
-auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, double* input)->int
+auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, double* current_body_and_leg)->int
 {
 
 	int per_step_count = Ellipse->get_s().getTc() * 1000;
 
-
-	static double current_leg_in_ground[12] = { 0 };
-	static double current_body_in_ground[16] = { 0 };
 
 	//判断行走状态
 	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
 	int e_2 = count % per_step_count;  //0->Tc count
 
 	//规划腿
-	planLegTrot(0, 1, current_leg_in_ground, e_2, Ellipse);
+	planLegTrot(0, 1, current_body_and_leg + 16, e_2, Ellipse);
 	//规划身体姿态
-	planBodyRotation(count, current_body_in_ground, body_pose_param);
-	//模型测试使用
-	for (int i = 0; i < 12; ++i)
-	{
-		file_current_leg[i] = current_leg_in_ground[i];
-	}
-	for (int i = 0; i < 16; ++i)
-	{
-		file_current_body[i] = current_body_in_ground[i];
-	}
-	//模型测试使用
-
-	inverseSame(current_leg_in_ground, current_body_in_ground, input);
+	planBodyRotation(count, current_body_and_leg, body_pose_param);
 
 	return  per_step_count - count - 1;
 }
@@ -656,35 +639,17 @@ auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, 
 //机器人行走对角步态，包括原地踏步、前进、后退、左移、右移。
 //其中步长步高和步数可由用户输入。走一步的时间（或行走快慢）可由用户输入梯形曲线的速度和加速度确定
 //#注意：行走最大速度和加速度还没测试
-auto trotPlanSameLeg(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
+auto trotPlanSameLeg(int n, int count, EllipseTrajectory* Ellipse, double* current_body_and_leg)->int
 {
-
-	int per_step_count = Ellipse->get_s().getTc() * 1000;
-
-	static double current_leg_in_ground[12] = { 0 };
-	static double current_body_in_ground[16] = { 0 };
 	//判断行走状态
+	int per_step_count = Ellipse->get_s().getTc() * 1000;
 	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
 	int e_2 = count % per_step_count;  //0->Tc count
 
-
 	//规划腿
-	planLegTrot(e_1, n, current_leg_in_ground, e_2, Ellipse);
+	planLegTrot(e_1, n, current_body_and_leg + 16, e_2, Ellipse);
 	//规划身体
-	planBodyTransformTrot(e_1, n, current_body_in_ground, count, Ellipse);
-
-	//模型测试使用
-	for (int i = 0; i < 12; ++i)
-	{
-
-		file_current_leg[i] = current_leg_in_ground[i];
-	}
-	for (int i = 0; i < 16; ++i)
-	{
-		file_current_body[i] = current_body_in_ground[i];
-	}
-	//模型测试使用
-	inverseSame(current_leg_in_ground, current_body_in_ground, input);
+	planBodyTransformTrot(e_1, n, current_body_and_leg, count, Ellipse);
 
 	return 2 * n * per_step_count - count - 1;
 }
@@ -693,100 +658,48 @@ auto trotPlanSameLeg(int n, int count, EllipseTrajectory* Ellipse, double* input
 //机器人行走静态步态，包括原地踏步、前进、后退、左移、右移。适用于四条腿初始姿态一样的情况
 //其中步长步高和步数可由用户输入。走一步的时间（或行走快慢）可由用户输入梯形曲线的速度和加速度确定
 //#注意：行走最大速度和加速度还没测试
-auto walkPlanSameLeg(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
+auto walkPlanSameLeg(int n, int count, EllipseTrajectory* Ellipse, double* current_body_and_leg)->int
 {
-
-	int per_step_count = Ellipse->get_s().getTc() * 1000;
-
-	static double current_leg_in_ground[12] = { 0 };
-	static double current_body_in_ground[16] = { 0 };
-
 	//判断行走状态
+	int per_step_count = Ellipse->get_s().getTc() * 1000;
 	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
 	int e_2 = count % per_step_count;  //0->Tc count
 
 	//规划腿
-	planLegWalk(e_1, n, current_leg_in_ground, e_2, Ellipse);
+	planLegWalk(e_1, n, current_body_and_leg + 16, e_2, Ellipse);
 	//规划身体
-	planBodyTransformWalk(e_1, n, current_body_in_ground, count, Ellipse);
-	//模型测试使用
-	for (int i = 0; i < 12; ++i)
-	{
-		file_current_leg[i] = current_leg_in_ground[i];
-	}
-	for (int i = 0; i < 16; ++i)
-	{
-		file_current_body[i] = current_body_in_ground[i];
-	}
-	//模型测试使用
-	inverseSame(current_leg_in_ground, current_body_in_ground, input);
+	planBodyTransformWalk(e_1, n, current_body_and_leg, count, Ellipse);
 
 	return 4 * n * per_step_count - count - 1;
 }
 
-auto updownPlanSameLeg(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int
+auto updownPlanSameLeg(int count, EllipseTrajectory* Ellipse, double distance, double* current_body_and_leg)->int
 {
-
-	int per_step_count = Ellipse->get_s().getTc() * 1000;
-
-	static double current_leg_in_ground[12] = { 0 };
-	static double current_body_in_ground[16] = { 0 };
-
 	//判断行走状态
+	int per_step_count = Ellipse->get_s().getTc() * 1000;
 	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
 	int e_2 = count % per_step_count;  //0->Tc count
 
 	//规划腿
-	planLegTrot(0, 1, current_leg_in_ground, e_2, Ellipse);
+	planLegTrot(0, 1, current_body_and_leg + 16, e_2, Ellipse);
 	//规划身体
-	planBodyUpDown(count, current_body_in_ground, Ellipse, distance);
-
-	//模型测试使用
-	for (int i = 0; i < 12; ++i)
-	{
-		file_current_leg[i] = current_leg_in_ground[i];
-	}
-	for (int i = 0; i < 16; ++i)
-	{
-		file_current_body[i] = current_body_in_ground[i];
-	}
-	//模型测试使用
-	inverseSame(current_leg_in_ground, current_body_in_ground, input);
+	planBodyUpDown(count, current_body_and_leg, Ellipse, distance);
 
 	return  per_step_count - count - 1;
 }
 
 //对角步态下原地旋转
-auto turnPlanTrotSameLeg(int n, int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, double* input)->int
+auto turnPlanTrotSameLeg(int n, int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, double* current_body_and_leg)->int
 {
-
-	int per_step_count = Ellipse->get_s().getTc() * 1000;
-
-	static double current_leg_in_ground[12] = { 0 };
-	static double current_body_in_ground[16] = { 0 };
-
 	//判断行走状态
+	int per_step_count = Ellipse->get_s().getTc() * 1000;
 	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
 	int e_2 = count % per_step_count;  //0->Tc count
 
 	//规划腿
-	planLegTrotTurn(e_1, current_leg_in_ground, e_2, Ellipse, body_pose_param);
+	planLegTrotTurn(e_1, current_body_and_leg + 16, e_2, Ellipse, body_pose_param);
 	//规划身体
-	planBodyTurn(e_2, current_body_in_ground, body_pose_param);
-
-
-	//模型测试使用
-	for (int i = 0; i < 12; ++i)
-	{
-		file_current_leg[i] = current_leg_in_ground[i];
-	}
-	for (int i = 0; i < 16; ++i)
-	{
-		file_current_body[i] = current_body_in_ground[i];
-	}
-	//模型测试使用
-
-	inverseSame(current_leg_in_ground, current_body_in_ground, input);
+	planBodyTurn(e_2, current_body_and_leg, body_pose_param);
 
 	return  per_step_count * n * 2 - count - 1;
 }
@@ -798,100 +711,50 @@ auto turnPlanTrotSameLeg(int n, int count, EllipseTrajectory* Ellipse, BodyPose*
 //机器人行走对角步态，包括原地踏步、前进、后退、左移、右移。
 //其中步长步高和步数可由用户输入。走一步的时间（或行走快慢）可由用户输入梯形曲线的速度和加速度确定
 //#注意：行走最大速度和加速度还没测试
-auto trotPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
+auto trotPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* current_body_and_leg)->int
 {
-
-	int per_step_count = Ellipse->get_s().getTc() * 1000;
-
-	static double current_leg_in_ground[12] = { 0 };
-	static double current_body_in_ground[16] = { 0 };
-
-
 	//判断行走状态
+	int per_step_count = Ellipse->get_s().getTc() * 1000;
 	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
 	int e_2 = count % per_step_count;  //0->Tc count
 
 	//规划腿
-	planLegTrot(e_1, n, current_leg_in_ground, e_2, Ellipse);
+	planLegTrot(e_1, n, current_body_and_leg + 16, e_2, Ellipse);
 	//规划身体
-	planBodyTransformTrot(e_1, n, current_body_in_ground, count, Ellipse);
-
-	//模型测试使用
-	for (int i = 0; i < 12; ++i)
-	{
-		file_current_leg[i] = current_leg_in_ground[i];
-	}
-	for (int i = 0; i < 16; ++i)
-	{
-		file_current_body[i] = current_body_in_ground[i];
-	}
-	//模型测试使用
-	inverseSymmetry(current_leg_in_ground, current_body_in_ground, input);
+	planBodyTransformTrot(e_1, n, current_body_and_leg, count, Ellipse);
 
 	return 2 * n * per_step_count - count - 1;
 }
 //机器人行走静态步态，包括原地踏步、前进、后退、左移、右移。适用于前后腿对称的情况
 //其中步长步高和步数可由用户输入。走一步的时间（或行走快慢）可由用户输入梯形曲线的速度和加速度确定
 //#注意：行走最大速度和加速度还没测试
-auto walkPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* input)->int
+auto walkPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* current_body_and_leg)->int
 {
 
 	int per_step_count = Ellipse->get_s().getTc() * 1000;
-
-	static double current_leg_in_ground[12] = { 0 };
-	static double current_body_in_ground[16] = { 0 };
 
 	//判断行走状态
 	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
 	int e_2 = count % per_step_count;  //0->Tc count
 	//规划腿
-	planLegWalk(e_1, n, current_leg_in_ground, e_2, Ellipse);
+	planLegWalk(e_1, n, current_body_and_leg + 16, e_2, Ellipse);
 	//规划身体
-	planBodyTransformWalk(e_1, n, current_body_in_ground, count, Ellipse);
-	//模型测试使用
-	for (int i = 0; i < 12; ++i)
-	{
-		file_current_leg[i] = current_leg_in_ground[i];
-	}
-	for (int i = 0; i < 16; ++i)
-	{
-		file_current_body[i] = current_body_in_ground[i];
-	}
-	//模型测试使用
-	inverseSymmetry(current_leg_in_ground, current_body_in_ground, input);
+	planBodyTransformWalk(e_1, n, current_body_and_leg, count, Ellipse);
 
 	return 4 * n * per_step_count - count - 1;
 }
 
-auto updownPlanSymmetry(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int
+auto updownPlanSymmetry(int count, EllipseTrajectory* Ellipse, double distance, double* current_body_and_leg)->int
 {
-
-	int per_step_count = Ellipse->get_s().getTc() * 1000;
-
-	static double current_leg_in_ground[12] = { 0 };
-	static double current_body_in_ground[16] = { 0 };
-
 	//判断行走状态
+	int per_step_count = Ellipse->get_s().getTc() * 1000;
 	int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步,e1加1
 	int e_2 = count % per_step_count;  //0->Tc count
 
 	//规划腿
-	planLegTrot(0, 1, current_leg_in_ground, e_2, Ellipse);
+	planLegTrot(0, 1, current_body_and_leg + 16, e_2, Ellipse);
 	//规划身体
-	planBodyUpDown(count, current_body_in_ground, Ellipse, distance);
-
-	//模型测试使用
-	for (int i = 0; i < 12; ++i)
-	{
-		file_current_leg[i] = current_leg_in_ground[i];
-	}
-	for (int i = 0; i < 16; ++i)
-	{
-		file_current_body[i] = current_body_in_ground[i];
-	}
-	//模型测试使用
-	inverseSymmetry(current_leg_in_ground, current_body_in_ground, input);
-
+	planBodyUpDown(count, current_body_and_leg, Ellipse, distance);
 
 	return  per_step_count - count - 1;
 }
