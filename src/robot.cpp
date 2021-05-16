@@ -1836,13 +1836,13 @@ public:
 
         // add joints //
         //leg1
-        auto& lf_r1 = this->addRevoluteJoint(lf_p1, body, leg_pe[0], std::array<double, 3>{-1, 0, 0}.data());
-        auto& lf_r2 = this->addRevoluteJoint(lf_p2, lf_p1, leg_pe[1], std::array<double, 3>{0, 0, -1}.data());
-        auto& lf_r3 = this->addRevoluteJoint(lf_p3, lf_p2, leg_pe[2], std::array<double, 3>{0, 0, -1}.data());
+        auto& lf_r1 = this->addRevoluteJoint(lf_p1, body, leg_pe[0], std::array<double, 3>{1, 0, 0}.data());
+        auto& lf_r2 = this->addRevoluteJoint(lf_p2, lf_p1, leg_pe[1], std::array<double, 3>{0, 0, 1}.data());
+        auto& lf_r3 = this->addRevoluteJoint(lf_p3, lf_p2, leg_pe[2], std::array<double, 3>{0, 0, 1}.data());
         //leg2
-        auto& lr_r1 = this->addRevoluteJoint(lr_p1, body, leg_pe[3], std::array<double, 3>{-1, 0, 0}.data());
-        auto& lr_r2 = this->addRevoluteJoint(lr_p2, lr_p1, leg_pe[4], std::array<double, 3>{0, 0, -1}.data());
-        auto& lr_r3 = this->addRevoluteJoint(lr_p3, lr_p2, leg_pe[5], std::array<double, 3>{0, 0, -1}.data());
+        auto& lr_r1 = this->addRevoluteJoint(lr_p1, body, leg_pe[3], std::array<double, 3>{1, 0, 0}.data());
+        auto& lr_r2 = this->addRevoluteJoint(lr_p2, lr_p1, leg_pe[4], std::array<double, 3>{0, 0, 1}.data());
+        auto& lr_r3 = this->addRevoluteJoint(lr_p3, lr_p2, leg_pe[5], std::array<double, 3>{0, 0, 1}.data());
         //leg3
         auto& rr_r1 = this->addRevoluteJoint(rr_p1, body, leg_pe[6], std::array<double, 3>{1, 0, 0}.data());
         auto& rr_r2 = this->addRevoluteJoint(rr_p2, rr_p1, leg_pe[7], std::array<double, 3>{0, 0, 1}.data());
