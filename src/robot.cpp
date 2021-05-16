@@ -1017,8 +1017,8 @@ auto DogTurn::executeRT()->int
 DogTurn::DogTurn(const std::string& name)
 {
     aris::core::fromXmlString(command(),
-        "<Command name=\"dog_right\">"
-        "</GroupParam>"
+        "<Command name=\"dog_turn\">"
+        "<GroupParam>"
         "<Param name=\"step\" default=\"3\" abbreviation=\"n\"/>"
         "<Param name = \"angle\" default=\"10\" abbreviation=\"d\"/>"
         "</GroupParam>"
@@ -2086,6 +2086,7 @@ auto createPlanQuadruped()->std::unique_ptr<aris::plan::PlanRoot>
     plan_root->planPool().add<DogBack>();
     plan_root->planPool().add<DogLeft>();
     plan_root->planPool().add<DogRight>();
+    plan_root->planPool().add<DogTurn>();
     plan_root->planPool().add<DogPitch>();
     plan_root->planPool().add<DogRoll>();
     plan_root->planPool().add<DogYaw>();
