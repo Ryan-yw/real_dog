@@ -18,6 +18,7 @@ int main(int argc, char *argv[])
 	cs.resetModel(robot::createModelQuadruped().release());
 	
 
+
 //---------------------------------adams仿真------------------------------------------------//
 
 	// 设置模型初始位置，给关节角度  注：相对的位置是模型Quad里设置的关节轴和末端 //
@@ -56,6 +57,8 @@ int main(int argc, char *argv[])
 	//网页控制代码
 	cs.interfacePool().add<aris::server::ProgramWebInterface>("", "5866", aris::core::Socket::WEB);
 	cs.interfacePool().add<aris::server::HttpInterface>("", "8001", "D:/UI/www");
+
+
 
     cs.init();
  
