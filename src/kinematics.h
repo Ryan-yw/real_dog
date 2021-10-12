@@ -6,10 +6,12 @@ const double L2 = 0.306;
 const double L3 = 0.310;
 const double PI = 3.14159265358979323846;
 
+
 //身体长宽高设置
 const double kBodyLong = 0.60398; //m  x方向
 const double kBodyWidth = 0.126;   //m  z方向
 const double kBodyHigh = 0.530;    //m y方向
+
 
 //初始时身体和脚在地面坐标系下的位置
 static double foot_position_start_point[12] = {
@@ -26,6 +28,7 @@ static double body_position_start_point[16] = { 1,0,0,0,
                                                 0,1,0,0,
                                                 0,0,1,0,
                                                 0,0,0,1 };
+
 
 
 auto inverseSame(double* leg_in_ground, double* body_in_ground, double* input)->int;

@@ -125,6 +125,8 @@ auto upPlan(int count, EllipseTrajectory* Ellipse, double distance, double* inpu
 auto updownPlanSameLeg(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int;
 auto updownPlanSymmetry(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int;
 auto turnPlanTrotSameLeg(int n, int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, double* input)->int;
+auto walkPlanSameLeg2(int n, int count, EllipseTrajectory* Ellipse, double* input,double body_amplitude)->int;
+auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, double* input, double* body_cm)->int;
 #endif
 
 

@@ -16,7 +16,7 @@ endif(WIN32)
 include_directories(${aris_INCLUDE_DIRS})
 
 
-add_executable(quad_rbt src/main.cpp src/robot.cpp src/robot.h src/plan.cpp src/plan.h src/kinematics.cpp src/kinematics.h )
+add_executable(quad_rbt src/main.cpp src/robot.cpp src/robot.h src/plan.cpp src/plan.h src/kinematics.cpp src/kinematics.h src/filter.h src/filter.cpp  )
 
 if(UNIX)
     target_link_libraries(quad_rbt ${aris_LIBRARIES} atomic)
