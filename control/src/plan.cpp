@@ -824,17 +824,15 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
 {
     int per_step_count = Ellipse->get_s().getTc() * 1000;
 
-    static double current_leg_in_ground[12] = { 0 };
-    static double current_body_in_ground[16] = { 0 };
 
     int e_1 = count / per_step_count;  //判断当前在走哪一步,腿走一步e1加1
     int e_2 = count % per_step_count;  //0-Tc
     if (count == 0)
     {
         for (auto i = 0; i < 12; i++)
-            current_leg_in_ground[i] = foot_position_start_point[i];
+            current_body_and_leg[i + 16] = foot_position_start_point[i];
         for (auto i = 0; i < 16; i++)
-            current_body_in_ground[i] = body_position_start_point[i];
+            current_body_and_leg[i] = body_position_start_point[i];
     }
 
     Ellipse->getEllipseTrajectory(e_2);
@@ -845,18 +843,18 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
         {
             for (int i = 0; i < 16; i++)
             {
-                current_body_in_ground[i] = body_position_start_point[i];
+                current_body_and_leg[i] = body_position_start_point[i];
             }
         }
-        current_body_in_ground[3] = body_position_start_point[3] + body_cm[0] * s1->getTCurve(e_2);
-        current_body_in_ground[7] = body_position_start_point[7] + body_cm[1] * s1->getTCurve(e_2);
-        current_body_in_ground[11] = body_position_start_point[11] + body_cm[2] * s1->getTCurve(e_2);
+        current_body_and_leg[3] = body_position_start_point[3] + body_cm[0] * s1->getTCurve(e_2);
+        current_body_and_leg[7] = body_position_start_point[7] + body_cm[1] * s1->getTCurve(e_2);
+        current_body_and_leg[11] = body_position_start_point[11] + body_cm[2] * s1->getTCurve(e_2);
 
         if (e_2 == floor(Ellipse->get_s().getTc() * 1000) - 1)
         {
             for (int i = 0; i < 16; i++)
             {
-                body_position_start_point[i] = current_body_in_ground[i];
+                body_position_start_point[i] = current_body_and_leg[i];
             }
         }
         //std::cout << "111111" << "\t" << count << std::endl;
@@ -867,19 +865,19 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
         {
             for (int i = 0; i < 12; i++)
             {
-                current_leg_in_ground[i] = foot_position_start_point[i];
+                current_body_and_leg[i] = foot_position_start_point[i];
             }
         }
 
-        current_leg_in_ground[6] = foot_position_start_point[6] + Ellipse->get_x();
-        current_leg_in_ground[7] = foot_position_start_point[7] + Ellipse->get_y();
-        current_leg_in_ground[8] = foot_position_start_point[8] + Ellipse->get_z();
+        current_body_and_leg[6 + 16] = foot_position_start_point[6] + Ellipse->get_x();
+        current_body_and_leg[7 + 16] = foot_position_start_point[7] + Ellipse->get_y();
+        current_body_and_leg[8 + 16] = foot_position_start_point[8] + Ellipse->get_z();
 
         if (e_2 == floor(Ellipse->get_s().getTc() * 1000) - 1)
         {
             for (int i = 0; i < 12; i++)
             {
-                foot_position_start_point[i] = current_leg_in_ground[i];
+                foot_position_start_point[i] = current_body_and_leg[i + 16];
             }
         }
     }
@@ -889,18 +887,18 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
         {
             for (int i = 0; i < 12; i++)
             {
-                current_leg_in_ground[i] = foot_position_start_point[i];
+                current_body_and_leg[i] = foot_position_start_point[i];
             }
         }
 
-        current_leg_in_ground[9] = foot_position_start_point[9] + Ellipse->get_x();
-        current_leg_in_ground[10] = foot_position_start_point[10] + Ellipse->get_y();
-        current_leg_in_ground[11] = foot_position_start_point[11] + Ellipse->get_z();
+        current_body_and_leg[9 + 16] = foot_position_start_point[9] + Ellipse->get_x();
+        current_body_and_leg[10 + 16] = foot_position_start_point[10] + Ellipse->get_y();
+        current_body_and_leg[11 + 16] = foot_position_start_point[11] + Ellipse->get_z();
         if (e_2 == floor(Ellipse->get_s().getTc() * 1000) - 1)
         {
             for (int i = 0; i < 12; i++)
             {
-                foot_position_start_point[i] = current_leg_in_ground[i];
+                foot_position_start_point[i] = current_body_and_leg[i + 16];
             }
         }
     }
@@ -910,17 +908,17 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
         {
             for (int i = 0; i < 16; i++)
             {
-                current_body_in_ground[i] = body_position_start_point[i];
+                current_body_and_leg[i] = body_position_start_point[i];
             }
         }
-        current_body_in_ground[3] = body_position_start_point[3] + body_cm[3] * s1->getTCurve(e_2);
-        current_body_in_ground[7] = body_position_start_point[7] + body_cm[4] * s1->getTCurve(e_2);
-        current_body_in_ground[11] = body_position_start_point[11] + body_cm[5] * s1->getTCurve(e_2);
+        current_body_and_leg[3] = body_position_start_point[3] + body_cm[3] * s1->getTCurve(e_2);
+        current_body_and_leg[7] = body_position_start_point[7] + body_cm[4] * s1->getTCurve(e_2);
+        current_body_and_leg[11] = body_position_start_point[11] + body_cm[5] * s1->getTCurve(e_2);
         if (e_2 == floor(Ellipse->get_s().getTc() * 1000) - 1)
         {
             for (int i = 0; i < 16; i++)
             {
-                body_position_start_point[i] = current_body_in_ground[i];
+                body_position_start_point[i] = current_body_and_leg[i];
             }
         }
     }
@@ -930,18 +928,18 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
         {
             for (int i = 0; i < 12; i++)
             {
-                current_leg_in_ground[i] = foot_position_start_point[i];
+                current_body_and_leg[i] = foot_position_start_point[i];
             }
         }
 
-        current_leg_in_ground[3] = foot_position_start_point[3] + Ellipse->get_x();
-        current_leg_in_ground[4] = foot_position_start_point[4] + Ellipse->get_y();
-        current_leg_in_ground[5] = foot_position_start_point[5] + Ellipse->get_z();
+        current_body_and_leg[3 + 16] = foot_position_start_point[3] + Ellipse->get_x();
+        current_body_and_leg[4 + 16] = foot_position_start_point[4] + Ellipse->get_y();
+        current_body_and_leg[5 + 16] = foot_position_start_point[5] + Ellipse->get_z();
         if (e_2 == floor(Ellipse->get_s().getTc() * 1000) - 1)
         {
             for (int i = 0; i < 12; i++)
             {
-                foot_position_start_point[i] = current_leg_in_ground[i];
+                foot_position_start_point[i] = current_body_and_leg[i + 16];
             }
         }
     }
@@ -952,18 +950,18 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
         {
             for (int i = 0; i < 12; i++)
             {
-                current_leg_in_ground[i] = foot_position_start_point[i];
+                current_body_and_leg[i + 16] = foot_position_start_point[i];
             }
         }
 
-        current_leg_in_ground[0] = foot_position_start_point[0] + Ellipse->get_x();
-        current_leg_in_ground[1] = foot_position_start_point[1] + Ellipse->get_y();
-        current_leg_in_ground[2] = foot_position_start_point[2] + Ellipse->get_z();
+        current_body_and_leg[0 + 16] = foot_position_start_point[0] + Ellipse->get_x();
+        current_body_and_leg[1 + 16] = foot_position_start_point[1] + Ellipse->get_y();
+        current_body_and_leg[2 + 16] = foot_position_start_point[2] + Ellipse->get_z();
         if (e_2 == floor(Ellipse->get_s().getTc() * 1000) - 1)
         {
             for (int i = 0; i < 12; i++)
             {
-                foot_position_start_point[i] = current_leg_in_ground[i];
+                foot_position_start_point[i] = current_body_and_leg[i + 16];
             }
         }
     }
@@ -973,17 +971,17 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
         {
             for (int i = 0; i < 16; i++)
             {
-                current_body_in_ground[i] = body_position_start_point[i];
+                current_body_and_leg[i] = body_position_start_point[i];
             }
         }
-        current_body_in_ground[3] = body_position_start_point[3] + body_cm[6] * s1->getTCurve(e_2);
-        current_body_in_ground[7] = body_position_start_point[7] + body_cm[7] * s1->getTCurve(e_2);
-        current_body_in_ground[11] = body_position_start_point[11] + body_cm[8] * s1->getTCurve(e_2);
+        current_body_and_leg[3] = body_position_start_point[3] + body_cm[6] * s1->getTCurve(e_2);
+        current_body_and_leg[7] = body_position_start_point[7] + body_cm[7] * s1->getTCurve(e_2);
+        current_body_and_leg[11] = body_position_start_point[11] + body_cm[8] * s1->getTCurve(e_2);
         if (e_2 == floor(Ellipse->get_s().getTc() * 1000) - 1)
         {
             for (int i = 0; i < 16; i++)
             {
-                body_position_start_point[i] = current_body_in_ground[i];
+                body_position_start_point[i] = current_body_and_leg[i];
             }
         }
     }

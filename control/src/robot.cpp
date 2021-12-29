@@ -14,7 +14,7 @@ double input_angle[12] = {0};      //任意时刻关节角度
 double init_pos_angle[12] = { 0 }; //初始位置下的关节角度
 extern std::atomic<double> gamepad[2];
 
-std::string gait="trot";
+std::string gait="walk";
 std::string prepose="same";
 //输出参数，模型曲线测试使用
 double current_body_and_leg[28] = { 
@@ -796,7 +796,7 @@ auto DogForward::executeRT()->int
     if(count()==1)this->master()->logFileRawName("forward");
 
     int ret=0;
-    TCurve s1(1,6);
+    TCurve s1(5,2);
     s1.getCurveParam();
     EllipseTrajectory e1(0.2, 0.1, 0, s1);
 
@@ -808,9 +808,9 @@ auto DogForward::executeRT()->int
     else if (gait =="walk"  && prepose == "same") //walk & same
     {
 
-        ret = walkPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
+        //ret = walkPlanSameLeg(step_, count() - 1, &e1, current_body_and_leg);
         //ret = walkPlanSameLeg2(step_, count() - 1, &e1, current_body_and_leg,z_);
-        //ret = walkPlanSameLeg3(step_, count() - 1, &e1, &s1,current_body_and_leg,body_cm);
+        ret = walkPlanSameLeg3(step_, count() - 1, &e1, &s1,current_body_and_leg,body_cm);
 
     }
     else if (gait == "walk" && prepose == "symmetry")  //walk & symmetry
@@ -861,12 +861,12 @@ auto DogForward::executeRT()->int
 
     for(int i= 0;i<12;++i)
         joint_pos[i] = current_body_and_leg[i+16];
-   // mout() << current_body_and_leg[25] << "\t" << current_body_and_leg[26] << "\t" << current_body_and_leg[27] << std::endl;
+
      //发送电机角度
-    for (int i = 0; i < 12; ++i)
-    {
-            controller()->motionPool()[i].setTargetPos(input_angle[i]);
-    }
+//    for (int i = 0; i < 12; ++i)
+//    {
+//            controller()->motionPool()[i].setTargetPos(input_angle[i]);
+//    }
 
     return ret;
 }
