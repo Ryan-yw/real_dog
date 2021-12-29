@@ -59,6 +59,16 @@ namespace robot
         explicit DogReadJoint(const std::string &name = "dog_read_joint");
     };
 
+    class DogReadTorque :public aris::core::CloneObject<DogReadTorque, aris::plan::Plan>
+    {
+    public:
+        auto virtual prepareNrt()->void;
+        auto virtual executeRT()->int;
+
+        virtual ~DogReadTorque();
+        explicit DogReadTorque(const std::string &name = "dog_read_torque");
+    };
+
     class DogTorqueControl :public aris::core::CloneObject<DogTorqueControl, aris::plan::Plan>
     {
     public:
