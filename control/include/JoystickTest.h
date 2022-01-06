@@ -1,6 +1,10 @@
 #ifndef JOYSTICK_TEST_H
 #define JOYSTICK_TEST_H
 
+#ifdef UNIX
+
+
+
 #include <QDialog>
 #include <./control/include/GamepadCommand.h>
 #include "./control/include/GameController.h"
@@ -26,5 +30,7 @@ private:
 private slots:
   void update();
 };
+
+#endif // UNIX
 
 #endif // JOYSTICK_TEST_H

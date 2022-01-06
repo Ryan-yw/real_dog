@@ -71,7 +71,6 @@ file(GLOB SOURCES
 
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-#add_executable(quad_rbt src/main.cpp src/robot.cpp src/robot.h src/plan.cpp src/plan.h src/kinematics.cpp src/kinematics.h src/filter.h src/filter.cpp  )
 
 target_link_libraries(${PROJECT_NAME}  Qt5::Core Qt5::Gui Qt5::Widgets Qt5::PrintSupport Qt5::Gamepad)
 
@@ -81,7 +80,7 @@ if(UNIX)
     target_link_libraries(${PROJECT_NAME} lcm)
 endif(UNIX)
 IF(WIN32)
-    target_link_libraries(quad_rbt ${aris_LIBRARIES})
+    target_link_libraries(${PROJECT_NAME} ${aris_LIBRARIES})
 endif(WIN32)
 
 

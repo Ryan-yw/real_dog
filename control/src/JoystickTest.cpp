@@ -1,8 +1,14 @@
+
+
+
+
 #include "./control/include/JoystickTest.h"
 #include "ui_JoystickTest.h"
 #include <QTimer>
 
 std::atomic<double> gamepad[2] = {0};
+
+#ifdef UNIX
 
 JoystickTestWindow::JoystickTestWindow(GameController& gamepad, QWidget *parent) :
     QDialog(parent),
@@ -43,3 +49,6 @@ void JoystickTestWindow::update() {
   sprintf(buffer, "Right Y: %4.2f\n", _command.rightStickAnalog[1]);
   ui->rightYLabel->setText(buffer);
 }
+
+
+#endif // UNIX

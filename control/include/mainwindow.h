@@ -26,6 +26,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#ifdef UNIX
+
+
+
 #include <QMainWindow>
 
 #include "GamepadCommand.h"
@@ -59,5 +63,6 @@ private:
 
 };
 
+#endif // UNIX
 
 #endif // MAINWINDOW_H

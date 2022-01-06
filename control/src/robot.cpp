@@ -14,7 +14,7 @@ double input_angle[12] = {0};      //任意时刻关节角度
 double init_pos_angle[12] = { 0 }; //初始位置下的关节角度
 extern std::atomic<double> gamepad[2];
 
-std::string gait="walk";
+std::string gait="trot";
 std::string prepose="same";
 //输出参数，模型曲线测试使用
 double current_body_and_leg[28] = { 
@@ -26,7 +26,9 @@ double current_body_and_leg[28] = {
 };
 
 
-double body_cm[9]={0.1,0,-0.05,0.1,0,0.1,0,0,-0.05};
+double body_cm[9]={ 0.05,  0, -0.0326,
+                    0.10,  0,  0.0652,
+                    0.05,  0, -0.0326};
 
 using namespace aris::dynamic;
 using namespace aris::plan;
@@ -851,7 +853,6 @@ auto DogForward::executeRT()->int
 //    for (int i = 0; i < 3; ++i)
 //    {
 //        fk_input_joint_[i+9] = controller()->motionPool()[i].actualPos();
-
 //    }
 //    model()->setInputPos(fk_input_joint_);
 //    if(model()->forwardKinematics())std::cout << "forward failed" << std::endl;
@@ -859,6 +860,7 @@ auto DogForward::executeRT()->int
 //        gm.updP();
 //    model()->getOutputPos(leg_ee_);
 
+    // qt plot //
     for(int i= 0;i<12;++i)
         joint_pos[i] = current_body_and_leg[i+16];
 
@@ -1434,7 +1436,7 @@ auto DogPose::executeRT()->int
     }
     else
     {
-        ret = posePlan(pose_angle, current_body_and_leg);
+        posePlan(pose_angle, current_body_and_leg);
     }
 
     if(count()% 100 == 0)
@@ -2294,9 +2296,7 @@ auto createControllerQuadruped()->std::unique_ptr<aris::control::Controller>
 
 
 #ifdef WIN32
-        dynamic_cast<aris::control::E	cs.interfacePool().add<aris::server::ProgramWebInterface>("", "5866", aris::core::Socket::WEB);
-        cs.interfacePool().add<aris::server::HttpInterface>("", "8001", "D:/UI/www");
-thercatMotor&>(controller->slavePool().back()).setVirtual(true);
+        dynamic_cast<aris::control::EthercatMotor&>(controller->slavePool().back()).setVirtual(true);
 #endif
 
 #ifndef WIN32

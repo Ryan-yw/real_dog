@@ -7,6 +7,10 @@
 #ifndef PROJECT_GAMECONTROLLER_H
 #define PROJECT_GAMECONTROLLER_H
 
+#ifdef UNIX
+
+
+
 #include "GamepadCommand.h"
 
 #include <QtCore/QObject>
@@ -25,5 +29,7 @@ class GameController : public QObject {
  private:
   QGamepad *_qGamepad = nullptr;
 };
+
+#endif // UNIX
 
 #endif  // PROJECT_GAMECONTROLLER_H

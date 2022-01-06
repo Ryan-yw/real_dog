@@ -5,6 +5,11 @@
 #ifndef PROJECT_GAMEPADCOMMAND_H
 #define PROJECT_GAMEPADCOMMAND_H
 
+#ifdef UNIX
+
+
+
+
 #include "utilities.h"
 #include "cppTypes.h"
 //#include "gamepad_lcmt.hpp"
@@ -131,5 +136,7 @@ struct GamepadCommand {
     return result;
   }
 };
+
+#endif // UNIX
 
 #endif  // PROJECT_DRIVERCOMMAND_H

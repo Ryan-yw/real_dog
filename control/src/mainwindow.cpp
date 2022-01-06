@@ -33,6 +33,8 @@
 #include <QWidget>
 using namespace std;
 
+#ifdef UNIX
+
 
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -74,3 +76,6 @@ void MainWindow::on_btn_plot()
     window->setAttribute(Qt::WA_DeleteOnClose);
     window->resize(600,400);
 }
+
+
+#endif // UNIX

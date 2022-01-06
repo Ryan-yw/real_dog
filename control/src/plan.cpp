@@ -740,7 +740,7 @@ auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose_param, 
 
 	return  per_step_count - count - 1;
 }
-auto posePlan(double* body_pose_param, double* current_body_and_leg)->int
+auto posePlan(double* body_pose_param, double* current_body_and_leg)->void
 {
 
     //规划腿
@@ -829,15 +829,16 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
     int e_2 = count % per_step_count;  //0-Tc
     if (count == 0)
     {
-        for (auto i = 0; i < 12; i++)
+        for (auto i = 0; i < 12; ++i)
             current_body_and_leg[i + 16] = foot_position_start_point[i];
-        for (auto i = 0; i < 16; i++)
+        for (auto i = 0; i < 16; ++i)
             current_body_and_leg[i] = body_position_start_point[i];
     }
 
     Ellipse->getEllipseTrajectory(e_2);
+
     //判断行走状态
-    if ((e_1 + 1) % 8 == 1)  //身体移动
+    if ((e_1 + 1) % 7 == 1)  //身体移动
     {
         if (e_2 == 0)
         {
@@ -859,13 +860,13 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
         }
         //std::cout << "111111" << "\t" << count << std::endl;
     }
-    else if ((e_1 + 1) % 8 == 2)  //迈3腿
+    else if ((e_1 + 1) % 7 == 2)  //迈3腿
     {
         if (e_2 == 0)//每次走的时候初始化脚的位置
         {
             for (int i = 0; i < 12; i++)
             {
-                current_body_and_leg[i] = foot_position_start_point[i];
+                current_body_and_leg[i + 16] = foot_position_start_point[i];
             }
         }
 
@@ -881,13 +882,13 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
             }
         }
     }
-    else if ((e_1 + 1) % 8 == 3)  //迈4腿
+    else if ((e_1 + 1) % 7 == 3)  //迈4腿
     {
         if (e_2 == 0)//每次走的时候初始化脚的位置
         {
             for (int i = 0; i < 12; i++)
             {
-                current_body_and_leg[i] = foot_position_start_point[i];
+                current_body_and_leg[i + 16] = foot_position_start_point[i];
             }
         }
 
@@ -902,7 +903,7 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
             }
         }
     }
-    else if ((e_1 + 1) % 8 == 4)  //身体移动
+    else if ((e_1 + 1) % 7 == 4)  //身体移动
     {
         if (e_2 == 0) //有用，不能删，否则算不出角度
         {
@@ -922,13 +923,13 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
             }
         }
     }
-    else if ((e_1 + 1) % 8 == 5)  //迈2腿
+    else if ((e_1 + 1) % 7 == 5)  //迈2腿
     {
         if (e_2 == 0)//每次走的时候初始化脚的位置
         {
             for (int i = 0; i < 12; i++)
             {
-                current_body_and_leg[i] = foot_position_start_point[i];
+                current_body_and_leg[i + 16] = foot_position_start_point[i];
             }
         }
 
@@ -943,7 +944,7 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
             }
         }
     }
-    else if ((e_1 + 1) % 8 == 6)  //迈1腿
+    else if ((e_1 + 1) % 7 == 6)  //迈1腿
     {
 
         if (e_2 == 0)//每次走的时候初始化脚的位置
@@ -965,7 +966,7 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
             }
         }
     }
-    else if ((e_1 + 1) % 8 == 7)  //身体移动
+    else if ((e_1 + 1) % 7 == 0)  //身体移动
     {
         if (e_2 == 0) //有用，不能删，否则算不出角度
         {
@@ -986,11 +987,6 @@ auto walkPlanSameLeg3(int n, int count, EllipseTrajectory* Ellipse, TCurve* s1, 
         }
     }
 
-    //模型测试使用
-    for (auto i = 0; i < 12; i++)
-        current_body_and_leg[i+16] = foot_position_start_point[i];
-    for (auto i = 0; i < 16; i++)
-        current_body_and_leg[i] = body_position_start_point[i];
 
     return 7 * n * per_step_count - count - 1;
 }

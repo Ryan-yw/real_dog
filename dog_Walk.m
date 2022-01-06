@@ -4,17 +4,16 @@ clc;
 
 %% 不同运动顺序测试
 % 读取参数测试顺序准备->前进->后退->左移->右移
-A=readmatrix('prepare.txt');  %准备
-B=readmatrix('forward.txt');  %前进
-C=readmatrix('back.txt');     %后退
-D=readmatrix('left.txt');     %左移
-E=readmatrix('right.txt');    %右移
-%F=readmatrix('tabu.txt');    %踏步
-angle=[A;B;C;D;E];
+A=readmatrix('../build_dog/log/prepare.txt');  %准备
+B=readmatrix('../build_dog/log/forward.txt');  %前进
+% C=readmatrix('back.txt');     %后退
+% D=readmatrix('left.txt');     %左移
+% E=readmatrix('right.txt');    %右移
+% %F=readmatrix('tabu.txt');    %踏步
+angle=[B];
 
 writematrix(angle(:,1:13),'T_angle.txt','Delimiter','tab');
-t=angle(:,13);
- %t=0.001:0.001:size(angle(:,1))/1000; %1ms执行一次
+t=0.001:0.001:size(angle(:,1))/1000; %1ms执行一次
 
 %% 输出关节角度曲线
 leg1_theta1 = angle(:,1);
@@ -42,21 +41,21 @@ subplot(335);
 plot(t,leg4_theta1,'r',t,leg4_theta2,'b',t,leg4_theta3,'g');
 
 %% 输出足尖末端曲线
-x1 = angle(:,14);
-y1 = angle(:,15);
-z1 = angle(:,16);
-x2 = angle(:,17);
-y2 = angle(:,18);
-z2 = angle(:,19);
-x3 = angle(:,20);
-y3 = angle(:,21);
-z3 = angle(:,22);
-x4 = angle(:,23);
-y4 = angle(:,24);
-z4 = angle(:,25);
-x = angle(:,26);
-y = angle(:,27);
-z = angle(:,28);
+x1 = angle(:,13);
+y1 = angle(:,14);
+z1 = angle(:,15);
+x2 = angle(:,16);
+y2 = angle(:,17);
+z2 = angle(:,18);
+x3 = angle(:,19);
+y3 = angle(:,20);
+z3 = angle(:,21);
+x4 = angle(:,22);
+y4 = angle(:,23);
+z4 = angle(:,24);
+x = angle(:,25);
+y = angle(:,26);
+z = angle(:,27);
 
 subplot(333);
 plot(t,x1,'r',t,x2,'b',t,x3,'y',t,x4,'m',t,x,'k');

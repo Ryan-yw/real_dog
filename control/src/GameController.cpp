@@ -7,12 +7,14 @@
  * QT event. Running it in another thread will cause it to not work. As a
  * result, this only works if called in the update method of a QTObject
  */
-
 #include "./control/include/GameController.h"
 
 #include <QtCore/QObject>
 #include <QtGamepad/QGamepad>
 #include <QtGamepad/QGamepadManager>
+
+#ifdef UNIX
+
 /*!
  * By default, the game controller selects the "first" joystick, printing a
  * warning if there are multiple joysticks On Linux, this is /dev/input/js0 If
@@ -86,3 +88,7 @@ void GameController::updateGamepadCommand(GamepadCommand &gamepadCommand) {
 }
 
 GameController::~GameController() { delete _qGamepad; }
+
+
+
+#endif // UNIX

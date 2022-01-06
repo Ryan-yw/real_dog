@@ -8,6 +8,10 @@
 #ifndef PROJECT_CPPTYPES_H
 #define PROJECT_CPPTYPES_H
 
+#ifdef UNIX
+
+
+
 #include <vector>
 #include "cTypes.h"
 #include <eigen3/Eigen/Dense>
@@ -121,5 +125,10 @@ template <typename T>
 using vectorAligned = typename std::vector<T, Eigen::aligned_allocator<T>>;
 
 enum class RobotType { CHEETAH_3, MINI_CHEETAH };
+
+
+
+#endif // UNIX
+
 
 #endif  // PROJECT_CPPTYPES_H

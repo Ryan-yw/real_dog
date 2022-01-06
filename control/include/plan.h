@@ -121,7 +121,7 @@ auto trotPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* i
 auto walkPlanSameLeg(int n, int count, EllipseTrajectory* param, double* input)->int;
 auto walkPlanSymmetryLeg(int n, int count, EllipseTrajectory* Ellipse, double* input)->int;
 auto posePlan(int count, EllipseTrajectory* Ellipse, BodyPose* body_pose, double* input)->int;
-auto posePlan(double* body_pose, double* input)->int;
+auto posePlan(double* body_pose, double* input)->void;
 auto upPlan(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int;
 auto updownPlanSameLeg(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int;
 auto updownPlanSymmetry(int count, EllipseTrajectory* Ellipse, double distance, double* input)->int;

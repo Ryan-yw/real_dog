@@ -6,6 +6,11 @@
 #ifndef PROJECT_UTILITIES_H
 #define PROJECT_UTILITIES_H
 
+#ifdef UNIX
+
+
+
+
 #include <algorithm>
 #include <map>
 #include <random>
@@ -301,5 +306,8 @@ Vec3<T> stringToVec3(const std::string& str) {
 }
 
 std::string getLcmUrl(s64 ttl);
+
+
+#endif // UNIX
 
 #endif  // PROJECT_UTILITIES_H
